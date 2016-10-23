@@ -1,7 +1,9 @@
 <?php
+use Interop\Container\ContainerInterface;
 use Zend\Expressive\Application;
 use Zend\Expressive\Container\ApplicationFactory;
 use Zend\Expressive\Helper;
+use Compose\Common;
 
 return [
     // Provides application-wide services.
@@ -19,6 +21,13 @@ return [
         'factories' => [
             Application::class => ApplicationFactory::class,
             Helper\UrlHelper::class => Helper\UrlHelperFactory::class,
+            Common\ServiceInjector::class => function(ContainerInterface $container) {
+                return new Common\ServiceInjector($container);
+            }
         ],
+        // abstract factory to auto-wire dependencies
+        'abstract_factories' => [
+            Common\ServiceFactory::class
+        ]
     ],
 ];
