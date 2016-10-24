@@ -6,15 +6,16 @@
  * Time: 9:22 PM
  */
 
-namespace Compose\Mvc;
+namespace Compose\Express;
 
 
-use Compose\Common\ServiceContainerAwareInterface;
+use Compose\Standard\Container\ContainerAwareInterface;
+use Compose\Standard\Container\ServiceAwareInterface;
 use Interop\Container\ContainerInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 
-abstract class Action implements ServiceContainerAwareInterface
+abstract class Action implements ServiceAwareInterface , ContainerAwareInterface
 {
     use ResponseHelperTrait;
 
@@ -41,8 +42,9 @@ abstract class Action implements ServiceContainerAwareInterface
 
     /**
      * @param ContainerInterface $container
+     * @return mixed|void
      */
-    public function setServiceContainer(ContainerInterface $container)
+    public function setContainer(ContainerInterface $container)
     {
         $this->container = $container;
     }
@@ -50,7 +52,7 @@ abstract class Action implements ServiceContainerAwareInterface
     /**
      * @return ContainerInterface
      */
-    public function getServiceContainer() : ContainerInterface
+    public function getContainer() : ContainerInterface
     {
         return $this->container;
     }

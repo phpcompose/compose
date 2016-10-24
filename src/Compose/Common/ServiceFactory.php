@@ -6,8 +6,13 @@
 
 namespace Compose\Common;
 
-use Zend\ServiceManager\Factory\AbstractFactoryInterface;
 use Interop\Container\ContainerInterface;
+use Zend\ServiceManager\Factory\AbstractFactoryInterface;
+use Zend\Expressive\Container\Exception\NotFoundException;
+use Compose\Standard\Container;
+
+
+
 
 /**
  * Class ServiceFactory
@@ -24,13 +29,12 @@ class ServiceFactory implements AbstractFactoryInterface
      * using the service container
      *
      * @param ContainerInterface $container
-     * @param string $requestedName
+     * @param string $name
      * @return bool
      */
-    public function canCreate(ContainerInterface $container, $requestedName)
+    public function canCreate(ContainerInterface $container, $name)
     {
-        return (class_exists($requestedName)
-            && in_array(ServiceAwareInterface::class, class_implements($requestedName)));
+        return $this->doesImplement($name, Container\ServiceInterface::class);
     }
 
     /**
@@ -43,16 +47,43 @@ class ServiceFactory implements AbstractFactoryInterface
      */
     public function __invoke(ContainerInterface $container, $requestedName, array $options = null)
     {
-        /** @var ServiceInjector $injector */
-        $injector = $container->get(ServiceInjector::class);
-        $instance = $injector->instantiate($requestedName);
+
+        if($this->doesImplement($requestedName, Container\ServiceFactoryInterface::class)) {
+            $instance = $requestedName::create($container);
+        }
+        else if($this->doesImplement($requestedName, Container\ServiceAwareInterface::class)) {
+            // we will attempt to reoslve dependencies and instantiate the object
+            /** @var ServiceInjector $injector */
+            $injector = $container->get(ServiceInjector::class);
+            $instance = $injector->instantiate($requestedName);
+        }
+        else {
+            // @todo we can try to delegate this
+            $instance = new $requestedName();
+        }
+
+        if(!$instance) {
+            throw new NotFoundException("Unable to instantiate service: {$requestedName}.");
+        }
+
 
         // if the instance also implements ServiceContainerAwareInterface interface,
         // then we will inject the container to the instance as well.
-        if ($instance instanceof ServiceContainerAwareInterface) {
-            $instance->setServiceContainer($container);
+        if ($instance instanceof Container\ContainerAwareInterface) {
+            $instance->setContainer($container);
         }
 
         return $instance;
+    }
+
+    /**
+     * @param $class
+     * @param $interface
+     * @return bool
+     */
+    protected function doesImplement($class, $interface)
+    {
+        return (class_exists($class)
+            && in_array($interface, class_implements($class)));
     }
 }

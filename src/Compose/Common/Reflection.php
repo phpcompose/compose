@@ -48,4 +48,24 @@ class Reflection
             throw new \InvalidArgumentException("Invalid Param count. (more than allowed)");
         }
     }
+
+    /**
+     * Check if given object/class implements interface
+     *
+     * @param $objOrClass
+     * @param $interface
+     * @return bool
+     */
+    public function implements($objOrClass, $interface)
+    {
+        if(is_object($objOrClass)) {
+            return $objOrClass instanceof $interface;
+        } else {
+            if(class_exists($objOrClass)) {
+                return in_array($interface, class_implements($objOrClass));
+            }
+        }
+
+        return false;
+    }
 }

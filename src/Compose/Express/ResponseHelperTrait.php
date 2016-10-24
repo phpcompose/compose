@@ -1,9 +1,7 @@
 <?php
-namespace Compose\Mvc;
-use Compose\Common\ServiceContainerAwareInterface;
+namespace Compose\Express;
+use Compose\Standard\Container\ContainerAwareInterface;
 use Psr\Http\Message\ResponseInterface;
-use Zend\Expressive\Router\RouteResult;
-use Zend\Expressive\Router\RouterInterface;
 
 /**
  * Created by PhpStorm.
@@ -25,12 +23,12 @@ trait ResponseHelperTrait
      */
     public function view(string $template, array $data = [], int $status = 200, array $headers = []) : ResponseInterface
     {
-        if(!$this instanceof ServiceContainerAwareInterface) {
+        if(!$this instanceof ContainerAwareInterface) {
             throw new \Exception("Class using trait ResponseHelperTrait must implement ServiceContainerAwareInterface to use view() method.");
         }
 
         /** @var \Zend\Expressive\Template\TemplateRendererInterface $renderer */
-        $renderer = $this->getServiceContainer()->get(\Zend\Expressive\Template\TemplateRendererInterface::class);
+        $renderer = $this->getContainer()->get(\Zend\Expressive\Template\TemplateRendererInterface::class);
         if(!$renderer) {
             throw new \Exception("TemplateRendererInterface not found in the container.");
         }

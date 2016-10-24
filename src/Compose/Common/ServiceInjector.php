@@ -10,7 +10,7 @@ namespace Compose\Common;
 use Interop\Container\ContainerInterface;
 
 
-class ServiceInjector
+class ServiceInjector extends Reflection
 {
     protected
         /** @var ContainerInterface */
