@@ -138,7 +138,7 @@ abstract class Action implements MiddlewareInterface, ServiceAwareInterface , Co
      * @param ServerRequestInterface $request
      * @return array
      */
-    protected function buildHandlerMethodParams(ServerRequestInterface $request) : array
+    protected function extractRequestParams(ServerRequestInterface $request) : array
     {
         /** @var RouteResult $route */
         $route = $request->getAttribute(RouteResult::class);
@@ -149,6 +149,17 @@ abstract class Action implements MiddlewareInterface, ServiceAwareInterface , Co
         } else {
             $params = [];
         }
+
+        return $params;
+    }
+
+    /**
+     * @param ServerRequestInterface $request
+     * @return array
+     */
+    protected function buildHandlerMethodParams(ServerRequestInterface $request) : array
+    {
+        $params = $this->extractRequestParams($request);
 
         // now add the ServerRequestInterface in the beginning of the method param
         array_unshift($params, $request);
