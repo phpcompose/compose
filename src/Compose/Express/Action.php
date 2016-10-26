@@ -9,15 +9,11 @@
 namespace Compose\Express;
 
 
-use Compose\Standard\Container\ContainerAwareInterface;
-use Compose\Standard\Container\ServiceAwareInterface;
+use Compose\Common\ServiceInjector;
+use Compose\Standard\Container\{ContainerAwareInterface, ServiceAwareInterface};
 use Compose\Standard\Http\MiddlewareInterface;
-use Compose\Standard\Http\RestfulResourceInterface;
-use Compose\Standard\Http\RestfulResourceTrait;
 use Interop\Container\ContainerInterface;
-use Psr\Http\Message\RequestInterface;
-use Psr\Http\Message\ResponseInterface;
-use Psr\Http\Message\ServerRequestInterface;
+use Psr\Http\Message\{ResponseInterface, ServerRequestInterface};
 use Zend\Expressive\Router\RouteResult;
 use Zend\Expressive\Router\RouterInterface;
 
@@ -106,21 +102,58 @@ abstract class Action implements MiddlewareInterface, ServiceAwareInterface , Co
     }
 
     /**
-     * @param RequestInterface $request
+     * @param ServerRequestInterface $request
      * @return mixed
      * @throws \HttpRequestException
      */
     public function forward(ServerRequestInterface $request)
     {
-        /** @var RouteResult $route */
-        $method = strtolower($request->getMethod());
+        $method = $this->generateHandlerMethodName($request);
         $reflection = new \ReflectionMethod($this, $method);
         if(!$reflection->isPublic()) {
-            // only public methods are considered
+            // only public methods are allowed for action handler
             throw new \ReflectionException();
         }
 
-        return $reflection->invoke($this, $request);
+        // build action handler method params
+        $params = $this->buildHandlerMethodParams($request);
+
+        /** @var ServiceInjector $injector */
+        $injector = $this->getContainer()->get(ServiceInjector::class);
+        $injector->validateParameters($reflection, $params);
+
+        return $reflection->invokeArgs($this, $params);
+    }
+
+    /**
+     * @param ServerRequestInterface $request
+     * @return string
+     */
+    protected function generateHandlerMethodName(ServerRequestInterface $request) : string
+    {
+        return strtolower($request->getMethod());
+    }
+
+    /**
+     * @param ServerRequestInterface $request
+     * @return array
+     */
+    protected function buildHandlerMethodParams(ServerRequestInterface $request) : array
+    {
+        /** @var RouteResult $route */
+        $route = $request->getAttribute(RouteResult::class);
+        $matchedParams = $route->getMatchedParams();
+        if(count($matchedParams)) {
+            $paramstring = reset($matchedParams);
+            $params = explode('/', $paramstring);
+        } else {
+            $params = [];
+        }
+
+        // now add the ServerRequestInterface in the beginning of the method param
+        array_unshift($params, $request);
+
+        return $params;
     }
 
     /**
@@ -152,7 +185,6 @@ abstract class Action implements MiddlewareInterface, ServiceAwareInterface , Co
      * @param array $headers
      * @return ResponseInterface|\Zend\Diactoros\Response\HtmlResponse
      * @throws \Exception
-     * @internal param $model
      */
     public function view(string $template, array $data = [],  int $status = 200, array $headers = []) : ResponseInterface
     {
@@ -162,10 +194,6 @@ abstract class Action implements MiddlewareInterface, ServiceAwareInterface , Co
             throw new \Exception("TemplateRendererInterface not found in the container.");
         }
 
-        // now need to guess template script based on current request
-        // /app/some/path/write => App\WriteAction::class                           = app::write
-        // /app/some/path/write => App\Action\HandlerAction::class                  = app::handler
-        // /app/some/path/blog/read => Abc\Controller\BlogController::class:read    = abc::blog\read
         return $this->html($renderer->render($template, $data), $status, $headers);
     }
 }

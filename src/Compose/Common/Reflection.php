@@ -36,16 +36,44 @@ class Reflection
      * @param array|null $args
      * @throws \InvalidArgumentException
      */
-    protected function validateParameters(\ReflectionFunctionAbstract $method, array $args = null)
+    public function validateParameters(\ReflectionFunctionAbstract $method, array $args = null)
     {
+
         // now we will validate the function with given $args
         $argsCount = ($args === null) ? 0 : count($args);
-        if ($argsCount < $method->getNumberOfRequiredParameters()) {
-            throw new \InvalidArgumentException("Invalid Param count. (less than required)");
+        $paramsCount = $method->getNumberOfParameters();
+        $requiredParamsCount = 0;
+        $optionalParamsCount = 0;
+
+        if(!$method->isVariadic()) { // for non-variadic methods, we can do traditional checks for params
+            $requiredParamsCount = $method->getNumberOfRequiredParameters();
+        } else {
+            foreach ($method->getParameters() as $parameter) {
+                if($parameter->isVariadic()) {
+                    // if we find variadic params
+                    // we need to allow all other input arguments
+                    // therefore,
+                    // 1) If $argsCount is more then $paramCount, we need to allow that
+                    $paramsCount = $argsCount;
+                    break;
+                }
+
+                if($parameter->isOptional()) {
+                    break;
+                }
+
+                $requiredParamsCount++;
+            }
         }
 
-        if ($argsCount > $method->getNumberOfParameters()) {
-            throw new \InvalidArgumentException("Invalid Param count. (more than allowed)");
+        $optionalParamsCount = ($paramsCount - $requiredParamsCount);
+
+        if ($argsCount < $requiredParamsCount) {
+            throw new \InvalidArgumentException("Invalid Param count. (Params ({$argsCount}) are less then method anticipates ({$requiredParamsCount}))");
+        }
+
+        if ($argsCount > $paramsCount) {
+            throw new \InvalidArgumentException("Invalid Param count. (Params ({$argsCount}) are more than method anticipates ({$requiredParamsCount}))");
         }
     }
 
