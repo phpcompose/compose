@@ -9,41 +9,24 @@
 namespace Compose\Express;
 
 
+use Compose\Common\Invocation;
 use Compose\Common\ServiceInjector;
-use Compose\Standard\Container\{ContainerAwareInterface, ServiceAwareInterface};
+use Compose\Standard\Container\{
+    ContainerAwareInterface, ContainerAwareTrait, ServiceAwareInterface
+};
 use Compose\Standard\Http\MiddlewareInterface;
-use Interop\Container\ContainerInterface;
 use Psr\Http\Message\{ResponseInterface, ServerRequestInterface};
 use Zend\Expressive\Router\RouteResult;
-use Zend\Expressive\Router\RouterInterface;
 
 abstract class Action implements MiddlewareInterface, ServiceAwareInterface , ContainerAwareInterface
 {
-    use ResponseHelperTrait;
+    use ResponseHelperTrait, ContainerAwareTrait;
 
     protected
-        /**
-         * Allows ability to map
-         * @var array
-         */
-        $httpMethodMap = [
-            'get' => 'get',
-            'put' => 'put',
-            'post' => 'post',
-            'delete' => 'delete'
-        ],
-
-        /**
-         * @var ContainerInterface
-         */
-        $container,
-
         /**
          * @var ServerRequestInterface  server request for the action
          */
         $request,
-
-        $router,
 
         /**
          * @var ResponseInterface server response for the action
@@ -55,23 +38,6 @@ abstract class Action implements MiddlewareInterface, ServiceAwareInterface , Co
          */
         $next = null;
 
-    /**
-     * @param ContainerInterface $container
-     * @return mixed|void
-     */
-    public function setContainer(ContainerInterface $container)
-    {
-        $this->container = $container;
-        $this->router = $container->get(RouterInterface::class);
-    }
-
-    /**
-     * @return ContainerInterface
-     */
-    public function getContainer() : ContainerInterface
-    {
-        return $this->container;
-    }
 
     /**
      * @param ServerRequestInterface $request
@@ -106,20 +72,21 @@ abstract class Action implements MiddlewareInterface, ServiceAwareInterface , Co
      * @return mixed
      * @throws \HttpRequestException
      */
-    public function forward(ServerRequestInterface $request)
+    protected function forward(ServerRequestInterface $request)
     {
-        $method = $this->generateHandlerMethodName($request);
+        $invocation = $this->generateActionInvocation($request);
+
         $reflection = new \ReflectionMethod($this, $method);
         if(!$reflection->isPublic()) {
             // only public methods are allowed for action handler
             throw new \ReflectionException();
         }
 
-        // build action handler method params
-        $params = $this->buildHandlerMethodParams($request);
-
         /** @var ServiceInjector $injector */
         $injector = $this->getContainer()->get(ServiceInjector::class);
+
+        // add the request object to the first param
+        array_unshift($params, $request); //
         $injector->validateParameters($reflection, $params);
 
         return $reflection->invokeArgs($this, $params);
@@ -127,12 +94,16 @@ abstract class Action implements MiddlewareInterface, ServiceAwareInterface , Co
 
     /**
      * @param ServerRequestInterface $request
-     * @return string
+     * @return Invocation
      */
-    protected function generateHandlerMethodName(ServerRequestInterface $request) : string
+    protected function generateActionInvocation(ServerRequestInterface $request) : Invocation
     {
-        return strtolower($request->getMethod());
+        return new Invocation(
+            [$this, strtolower($request->getMethod())],
+            $this->extractRequestParams($request)
+        );
     }
+
 
     /**
      * @param ServerRequestInterface $request
@@ -143,26 +114,13 @@ abstract class Action implements MiddlewareInterface, ServiceAwareInterface , Co
         /** @var RouteResult $route */
         $route = $request->getAttribute(RouteResult::class);
         $matchedParams = $route->getMatchedParams();
+
         if(count($matchedParams)) {
             $paramstring = reset($matchedParams);
             $params = explode('/', $paramstring);
         } else {
             $params = [];
         }
-
-        return $params;
-    }
-
-    /**
-     * @param ServerRequestInterface $request
-     * @return array
-     */
-    protected function buildHandlerMethodParams(ServerRequestInterface $request) : array
-    {
-        $params = $this->extractRequestParams($request);
-
-        // now add the ServerRequestInterface in the beginning of the method param
-        array_unshift($params, $request);
 
         return $params;
     }
@@ -197,7 +155,7 @@ abstract class Action implements MiddlewareInterface, ServiceAwareInterface , Co
      * @return ResponseInterface|\Zend\Diactoros\Response\HtmlResponse
      * @throws \Exception
      */
-    public function view(string $template, array $data = [],  int $status = 200, array $headers = []) : ResponseInterface
+    protected function view(string $template, array $data = [],  int $status = 200, array $headers = []) : ResponseInterface
     {
         /** @var \Zend\Expressive\Template\TemplateRendererInterface $renderer */
         $renderer = $this->getContainer()->get(\Zend\Expressive\Template\TemplateRendererInterface::class);

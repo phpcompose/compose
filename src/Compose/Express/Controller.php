@@ -8,6 +8,7 @@
 
 namespace Compose\Express;
 
+use Compose\Standard\Http\Exception\HttpException;
 use Psr\Http\Message\ServerRequestInterface;
 
 class Controller extends Action
@@ -23,7 +24,7 @@ class Controller extends Action
      * @param ServerRequestInterface $request
      * @return string
      */
-    protected function generateHandlerMethodName(ServerRequestInterface $request) : string
+    protected function generateActionMethodName(ServerRequestInterface $request) : string
     {
         $params = $this->extractRequestParams($request);
         if(count($params)) {
@@ -32,8 +33,10 @@ class Controller extends Action
             $action = $this->defaultAction;
         }
 
-        if(!$this->validateActionName($action)) {
+        $action = $this->filterActionMethodName($action, ['_']);
 
+        if(!$this->validateActionMethodName($action)) {
+            throw new HttpException("Bad method request.", 404);
         }
 
         return sprintf("%s%s",
@@ -41,6 +44,30 @@ class Controller extends Action
             ucfirst($action)
             );
     }
+
+    protected function buildActionMethodParams(ServerRequestInterface $request) : array
+    {
+        $params = $this->extractRequestParams($request);
+        if(count($params)) {
+            array_shift($params);
+        }
+
+        return $params;
+    }
+
+
+    /**
+     * @todo should use validation classes/components
+     * @param string $action
+     * @param null $allowedChars
+     * @return string
+     */
+    protected function filterActionMethodName(string $action, $allowedChars = []) : string
+    {
+        $str = preg_replace('/[^a-z0-9' . implode("", $allowedChars) . ']+/i', ' ', $action);
+        return str_replace(' ', '', ucwords(trim($str)));
+    }
+
 
     /**
      * Validate action name
@@ -50,7 +77,7 @@ class Controller extends Action
      * @param string $action
      * @return bool
      */
-    protected function validateActionName(string $action) : bool
+    protected function validateActionMethodName(string $action) : bool
     {
         $regex = "/^[a-zA-Z_\x7f-\xff][a-zA-Z0-9_\x7f-\xff]*$/"; // see comment ^
         if(!preg_match($regex, $action)) {

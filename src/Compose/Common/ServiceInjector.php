@@ -10,7 +10,7 @@ namespace Compose\Common;
 use Interop\Container\ContainerInterface;
 
 
-class ServiceInjector extends Reflection
+class ServiceInjector
 {
     protected
         /** @var ContainerInterface */
@@ -28,19 +28,21 @@ class ServiceInjector extends Reflection
     /**
      * Invokes given method on the reflecting object
      *
-     * @param callable $method
+     * @param callable $callable
      * @param array|null $args
      * @return mixed
      */
-    public function invoke(callable $method, array $args = null)
+    public function invoke(callable $callable, array $args = null)
     {
-        $methodReflector = $this->reflectCallable($method);
-        $methodReflector->setAccessible(true); // allows to call private/protected methods
+        $invocation = new Invocation($callable);
+        $reflection = $invocation->reflect();
+        $reflection->setAccessible(true); // allows to call private/protected methods
 
+        // attempt to resolve dependencies
+        $dependencies = $this->resolveFunctionDependencies($reflection, $args);
+        $invocation->setParameters($dependencies);
 
-        // finally invoking the methods
-        $dependencies = $this->resolveFunctionDependencies($methodReflector, $args);
-        return $methodReflector->invokeArgs($dependencies);
+        return $invocation();
     }
 
     /**

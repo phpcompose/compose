@@ -15,6 +15,8 @@ class Reflection
     /**
      * Attempt to get reflection for given callable, method
      *
+     * @todo NOT COMPLETE.
+     * @note temporary solution until php 7.1 Closure::fromCallable()
      * @param callable $callable
      * @return \ReflectionFunctionAbstract
      */
