@@ -9,38 +9,55 @@
 namespace Compose\Express;
 
 use Psr\Http\Message\ServerRequestInterface;
+use Psr\Http\Message\ResponseInterface;
+use Compose\Standard\Http\Exception\HttpException;
 
 class Controller extends Action
 {
-    protected
-        /**
-         * @var string
-         */
-        $defaultAction = 'index';
-
+    /**
+     * Finalize the execute method.
+     * We don't want subclasses to override it within the controller environment
+     *
+     * @inheritdoc
+     * @param ServerRequestInterface $request
+     * @return ResponseInterface
+     */
+    final public function execute(ServerRequestInterface $request) : ResponseInterface
+    {
+        return parent::execute($request);
+    }
 
     /**
-     * @param ServerRequestInterface $request
+     * Overrides to provide action name for the controller
+     *
+     * @inheritdoc
+     * @param string $httpMethod
+     * @param array $httpParams
      * @return string
      */
-    protected function generateHandlerMethodName(ServerRequestInterface $request) : string
+    protected function resolveActionName(string $httpMethod, array &$httpParams = []) : string
     {
-        $params = $this->extractRequestParams($request);
-        if(count($params)) {
-            $action = reset($params);
-        } else {
+        $actionMethod = parent::resolveActionName($httpMethod, $httpParams);
+
+        if(!count($httpParams)) {
             $action = $this->defaultAction;
+        } else {
+            $action = array_shift($httpParams);
         }
 
-        if(!$this->validateActionName($action)) {
-
+        $action = $this->filterActionName($action, ['-']);
+        if(!$action) {
+            throw new HttpException("Unable to route.");
         }
 
-        return sprintf("%s%s",
-            strtolower($request->getMethod()),
-            ucfirst($action)
-            );
+        $method = $actionMethod . $action;
+        if(method_exists($this, $method)) {
+            return $method;
+        }
+
+        return "{$this->actionPrefix}{$action}";
     }
+
 
     /**
      * Validate action name
@@ -50,13 +67,19 @@ class Controller extends Action
      * @param string $action
      * @return bool
      */
-    protected function validateActionName(string $action) : bool
+    protected function filterActionName(string $action, array $allowedChars = [])
     {
-        $regex = "/^[a-zA-Z_\x7f-\xff][a-zA-Z0-9_\x7f-\xff]*$/"; // see comment ^
-        if(!preg_match($regex, $action)) {
-            return false;
+        // if allowed chars are provided,
+        // then we will need to remove them first
+        if(count($allowedChars)) {
+            $action = str_replace(' ', '', str_replace($allowedChars, ' ', $action));
         }
 
-        return true;
+        $regex = "/^[a-zA-Z_\x7f-\xff][a-zA-Z0-9_\x7f-\xff]*$/"; // see comment ^
+        if(!preg_match($regex, $action)) {
+            return null;
+        }
+
+        return $action;
     }
 }
