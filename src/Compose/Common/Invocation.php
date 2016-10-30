@@ -19,24 +19,40 @@ class Invocation
         $reflection = null,
 
         /**
-         * @var callable
+         * @var string
          */
-        $callable,
+        $name,
+
+        /**
+         * @var object
+         */
+        $target,
 
         /**
          * @var array
          */
-        $parameters;
+        $parameters = [];
 
     /**
      * Invocation constructor.
-     * @param callable $callable
-     * @param array $parameters
+     * @param string $name
+     * @param array|null $parameters
+     * @param null $target
      */
-    public function __construct(callable $callable, array $parameters = [])
+    public function __construct(string $name, array $parameters = null, $target = null)
     {
-        $this->callable = $callable;
+        $this->name = $name;
         if($parameters) $this->parameters = $parameters;
+        if($target) $this->target = $target;
+    }
+
+    /**
+     * Get the method/function name
+     * @return string
+     */
+    public function getName() : string
+    {
+        return $this->name;
     }
 
     /**
@@ -56,6 +72,22 @@ class Invocation
     }
 
     /**
+     * @param null|mixed $object
+     */
+    public function setTarget($object)
+    {
+        $this->target = $object;
+    }
+
+    /**
+     * @return null|mixed
+     */
+    public function getTarget()
+    {
+        return $this->target;
+    }
+
+    /**
      * Attempt to invoke the invocation
      *
      * Will use reflection to validate and invoke the callable
@@ -66,39 +98,22 @@ class Invocation
      */
     public function __invoke()
     {
-        $reflection = $this->reflect();
+        if($this->target == null) {
+            throw new \InvalidArgumentException("Target for Invocation is not specified.");
+        }
+
+        $reflection = new \ReflectionMethod($this->target, $this->name);
         $params = $this->getParameters();
 
         $this->verify($reflection, $params);
 
-        return $reflection->invokeArgs($params);
+        return $reflection->invokeArgs($this->target, $params);
     }
 
-    /**
-     * @return \ReflectionFunctionAbstract
-     * @throws \ReflectionException
-     */
-    public function reflect() : \ReflectionFunctionAbstract
-    {
-        if(!$this->reflection) {
-            $callable = $this->callable;
-            $reflection = null;
-            if (is_string($callable) || $callable instanceof \Closure) {
-                $reflection = new \ReflectionFunction($callable);
-            } elseif (is_array($callable) && count($callable) == 2) { // standard php [class, method] syntax
-                list($class, $method) = $callable;
-                $reflection = new \ReflectionMethod($class, $method);
-            } else {
-                throw new \ReflectionException("Unable to reflect Invocation.");
-            }
-            $this->reflection = $reflection;
-        }
-
-        return $this->reflection;
-    }
 
     /**
-     * @throws \InvalidArgumentException
+     * @param \ReflectionFunctionAbstract $method
+     * @param array $args
      */
     protected function verify(\ReflectionFunctionAbstract $method, array $args = [])
     {

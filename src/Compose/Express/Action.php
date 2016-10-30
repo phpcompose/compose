@@ -10,19 +10,25 @@ namespace Compose\Express;
 
 
 use Compose\Common\Invocation;
-use Compose\Common\ServiceInjector;
 use Compose\Standard\Container\{
-    ContainerAwareInterface, ContainerAwareTrait, ServiceAwareInterface
+    ContainerAwareInterface,
+    ContainerAwareTrait,
+    ServiceAwareInterface
 };
+use Compose\Standard\Http\CommandInterface;
 use Compose\Standard\Http\MiddlewareInterface;
-use Psr\Http\Message\{ResponseInterface, ServerRequestInterface};
-use Zend\Expressive\Router\RouteResult;
+use Psr\Http\Message\{
+    ResponseInterface, ServerRequestInterface
+};
 
-abstract class Action implements MiddlewareInterface, ServiceAwareInterface , ContainerAwareInterface
+abstract class Action
+    implements MiddlewareInterface, CommandInterface, ServiceAwareInterface , ContainerAwareInterface
 {
-    use ResponseHelperTrait, ContainerAwareTrait;
+    use ActionResolverTrait, ResponseHelperTrait, ContainerAwareTrait;
 
     protected
+
+
         /**
          * @var ServerRequestInterface  server request for the action
          */
@@ -31,98 +37,45 @@ abstract class Action implements MiddlewareInterface, ServiceAwareInterface , Co
         /**
          * @var ResponseInterface server response for the action
          */
-        $response,
-
-        /**
-         * @var callable $next
-         */
-        $next = null;
+        $response;
 
 
     /**
+     * @inheritdoc
      * @param ServerRequestInterface $request
      * @param ResponseInterface $response
-     * @param callable $next
      * @return ResponseInterface
      */
     final public function __invoke(ServerRequestInterface $request, ResponseInterface $response, callable $next = null) : ResponseInterface
     {
         $this->request = $request;
         $this->response = $response;
-        $this->next = $next;
 
         try {
             $this->onInit();
 
-            $response = $this->forward($request);
+            $response = $this->execute($request);
 
             $this->response = $response;
 
             $this->onExit();
 
-            return $response;
-
         } catch(\Exception $exception) {
             $this->onException($exception);
         }
+
+        return $this->response;
     }
 
     /**
      * @param ServerRequestInterface $request
-     * @return mixed
-     * @throws \HttpRequestException
+     * @return ResponseInterface
      */
-    protected function forward(ServerRequestInterface $request)
+    public function execute(ServerRequestInterface $request) : ResponseInterface
     {
-        $invocation = $this->generateActionInvocation($request);
-
-        $reflection = new \ReflectionMethod($this, $method);
-        if(!$reflection->isPublic()) {
-            // only public methods are allowed for action handler
-            throw new \ReflectionException();
-        }
-
-        /** @var ServiceInjector $injector */
-        $injector = $this->getContainer()->get(ServiceInjector::class);
-
-        // add the request object to the first param
-        array_unshift($params, $request); //
-        $injector->validateParameters($reflection, $params);
-
-        return $reflection->invokeArgs($this, $params);
-    }
-
-    /**
-     * @param ServerRequestInterface $request
-     * @return Invocation
-     */
-    protected function generateActionInvocation(ServerRequestInterface $request) : Invocation
-    {
-        return new Invocation(
-            [$this, strtolower($request->getMethod())],
-            $this->extractRequestParams($request)
-        );
-    }
-
-
-    /**
-     * @param ServerRequestInterface $request
-     * @return array
-     */
-    protected function extractRequestParams(ServerRequestInterface $request) : array
-    {
-        /** @var RouteResult $route */
-        $route = $request->getAttribute(RouteResult::class);
-        $matchedParams = $route->getMatchedParams();
-
-        if(count($matchedParams)) {
-            $paramstring = reset($matchedParams);
-            $params = explode('/', $paramstring);
-        } else {
-            $params = [];
-        }
-
-        return $params;
+        /** @var Invocation $invocation */
+        $invocation = $this->resolveRequestHandler($request);
+        return $invocation();
     }
 
     /**
@@ -131,6 +84,9 @@ abstract class Action implements MiddlewareInterface, ServiceAwareInterface , Co
     protected function onInit()
     {}
 
+    /**
+     *
+     */
     protected function onExit()
     {}
 
@@ -143,7 +99,6 @@ abstract class Action implements MiddlewareInterface, ServiceAwareInterface , Co
     {
         throw $e;
     }
-
 
     /**
      * Create additional Response helper method for view

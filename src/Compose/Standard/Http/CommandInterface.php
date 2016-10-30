@@ -9,11 +9,10 @@
 namespace Compose\Standard\Http;
 
 
-use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\ServerRequestInterface;
 
 interface CommandInterface
 {
-    public function execute(RequestInterface $request) : ResponseInterface;
-    public function __invoke(RequestInterface $request, ResponseInterface $response) : ResponseInterface;
+    public function execute(ServerRequestInterface $request) : ResponseInterface;
 }
