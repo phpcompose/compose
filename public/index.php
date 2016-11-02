@@ -15,4 +15,16 @@ $container = require 'config/container.php';
 
 /** @var \Zend\Expressive\Application $app */
 $app = $container->get(\Zend\Expressive\Application::class);
-$app->run();
+
+/** @var \Compose\Express\RequestHandler $express */
+$express = \Compose\Express\RequestHandlerFactory::create($container);
+
+$app->pipe($express);
+
+/** @var \Zend\Diactoros\Server $server */
+$server = \Zend\Diactoros\Server::createServerFromRequest(
+    $app,
+    \Zend\Diactoros\ServerRequestFactory::fromGlobals()
+);
+
+$server->listen();

@@ -27,8 +27,6 @@ abstract class Action
     use ActionResolverTrait, ResponseHelperTrait, ContainerAwareTrait;
 
     protected
-
-
         /**
          * @var ServerRequestInterface  server request for the action
          */
@@ -74,7 +72,7 @@ abstract class Action
     public function execute(ServerRequestInterface $request) : ResponseInterface
     {
         /** @var Invocation $invocation */
-        $invocation = $this->resolveRequestHandler($request);
+        $invocation = $this->resolveActionHandler($request);
         return $invocation();
     }
 

@@ -1,6 +1,7 @@
 <?php
 
 return [
+    // disable debugging on production
     'debug' => false,
 
     'config_cache_enabled' => false,

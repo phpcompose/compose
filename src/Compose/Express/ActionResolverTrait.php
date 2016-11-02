@@ -10,6 +10,7 @@ namespace Compose\Express;
 
 use Psr\Http\Message\ServerRequestInterface;
 use Compose\Common\Invocation;
+use Psr\Http\Message\UriInterface;
 use Zend\Expressive\Router\RouteResult;
 
 trait ActionResolverTrait
@@ -41,7 +42,7 @@ trait ActionResolverTrait
      * @param ServerRequestInterface $request
      * @return Invocation|null
      */
-    protected function resolveRequestHandler(ServerRequestInterface $request) : Invocation
+    protected function resolveActionHandler(ServerRequestInterface $request) : Invocation
     {
         $method = strtolower($request->getMethod());
         $params = $this->extractRequestParams($request);
@@ -83,12 +84,12 @@ trait ActionResolverTrait
      */
     protected function extractRequestParams(ServerRequestInterface $request) : array
     {
-        /** @var RouteResult $route */
-        $route = $request->getAttribute(RouteResult::class);
-        $matchedParams = $route->getMatchedParams();
+        /** @var UriInterface $uri */
+        $uri = $request->getUri();
+        $path = $uri->getPath();
 
-        if(count($matchedParams)) {
-            $params = explode('/', reset($matchedParams)); // get the first entry and
+        if(!empty($path)) {
+            $params = explode('/', reset($path)); // get the first entry and
         } else {
             $params = [];
         }
