@@ -1,8 +1,5 @@
 <?php
 
-use Zend\Stdlib\ArrayUtils;
-use Zend\Stdlib\Glob;
-
 /**
  * Configuration files are loaded in a specific order. First ``global.php``, then ``*.global.php``.
  * then ``local.php`` and finally ``*.local.php``. This way local settings overwrite global settings.
@@ -14,22 +11,33 @@ use Zend\Stdlib\Glob;
 
 $cachedConfigFile = 'data/cache/app_config.php';
 
-$config = [];
-if (is_file($cachedConfigFile)) {
-    // Try to load the cached config
-    $config = include $cachedConfigFile;
-} else {
-    // Load configuration from autoload path
-    foreach (Glob::glob('config/autoload/{{,*.}global,{,*.}local}.php', Glob::GLOB_BRACE) as $file) {
-        $config = ArrayUtils::merge($config, include $file);
-    }
+//$config = [];
+//if (is_file($cachedConfigFile)) {
+//    // Try to load the cached config
+//    $config = include $cachedConfigFile;
+//} else {
+//    // Load configuration from autoload path
+//    foreach (Glob::glob('config/autoload/{{,*.}global,{,*.}local}.php', Glob::GLOB_BRACE) as $file) {
+//        $config = ArrayUtils::merge($config, include $file);
+//    }
+//
+//    // Cache config if enabled
+//    if (isset($config['config_cache_enabled']) && $config['config_cache_enabled'] === true) {
+//        file_put_contents($cachedConfigFile, '<?php return ' . var_export($config, true) . ';');
+//    }
+//}
+//
+//// Return an ArrayObject so we can inject the config as a service in Aura.Di
+//// and still use array checks like ``is_array``.
+//return new ArrayObject($config, ArrayObject::ARRAY_AS_PROPS);
 
-    // Cache config if enabled
-    if (isset($config['config_cache_enabled']) && $config['config_cache_enabled'] === true) {
-        file_put_contents($cachedConfigFile, '<?php return ' . var_export($config, true) . ';');
-    }
+$autoload = 'config/autoload/{{,*.}global,{,*.}local}.php';
+
+$config = new \Compose\Common\Configuration();
+$config->glob($autoload);
+
+if(isset($config['autoload'])) {
+    $config->loadFiles($config['autoload']);
 }
 
-// Return an ArrayObject so we can inject the config as a service in Aura.Di
-// and still use array checks like ``is_array``.
-return new ArrayObject($config, ArrayObject::ARRAY_AS_PROPS);
+return $config;

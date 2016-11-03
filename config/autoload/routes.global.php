@@ -23,5 +23,15 @@ return [
             'middleware' => App\Action\PingAction::class,
             'allowed_methods' => ['GET'],
         ],
+        [
+            'name' => 'test.hello',
+            'path' => '/test/hello[/{action_params:.+}]',
+            'middleware' => \App\Test\Action\HelloAction::class,
+            'allowed_methods' => ['GET'],
+        ],
+    ],
+
+    "paths" => [
+        "/test/hey" => \App\Test\Action\HelloAction::class,
     ],
 ];

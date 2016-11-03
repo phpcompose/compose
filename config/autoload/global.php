@@ -12,4 +12,10 @@ return [
             'template_error' => 'error::error',
         ],
     ],
+
+    "autoload" => [
+        'testging.config' => 'src/App/Test/config.php'
+    ],
+
+
 ];
