@@ -6,7 +6,7 @@
  * Time: 1:24 PM
  */
 
-namespace Compose\Standard\Http;
+namespace Compose\System\Http;
 
 
 use Psr\Http\Message\ResponseInterface;

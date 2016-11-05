@@ -6,7 +6,7 @@
  * Time: 10:00 PM
  */
 
-namespace Compose\Standard\Http\Exception;
+namespace Compose\System\Http\Exception;
 
 
 class HttpException extends \Exception

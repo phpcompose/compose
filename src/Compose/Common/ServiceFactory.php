@@ -9,7 +9,7 @@ namespace Compose\Common;
 use Interop\Container\ContainerInterface;
 use Zend\ServiceManager\Factory\AbstractFactoryInterface;
 use Zend\Expressive\Container\Exception\NotFoundException;
-use Compose\Standard\Container;
+use Compose\System\Container;
 
 
 
@@ -75,8 +75,6 @@ class ServiceFactory implements AbstractFactoryInterface
 
         return $instance;
     }
-
-
 
     /**
      * @param $class

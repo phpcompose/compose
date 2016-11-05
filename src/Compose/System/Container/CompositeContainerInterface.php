@@ -6,7 +6,7 @@
  * Time: 7:06 PM
  */
 
-namespace Compose\Standard\Container;
+namespace Compose\System\Container;
 
 
 use Interop\Container\ContainerInterface;

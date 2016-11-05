@@ -10,7 +10,7 @@ namespace Compose\Express;
 
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\ResponseInterface;
-use Compose\Standard\Http\Exception\HttpException;
+use Compose\System\Http\Exception\HttpException;
 
 class Controller extends Action
 {

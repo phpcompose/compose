@@ -6,7 +6,7 @@
  * Time: 10:25 AM
  */
 
-namespace Compose\Standard\Container;
+namespace Compose\System\Container;
 
 
 /**
