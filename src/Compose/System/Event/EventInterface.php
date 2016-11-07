@@ -24,7 +24,7 @@ interface EventInterface
     /**
      * @return array
      */
-    public function getParameters(): array;
+    public function getArguments(): array;
 
     /**
      * @return mixed

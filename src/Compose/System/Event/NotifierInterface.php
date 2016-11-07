@@ -17,7 +17,7 @@ use SplStack;
  * EventManagerInterface is interface per development of PSR-14
  * @package Compose\System\Event
  */
-interface EventManagerInterface
+interface NotifierInterface
 {
     /**
      * @param string $event
@@ -40,5 +40,5 @@ interface EventManagerInterface
      * @param array $args
      * @return mixed
      */
-    public function trigger(string $event, $target = null, array $args = []): SplStack;
+    public function notify(string $event, $target = null, array $args = []): SplStack;
 }
