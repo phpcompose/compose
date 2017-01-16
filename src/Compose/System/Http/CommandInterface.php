@@ -12,7 +12,17 @@ namespace Compose\System\Http;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 
+/**
+ * Interface CommandInterface
+ *
+ * Provides interface for Command pattern
+ * @package Compose\Core\Http
+ */
 interface CommandInterface
 {
-    public function execute(ServerRequestInterface $request) : ResponseInterface;
+    /**
+     * @param ServerRequestInterface $request
+     * @return ResponseInterface
+     */
+    public function process(ServerRequestInterface $request) : ResponseInterface;
 }

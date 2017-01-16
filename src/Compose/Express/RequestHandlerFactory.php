@@ -24,17 +24,11 @@ class RequestHandlerFactory
         $config = ($container->has('config')) ? $container->get('config') : [];
         $handler = new RequestHandler();
 
-        if(isset($config['paths'])) {
-            $handlers = $config['paths'];
+        if(isset($config['routes'])) {
+            $handlers = $config['routes'];
 
-            foreach($handlers as $path => $class) {
-                if(is_string($class)) {
-                    $callable = $container->get($class);
-                } else {
-                    $callable = $class;
-                }
-
-                $handler->pipe($path, $callable);
+            foreach($handlers as $path => $command) {
+                $handler->route($path, $command);
             }
         }
 

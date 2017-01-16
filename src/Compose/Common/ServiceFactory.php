@@ -8,8 +8,7 @@ namespace Compose\Common;
 
 use Interop\Container\ContainerInterface;
 use Zend\ServiceManager\Factory\AbstractFactoryInterface;
-use Zend\Expressive\Container\Exception\NotFoundException;
-use Compose\System\Container;
+use Compose\Core\Container;
 
 
 

@@ -19,12 +19,7 @@ trait ActionResolverTrait
         /**
          * @var string
          */
-        $defaultAction = 'index',
-
-        /**
-         * @var string
-         */
-        $actionPrefix = 'execute',
+        $actionPrefix = 'onProcess',
 
         /**
          * @var array
@@ -47,11 +42,6 @@ trait ActionResolverTrait
         $method = strtolower($request->getMethod());
         $params = $this->extractRequestParams($request);
 
-        // handle special case
-        if(!count($params) && $method == 'get') {
-            $method = $this->defaultAction;
-        }
-
         // map http method
         if(isset($this->httpMethodMapper[$method])) {
             $method = $this->httpMethodMapper[$method];
@@ -68,6 +58,7 @@ trait ActionResolverTrait
     }
 
     /**
+     * Resolve action name for given HTTP method and passed params
      * @param string $httpMethod
      * @param array $httpParams
      * @return string

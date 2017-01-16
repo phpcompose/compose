@@ -1,4 +1,7 @@
 <?php
+use Psr\Http\Message\ServerRequestInterface;
+use Interop\Http\Middleware\DelegateInterface;
+use Psr\Http\Message\ResponseInterface;
 
 // Delegate static file requests back to the PHP built-in webserver
 if (php_sapi_name() === 'cli-server'
@@ -13,18 +16,41 @@ require 'vendor/autoload.php';
 /** @var \Interop\Container\ContainerInterface $container */
 $container = require 'config/container.php';
 
-/** @var \Zend\Expressive\Application $app */
-$app = $container->get(\Zend\Expressive\Application::class);
 
-/** @var \Compose\Express\RequestHandler $express */
-$express = \Compose\Express\RequestHandlerFactory::create($container);
+$app = new \Zend\Stratigility\MiddlewarePipe();
 
-$app->pipe($express);
+// setup error handlings
+$app->raiseThrowables();
+$app->pipe(new \Zend\Stratigility\Middleware\ErrorHandler(new \Zend\Diactoros\Response(), new \Zend\Stratigility\Middleware\ErrorResponseGenerator(true)));
 
-/** @var \Zend\Diactoros\Server $server */
-$server = \Zend\Diactoros\Server::createServerFromRequest(
+
+$frontController = new \Compose\Express\RequestHandler($container);
+$frontController->route('/app', \App\Test\Action\HelloAction::class);
+$app->pipe($frontController);
+
+
+
+
+
+$app->pipe('/hello', function(ServerRequestInterface $req, DelegateInterface $del) {
+    return new \Zend\Diactoros\Response\HtmlResponse('<h1>Hello World</h1>');
+});
+
+$app->pipe('/err', function(ServerRequestInterface $request, DelegateInterface $delegate) {
+    throw new Exception('Testing exception');
+});
+
+
+
+$app->pipe(new \Zend\Stratigility\Middleware\NotFoundHandler(new \Zend\Diactoros\Response()));
+
+//
+$server = \Zend\Diactoros\Server::createServer(
     $app,
-    \Zend\Diactoros\ServerRequestFactory::fromGlobals()
+    $_SERVER,
+    $_GET,
+    $_POST,
+    $_COOKIE,
+    $_FILES
 );
-
-$server->listen();
+$server->listen(new \Zend\Stratigility\NoopFinalHandler());

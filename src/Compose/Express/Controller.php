@@ -10,22 +10,16 @@ namespace Compose\Express;
 
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\ResponseInterface;
-use Compose\System\Http\Exception\HttpException;
+use Compose\Core\Http\Exception\HttpException;
 
 class Controller extends Action
 {
-    /**
-     * Finalize the execute method.
-     * We don't want subclasses to override it within the controller environment
-     *
-     * @inheritdoc
-     * @param ServerRequestInterface $request
-     * @return ResponseInterface
-     */
-    final public function execute(ServerRequestInterface $request) : ResponseInterface
-    {
-        return parent::execute($request);
-    }
+    protected
+        /**
+         * @var string
+         */
+        $defaultAction = 'index';
+
 
     /**
      * Overrides to provide action name for the controller

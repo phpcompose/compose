@@ -8,7 +8,6 @@
 
 namespace Compose\Express;
 
-
 use Compose\Common\Invocation;
 use Compose\System\Container\{
     ContainerAwareInterface,
@@ -16,13 +15,13 @@ use Compose\System\Container\{
     ServiceAwareInterface
 };
 use Compose\System\Http\CommandInterface;
-use Compose\System\Http\MiddlewareInterface;
 use Psr\Http\Message\{
-    ResponseInterface, ServerRequestInterface
+    ResponseInterface,
+    ServerRequestInterface
 };
 
 abstract class Action
-    implements MiddlewareInterface, CommandInterface, ServiceAwareInterface , ContainerAwareInterface
+    implements CommandInterface, ServiceAwareInterface , ContainerAwareInterface
 {
     use ActionResolverTrait, ResponseHelperTrait, ContainerAwareTrait;
 
@@ -30,31 +29,21 @@ abstract class Action
         /**
          * @var ServerRequestInterface  server request for the action
          */
-        $request,
-
-        /**
-         * @var ResponseInterface server response for the action
-         */
-        $response;
+        $request;
 
 
     /**
-     * @inheritdoc
      * @param ServerRequestInterface $request
-     * @param ResponseInterface $response
      * @return ResponseInterface
      */
-    final public function __invoke(ServerRequestInterface $request, ResponseInterface $response, callable $next = null) : ResponseInterface
+    final public function process(ServerRequestInterface $request) : ResponseInterface
     {
         $this->request = $request;
-        $this->response = $response;
 
         try {
             $this->onInit();
 
-            $response = $this->execute($request);
-
-            $this->response = $response;
+            $response = $this->onProcess($request);
 
             $this->onExit();
 
@@ -62,18 +51,7 @@ abstract class Action
             $this->onException($exception);
         }
 
-        return $this->response;
-    }
-
-    /**
-     * @param ServerRequestInterface $request
-     * @return ResponseInterface
-     */
-    public function execute(ServerRequestInterface $request) : ResponseInterface
-    {
-        /** @var Invocation $invocation */
-        $invocation = $this->resolveActionHandler($request);
-        return $invocation();
+        return $response;
     }
 
     /**
@@ -81,6 +59,17 @@ abstract class Action
      */
     protected function onInit()
     {}
+
+    /**
+     * @param ServerRequestInterface $request
+     * @return mixed
+     */
+    protected function onProcess(ServerRequestInterface $request)
+    {
+        /** @var Invocation $invocation */
+        $invocation = $this->resolveActionHandler($request);
+        return $invocation();
+    }
 
     /**
      *

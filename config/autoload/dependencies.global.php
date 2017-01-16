@@ -15,18 +15,18 @@ return [
         // class name.
         'invokables' => [
             // Fully\Qualified\InterfaceName::class => Fully\Qualified\ClassName::class,
-            Zend\Expressive\Router\RouterInterface::class => Zend\Expressive\Router\FastRouteRouter::class,
-            Helper\ServerUrlHelper::class => Helper\ServerUrlHelper::class,
+//            Zend\Expressive\Router\RouterInterface::class => Zend\Expressive\Router\FastRouteRouter::class,
+//            Helper\ServerUrlHelper::class => Helper\ServerUrlHelper::class,
         ],
 
 
         // Use 'factories' for services provided by callbacks/factory classes.
         'factories' => [
-            Helper\ServerUrlMiddleware::class => Helper\ServerUrlMiddlewareFactory::class,
-            Helper\UrlHelperMiddleware::class => Helper\UrlHelperMiddlewareFactory::class,
+//            Helper\ServerUrlMiddleware::class => Helper\ServerUrlMiddlewareFactory::class,
+//            Helper\UrlHelperMiddleware::class => Helper\UrlHelperMiddlewareFactory::class,
 
-            Application::class => ApplicationFactory::class,
-            Helper\UrlHelper::class => Helper\UrlHelperFactory::class,
+//            Application::class => ApplicationFactory::class,
+//            Helper\UrlHelper::class => Helper\UrlHelperFactory::class,
             Common\ServiceInjector::class => function(ContainerInterface $container) {
                 return new Common\ServiceInjector($container);
             }
