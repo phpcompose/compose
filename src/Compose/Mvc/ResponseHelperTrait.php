@@ -1,5 +1,7 @@
 <?php
-namespace Compose\Express;
+namespace Compose\Mvc;
+
+
 use Psr\Http\Message\ResponseInterface;
 
 /**

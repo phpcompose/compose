@@ -10,20 +10,19 @@ namespace Compose\System\Container;
 
 
 use Interop\Container\ContainerInterface;
-use Zend\Expressive\Container\Exception\NotFoundException;
+use Interop\Container\Exception\NotFoundException;
 
 /**
  * Trait CompositeContainerTrait
  *
  * Provides simple implementation of CompositeContainerInterface
- * There has bee various approaches to implementing a composite container has been discussed at linke provided below.
+ * There has been various approaches to implementing a composite container.  Concept has been discussed at linked provided below.
  *
  * @link https://github.com/container-interop/container-interop/blob/master/docs/Delegate-lookup-meta.md
  * @package Compose\Standard\Container
  */
 trait CompositeContainerTrait
 {
-
     protected
         /**
          * @var ContainerInterface[]
@@ -31,7 +30,8 @@ trait CompositeContainerTrait
         $containers = [],
 
         /**
-         * Holds service mapped to container if available
+         * Holds service mapped to container index, if available
+         *
          * @var array
          */
         $map = [];
@@ -51,7 +51,8 @@ trait CompositeContainerTrait
 
 
     /**
-     * Loops through all delegate containers to check if given service $name is avialable
+     * Loops through all delegate containers to check if given service $name is available
+     *
      * @param $name
      * @return bool
      */
@@ -83,15 +84,15 @@ trait CompositeContainerTrait
      */
     public function get($name)
     {
-        if($this->has($name)) {
-            $index = $this->map[$name];
-
-            /** @var ContainerInterface $container */
-            $container = $this->containers[$index];
-            return $container->get($name);
-        } else {
+        if(!$this->has($name)) {
             // unable to resolve given service $name
-            throw new NotFoundException("Service {$name} not found.");
+            throw new class("Service {$name} not found.") extends \Exception implements NotFoundException {};
         }
+
+        $index = $this->map[$name];
+
+        /** @var ContainerInterface $container */
+        $container = $this->containers[$index];
+        return $container->get($name);
     }
 }

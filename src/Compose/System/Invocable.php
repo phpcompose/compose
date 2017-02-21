@@ -1,12 +1,13 @@
 <?php
-
-namespace Compose\Standard\System;
-
 /**
  * Created by PhpStorm.
  * User: alaminahmed
- * Date: 2016-10-27
- * Time: 8:34 PM
+ */
+namespace Compose\Standard\System;
+
+/**
+ * Interface Invocable
+ * @package Compose\Standard\System
  */
 interface Invocable
 {

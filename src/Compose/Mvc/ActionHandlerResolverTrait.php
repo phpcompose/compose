@@ -6,27 +6,18 @@
  * Time: 5:53 PM
  */
 
-namespace Compose\Express;
+namespace Compose\Mvc;
 
 use Psr\Http\Message\ServerRequestInterface;
-use Compose\Common\Invocation;
+use Compose\System\Invocation;
 use Psr\Http\Message\UriInterface;
-use Zend\Expressive\Router\RouteResult;
 
-trait ActionResolverTrait
+trait ActionHandlerResolverTrait
 {
     protected
         /**
-         * @var string
-         */
-        $defaultAction = 'index',
-
-        /**
-         * @var string
-         */
-        $actionPrefix = 'execute',
-
-        /**
+         * Mapping HTTP method to internal method for action routing
+         *
          * @var array
          */
         $httpMethodMapper = [
@@ -39,6 +30,8 @@ trait ActionResolverTrait
         ];
 
     /**
+     * Resolving action handler
+     *
      * @param ServerRequestInterface $request
      * @return Invocation|null
      */
@@ -47,11 +40,6 @@ trait ActionResolverTrait
         $method = strtolower($request->getMethod());
         $params = $this->extractRequestParams($request);
 
-        // handle special case
-        if(!count($params) && $method == 'get') {
-            $method = $this->defaultAction;
-        }
-
         // map http method
         if(isset($this->httpMethodMapper[$method])) {
             $method = $this->httpMethodMapper[$method];
@@ -59,24 +47,27 @@ trait ActionResolverTrait
 
         $action = $this->resolveActionName($method, $params);
 
-        array_unshift($params, $request);
-        return new Invocation(
-            $action,
-            $params,
-            $this
+        $invocation = new Invocation(
+            $this,
+            $action
         );
+
+        if($invocation->getArgumentTypeAtIndex(0) == ServerRequestInterface::class) {
+            array_unshift($params, $request); // add the request as the first param
+        }
+
+        $invocation->setParameters($params);
+        return $invocation;
     }
 
     /**
+     * Resolve action name for given HTTP method and passed params
+     *
      * @param string $httpMethod
      * @param array $httpParams
      * @return string
      */
-    protected function resolveActionName(string $httpMethod, array &$httpParams = []) : string
-    {
-        return $this->actionPrefix .  ucfirst($httpMethod);
-    }
-
+    abstract protected function resolveActionName(string $httpMethod, array &$httpParams = []) : string;
 
     /**
      * @param ServerRequestInterface $request
@@ -89,7 +80,7 @@ trait ActionResolverTrait
         $path = $uri->getPath();
 
         if(!empty($path)) {
-            $params = explode('/', reset($path)); // get the first entry and
+            $params = array_values(array_filter(explode('/', $path)));
         } else {
             $params = [];
         }

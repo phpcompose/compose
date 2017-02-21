@@ -6,11 +6,17 @@
  * Time: 10:09 PM
  */
 
-namespace Compose\Common;
+namespace Compose\System;
 
 
 
-class Invocation
+use Compose\Standard\System\Invocable;
+
+/**
+ * Class Invocation
+ * @package Compose\System
+ */
+class Invocation implements Invocable
 {
     protected
         /**
@@ -39,11 +45,11 @@ class Invocation
      * @param array|null $parameters
      * @param null $target
      */
-    public function __construct(string $name, array $parameters = null, $target = null)
+    public function __construct($target, string $name, array $parameters = null)
     {
+        $this->target = $target;
         $this->name = $name;
         if($parameters) $this->parameters = $parameters;
-        if($target) $this->target = $target;
     }
 
     /**
@@ -64,19 +70,13 @@ class Invocation
     }
 
     /**
+     * Sets params for the invocation method
+     *
      * @param mixed $arguments
      */
-    public function setParameters($arguments)
+    public function setParameters(array $arguments)
     {
         $this->parameters = $arguments;
-    }
-
-    /**
-     * @param null|mixed $object
-     */
-    public function setTarget($object)
-    {
-        $this->target = $object;
     }
 
     /**
@@ -91,25 +91,39 @@ class Invocation
      * Attempt to invoke the invocation
      *
      * Will use reflection to validate and invoke the callable
-     * Will validate method signature with current params
+     * Will validate method signature with params
+     *
+     * If params is passed, it will be used, else will attempt to use from getParameters()
+     * @param $params
      * @throws \ReflectionException
      * @throws \InvalidArgumentException
      * @return mixed
      */
-    public function __invoke()
+    public function __invoke(...$params)
     {
         if($this->target == null) {
             throw new \InvalidArgumentException("Target for Invocation is not specified.");
         }
 
-        $reflection = new \ReflectionMethod($this->target, $this->name);
-        $params = $this->getParameters();
+        $reflection = $this->getReflection();
+        $params = $params ?: $this->getParameters();
 
         $this->verify($reflection, $params);
 
         return $reflection->invokeArgs($this->target, $params);
     }
 
+    /**
+     * @return \ReflectionMethod
+     */
+    public function getReflection() : \ReflectionMethod
+    {
+        if(!$this->reflection) {
+            $this->reflection = new \ReflectionMethod($this->target, $this->name);
+        }
+
+        return $this->reflection;
+    }
 
     /**
      * @param \ReflectionFunctionAbstract $method
@@ -142,11 +156,24 @@ class Invocation
         }
 
         if ($argsCount < $requiredParamsCount) {
-            throw new \InvalidArgumentException("Invalid Param count. (Params ({$argsCount}) are less then method anticipates ({$requiredParamsCount}))");
+            throw new \InvalidArgumentException("{$method->getName()}: Invalid Param count. (Params ({$argsCount}) are less then method anticipates ({$requiredParamsCount}))");
         }
 
         if ($argsCount > $paramsCount) {
-            throw new \InvalidArgumentException("Invalid Param count. (Params ({$argsCount}) are more than method anticipates ({$requiredParamsCount}))");
+            throw new \InvalidArgumentException("{$method->getName()}: Invalid Param count. (Params ({$argsCount}) are more than method anticipates ({$requiredParamsCount}))");
         }
+    }
+
+    /**
+     * @param int $index
+     * @return null|string
+     */
+    public function getArgumentTypeAtIndex(int $index) : ?string
+    {
+        $reflection = $this->getReflection();
+        $param = isset($reflection->getParameters()[$index]) ? $reflection->getParameters()[$index] : null;
+        if(!$param) return null;
+
+        return (string) $param->getType();
     }
 }

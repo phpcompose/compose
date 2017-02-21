@@ -12,5 +12,4 @@ $container = new ServiceManager();
 
 // Inject config
 $container->setService('config', $config);
-
 return $container;

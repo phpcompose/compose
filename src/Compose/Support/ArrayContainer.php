@@ -6,14 +6,14 @@
  * Time: 7:03 PM
  */
 
-namespace Compose\Common;
+namespace Compose\Support;
 
 
 use Interop\Container\ContainerInterface;
 
 /**
  * Class ArrayContainer
- * @package Compose\Common
+ * @package Compose\Support
  */
 class ArrayContainer extends \ArrayObject  implements ContainerInterface
 {
@@ -37,7 +37,7 @@ class ArrayContainer extends \ArrayObject  implements ContainerInterface
      * @param string $id
      * @return bool
      */
-    public function has($id)
+    public function has($id) : bool
     {
         return isset($this[$id]);
     }

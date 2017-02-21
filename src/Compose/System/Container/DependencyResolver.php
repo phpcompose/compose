@@ -2,23 +2,27 @@
 /**
  * Created by PhpStorm.
  * User: Alamin
- * Date: 2016-10-18
- * Time: 6:58 PM
  */
+namespace Compose\System\Container;
 
-namespace Compose\Common;
+
 use Interop\Container\ContainerInterface;
 
-
-class ServiceInjector
+/**
+ * Class DependencyResolver
+ *
+ * Uses given ContainerInterface to resolve dependencies
+ * @package Ats\Support\Container
+ */
+class DependencyResolver
 {
     protected
         /** @var ContainerInterface */
         $container;
 
     /**
+     * DependencyResolver constructor.
      * @param ContainerInterface $container
-     * @inheritdoc
      */
     public function __construct(ContainerInterface $container)
     {
@@ -32,29 +36,47 @@ class ServiceInjector
      * @param array|null $args
      * @return mixed
      */
-    public function invoke(callable $callable, array $args = null)
+    public function invoke(callable $callable, array $args = [])
     {
-        $invocation = new Invocation($callable);
-        $reflection = $invocation->reflect();
-        $reflection->setAccessible(true); // allows to call private/protected methods
+        $reflection = $this->reflectCallable($callable);
 
         // attempt to resolve dependencies
         $dependencies = $this->resolveFunctionDependencies($reflection, $args);
-        $invocation->setParameters($dependencies);
-
-        return $invocation();
+        return $reflection->invokeArgs($dependencies);
     }
 
     /**
-     * @param $classname
+     * Attempt to get reflection for given callable
+     *
+     * @param callable $callable
+     * @return \ReflectionFunctionAbstract
+     * @throws \ReflectionException
+     */
+    protected function reflectCallable(callable $callable) : \ReflectionFunctionAbstract
+    {
+        if (is_string($callable) || $callable instanceof \Closure) {
+            $reflection = new \ReflectionFunction($callable);
+        } elseif(is_array($callable) && count($callable) == 2) { // standard php [class, method] syntax
+            list($class, $method) = $callable;
+            $reflection = new \ReflectionMethod($class, $method);
+            $reflection->setAccessible(true); // allows to call private/protected methods
+        } else {
+            throw new \ReflectionException("Unable to reflect callable.");
+        }
+
+        return $reflection;
+    }
+
+    /**
+     * @param $className
      * @param array|null $args
      * @return null|object
      * @internal param ContainerInterface $container
      */
-    public function instantiate($classname, array $args = [])
+    public function instantiate($className, array $args = [])
     {
         $instance = null;
-        $reflection = new \ReflectionClass($classname);
+        $reflection = new \ReflectionClass($className);
 
         $constructor = $reflection->getConstructor();
         if ($constructor === null) {
@@ -78,7 +100,7 @@ class ServiceInjector
      * @throws \InvalidArgumentException
      * @internal param ContainerInterface $container
      */
-    public function resolveFunctionDependencies(\ReflectionFunctionAbstract $function,  array $args = [] )
+    public function resolveFunctionDependencies(\ReflectionFunctionAbstract $function,  array $args = [] ) : array
     {
         $container = $this->container;
 

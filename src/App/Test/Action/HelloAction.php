@@ -8,20 +8,25 @@
 namespace App\Test\Action;
 
 
-use Compose\Express\Action;
-use Compose\Express\Controller;
+use Compose\Adapter\League\PlatesViewRenderer;
+use Compose\Mvc\Action;
+use Compose\Mvc\ViewRendererInterface;
+use League\Plates\Engine;
+use League\Plates\Template\Template;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 
 class HelloAction extends Action
 {
-    public function execute(ServerRequestInterface $request) : ResponseInterface
+    /**
+     * @param ServerRequestInterface $request
+     * @return ResponseInterface
+     */
+    public function onIndex(ServerRequestInterface $request) : ResponseInterface
     {
-        $params = $request->getUri();
-        $out = var_export($params, true);
+        $renderer = $this->container->get(ViewRendererInterface::class);
+        $script = 'templates/test/hello';
 
-
-
-        return $this->html("<pre>{$out}</pre>");
+        return $this->html($renderer->render($script));
     }
 }

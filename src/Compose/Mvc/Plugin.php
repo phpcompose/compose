@@ -6,7 +6,7 @@
  * Time: 4:52 PM
  */
 
-namespace Compose\Express;
+namespace Compose\Mvc;
 
 
 use Compose\System\Event\EventInterface;
