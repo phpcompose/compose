@@ -1,0 +1,124 @@
+<?php
+$globals = [
+    'request' => $_REQUEST,
+    'session' => $_SESSION ?? [],
+    'cookie' => $_COOKIE,
+    'header' => getallheaders(),
+    'server' => $_SERVER,
+    'env' => $_ENV
+];
+
+$rootDir = dirname($_SERVER['DOCUMENT_ROOT']) . '/';
+?>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Debug Page</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/css/bootstrap.min.css" integrity="sha384-rwoIResjU2yc3z8GV/NPeZWAv56rSmLldC3R/AZzGRnGxQQKnKkoFVhFQhNUwEyJ" crossorigin="anonymous">
+</head>
+<body>
+    <nav class="navbar sticky-top  navbar-light bg-danger">
+        <span class="navbar-text text-white font-weight-bold">
+            <i class="fa fa-warning" aria-hidden="true"></i>
+            Error <?= $exception->getCode() ?> : <?= $exception->getMessage() ?> @ <u><?= $exception->getFile() ?></u>,  Line # <?= $exception->getLine() ?>
+        </span>
+    </nav>
+
+    <div class="container-fluid">
+    <header>
+        <h1 class="display-3 text-p">Oh snap! <sup><small><small><small class="font-weight-normal badge badge-danger"><small>Debug</small></small></small></small></sup></h1>
+        <div class="alert alert-warning" role="alert">
+            <small>Application is running in debug mode. To <b>disable</b> debug mode (production) make sure
+                1) set <var>debug</var> config variable to <var>true</var>,
+                2) have two user-friendly templates defined in the <var>templates</var> config array a) http_error and b) http_404
+            </small>
+        </div>
+        <hr />
+    </header>
+
+    <main>
+        <div class="row">
+            <div class="col-md-5">
+                <h3>Error Info</h3>
+                <div class="jumbotron">
+                <dl class="row">
+                    <dt class="col-sm-3">Error Code:</dt>
+                    <dd class="col-sm-9"><?= $exception->getCode() ?> </dd>
+                    <dt class="col-sm-3">Error Message:</dt>
+                    <dd class="col-sm-9"><?= htmlentities($exception->getMessage()) ?></dd>
+                    <dt class="col-sm-3">Exception name:</dt>
+                    <dd class="col-sm-9"><?= get_class($exception); ?></dd>
+                </dl>
+                </div>
+
+                <h3>Global variables</h3>
+                <hr>
+                <div id="accordion" role="tablist" aria-multiselectable="true">
+                    <?php foreach($globals as $gkey => $gvars) : ?>
+                    <div class="card">
+                        <div class="card-header" role="tab" id="variable-<?= $gkey ?>">
+                            <h5 class="text-uppercase">
+                                <a data-toggle="collapse" data-parent="#accordion" href="#collapse-<?= $gkey ?>" aria-expanded="true" aria-controls="collapse-<?= $gkey ?>">
+                                    <?= $gkey ?>
+                                </a>
+                                <small class="pull-right badge badge-pill badge-default"><?= count($gvars) ?></small>
+                            </h5>
+                        </div>
+                        <div id="collapse-<?= $gkey ?>" class="collapse show" role="tabpanel" aria-labelledby="heading-<?= $gkey ?>">
+                        <div class="card-block">
+                            <dl class="row">
+                                <?php if($gvars) : ?>
+                                <?php foreach($gvars as $key => $val): ?>
+                                <dt class="col-sm-3"><?= $key ?></dt>
+                                <dd class="col-sm-9 text-right border"><small><?= print_r($val, true) ?></small></dd>
+                                <?php endforeach; ?>
+                                <?php endif; ?>
+                            </dl>
+                        </div>
+                        </div>
+                    </div>
+                    <br/>
+                    <?php endforeach; ?>
+                </div>
+            </div>
+            <div class="col-md-7">
+                <h3>Error Stack:</h3>
+                <?php $traces = $exception->getTrace(); ?>
+                <?php $trace = array_shift($traces); // get the first one ?>
+                <table class="table table-bordered table-inverse">
+                    <thead class="thead-inverse">
+                    <tr>
+                        <th>File</th>
+                        <th>Line </th>
+                        <th>Function</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr class="table-active font-weight-bold text-warning">
+                        <td><?= str_replace($rootDir, '', $exception->getFile()) ?></td>
+                        <td><?= $exception->getLine() ?></td>
+                        <td><?= $trace['function']?></td>
+                    </tr>
+                    <?php foreach($traces as $trace): ?>
+                        <tr>
+                            <td><?= str_replace($rootDir, '', $trace['file']) ?></td>
+                            <td><?= $trace['line'] ?></td>
+                            <td><?= $trace['function'] ?></td>
+                        </tr>
+                    <?php endforeach ?>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.1.1.slim.min.js" integrity="sha384-A7FZj7v+d/sdmMqp/nOQwliLvUsJfDHW+k9Omg/a/EheAdgtzNs3hpfag6Ed950n" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tether/1.4.0/js/tether.min.js" integrity="sha384-DztdAPBWPRXSA/3eYEEUWrWCy7G5KFbe8fFjk5JAIxUYHKkDx6Qin1DkWx51bBrb" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/js/bootstrap.min.js" integrity="sha384-vBWWzlZJ8ea9aCX4pEW3rVHjgjt7zpkNpZk+02D9phzyeVkE+jo0ieGizqPLForn" crossorigin="anonymous"></script>
+</body>
+</html>
