@@ -6,21 +6,11 @@
  * Time: 9:55 PM
  */
 
-namespace Compose\Express;
+namespace Compose\Mvc;
 
-use Psr\Http\Message\ServerRequestInterface;
-use Psr\Http\Message\ResponseInterface;
-use Compose\Core\Http\Exception\HttpException;
 
 class Controller extends Action
 {
-    protected
-        /**
-         * @var string
-         */
-        $defaultAction = 'index';
-
-
     /**
      * Overrides to provide action name for the controller
      *
@@ -31,38 +21,36 @@ class Controller extends Action
      */
     protected function resolveActionName(string $httpMethod, array &$httpParams = []) : string
     {
-        $actionMethod = parent::resolveActionName($httpMethod, $httpParams);
-
-        if(!count($httpParams)) {
+        if(!count($httpParams)) { // index page
             $action = $this->defaultAction;
+            $httpMethod = null;
         } else {
             $action = array_shift($httpParams);
+            if(!count($httpParams) && $httpMethod == 'get') {
+                $httpMethod = $this->defaultAction;
+            }
         }
 
-        $action = $this->filterActionName($action, ['-']);
+        $action = $this->filterActionName($action);
         if(!$action) {
-            throw new HttpException("Unable to route.");
+            throw new \Exception("Unable to route.");
         }
 
-        $method = $actionMethod . $action;
-        if(method_exists($this, $method)) {
-            return $method;
-        }
-
-        return "{$this->actionPrefix}{$action}";
+        return $this->buildActionName($httpMethod, $action);
     }
 
 
     /**
      * Validate action name
      *
-     * @todo could use validator class.... thinking...
      * @note regex from php doc for function name: http://php.net/manual/en/functions.user-defined.php
      * @param string $action
      * @return bool
      */
-    protected function filterActionName(string $action, array $allowedChars = [])
+    protected function filterActionName(string $action)
     {
+        $allowedChars = ['-'];
+
         // if allowed chars are provided,
         // then we will need to remove them first
         if(count($allowedChars)) {

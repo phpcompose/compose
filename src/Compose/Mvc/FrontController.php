@@ -6,10 +6,11 @@
  * Time: 2:17 PM
  */
 
-namespace Compose\Express;
+namespace Compose\Mvc;
 
 
-use Compose\Core\Http\CommandInterface;
+use Compose\System\Container\ServiceFactoryInterface;
+use Compose\System\Http\CommandInterface;
 use Interop\Container\ContainerInterface;
 use Interop\Http\Middleware\DelegateInterface;
 use Zend\Stratigility\MiddlewarePipe;
@@ -17,10 +18,11 @@ use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\ResponseInterface;
 
 /**
- * Class RequestHandler
- * @package Compose\Express
+ * Class FrontController for Compose apps
+ *
+ * @package Compose\Mvc
  */
-class RequestHandler extends MiddlewarePipe
+class FrontController extends MiddlewarePipe
 {
     use CommandResolverTrait;
 
@@ -37,12 +39,22 @@ class RequestHandler extends MiddlewarePipe
 
     /**
      * RequestHandler constructor.
+     * @param ContainerInterface $container
      */
     public function __construct(ContainerInterface $container)
     {
-        $this->raiseThrowables();
         parent::__construct();
         $this->container = $container;
+    }
+
+
+    /**
+     * Get the dependency container
+     * @return ContainerInterface
+     */
+    public function getContainer() : ContainerInterface
+    {
+        return $this->container;
     }
 
     /**
@@ -63,6 +75,8 @@ class RequestHandler extends MiddlewarePipe
     }
 
     /**
+     * Implement middleware interface
+     *
      * @param ServerRequestInterface $request
      * @param DelegateInterface|null $delegate
      * @return ResponseInterface
@@ -73,6 +87,8 @@ class RequestHandler extends MiddlewarePipe
     }
 
     /**
+     * Dispatches to command pattern
+     *
      * @param ServerRequestInterface $request
      * @return ResponseInterface
      * @throws \Exception
@@ -92,6 +108,6 @@ class RequestHandler extends MiddlewarePipe
         /** @var CommandInterface $instance */
         $instance = $this->resolveCommand($command, $this->container);
 
-        return $instance->process($request);
+        return $instance->execute($request);
     }
 }

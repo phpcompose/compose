@@ -6,15 +6,14 @@
  * Time: 9:43 AM
  */
 
-namespace Compose\Express;
+namespace Compose\Mvc;
 
 
-use Compose\Core\Http\CommandInterface;
+use Compose\System\Http\CommandInterface;
 use Interop\Container\ContainerInterface;
 
 trait CommandResolverTrait
 {
-
     /**
      * @param $mixed
      * @param ContainerInterface $container
