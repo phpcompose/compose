@@ -1,0 +1,9 @@
+version: '2'
+services:
+  php_compose_test:
+    image: atsinc/php
+    volumes:
+      - .:/var/www/html
+    ports:
+      - "80:80"
+    command: "sh -c 'composer install && apache2-foreground'"

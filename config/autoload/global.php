@@ -2,7 +2,7 @@
 
 return [
     // disable debugging on production
-    'debug' => false,
+    'debug' => true,
 
     'config_cache_enabled' => false,
 

@@ -16,6 +16,7 @@ return [
 
     'templates' => [
         'layout' => 'layout/default',
+        'http_404' => 'error::error',
         'map' => [
             'layout/default' => 'templates/layout/default.phtml',
             'error/error'    => 'templates/error/error.phtml',
