@@ -24,5 +24,5 @@ interface CommandInterface
      * @param ServerRequestInterface $request
      * @return ResponseInterface
      */
-    public function process(ServerRequestInterface $request) : ResponseInterface;
+    public function execute(ServerRequestInterface $request) : ResponseInterface;
 }
