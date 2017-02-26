@@ -1,6 +1,6 @@
 {
-    "name": "zendframework/zend-expressive-skeleton",
-    "description": "Zend expressive skeleton. Begin developing PSR-7 middleware applications in seconds",
+    "name": "phpcompose/compose",
+    "description": "A Thin MVC Application framework for Zend Expressive / Stratigility",
     "type": "project",
     "homepage": "https://github.com/phpcompose/compose",
     "license": "BSD-3-Clause",
@@ -23,12 +23,10 @@
     },
     "require-dev": {
         "phpunit/phpunit": "^4.8",
-        "squizlabs/php_codesniffer": "^2.3",
-        "filp/whoops": "^1.1 || ^2.0"
+        "squizlabs/php_codesniffer": "^2.3"
     },
     "autoload": {
         "psr-4": {
-            "App\\": "src/App/",
             "Compose\\": "src/Compose/"
         }
     },
