@@ -15,4 +15,11 @@ interface ViewRendererInterface
      * @return mixed
      */
     public function render(string $script, array $data = []);
+
+    /**
+     * @param $dir
+     * @param $namespace
+     * @return mixed
+     */
+    public function addPath($dir, $namespace);
 }

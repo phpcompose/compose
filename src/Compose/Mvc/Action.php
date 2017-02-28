@@ -8,23 +8,19 @@
 
 namespace Compose\Mvc;
 
+use Compose\System\Http\Command;
 use Compose\System\Invocation;
-use Compose\System\Container\{
-    ContainerAwareInterface,
-    ContainerAwareTrait,
-    ServiceAwareInterface
-};
-use Compose\System\Http\MiddlewareCommand;
-use Psr\Http\Message\{
-    ResponseInterface,
-    ServerRequestInterface
-};
+use Compose\System\Container\ContainerAwareInterface;
+use Compose\System\Container\ContainerAwareTrait;
+use Compose\System\Container\ServiceAwareInterface;
+use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\ServerRequestInterface;
 
 /**
  * Class Action
  * @package Compose\Mvc
  */
-abstract class Action extends MiddlewareCommand implements ServiceAwareInterface , ContainerAwareInterface
+abstract class Action extends Command implements ServiceAwareInterface , ContainerAwareInterface
 {
     use ActionHandlerResolverTrait, ResponseHelperTrait, ContainerAwareTrait;
 

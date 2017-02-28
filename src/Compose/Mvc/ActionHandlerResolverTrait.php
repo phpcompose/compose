@@ -2,15 +2,12 @@
 /**
  * Created by PhpStorm.
  * User: alaminahmed
- * Date: 2016-10-30
- * Time: 5:53 PM
  */
 
 namespace Compose\Mvc;
 
 use Psr\Http\Message\ServerRequestInterface;
 use Compose\System\Invocation;
-use Psr\Http\Message\UriInterface;
 
 trait ActionHandlerResolverTrait
 {
@@ -75,9 +72,8 @@ trait ActionHandlerResolverTrait
      */
     protected function extractRequestParams(ServerRequestInterface $request) : array
     {
-        /** @var UriInterface $uri */
-        $uri = $request->getUri();
-        $path = $uri->getPath();
+        // get the param path.  If routed by the dispatcher, it will use use that first.
+        $path = $request->getAttribute(Dispatcher::PARAM_PATH) ?? $request->getUri()->getPath();
 
         if(!empty($path)) {
             $params = array_values(array_filter(explode('/', $path)));

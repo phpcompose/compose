@@ -6,44 +6,16 @@
 
 namespace Compose\System\Http;
 
-
-use Interop\Http\Middleware\DelegateInterface;
-use Interop\Http\Middleware\ServerMiddlewareInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 
-abstract class MiddlewareCommand implements CommandInterface, ServerMiddlewareInterface
+abstract class Command implements CommandInterface
 {
     protected
         /**
          * @var ServerRequestInterface
          */
         $request;
-
-    /**
-     * Implementing new psr middleware
-     *
-     * @param ServerRequestInterface $request
-     * @param DelegateInterface $delegate
-     * @return ResponseInterface
-     */
-    public function process(ServerRequestInterface $request, DelegateInterface $delegate)
-    {
-        return $this->execute($request);
-    }
-
-    /**
-     * Implementing legacy middleware interface
-     *
-     * @param ServerRequestInterface $request
-     * @param ResponseInterface $response
-     * @param callable|null $next
-     * @return ResponseInterface
-     */
-    public function __invoke(ServerRequestInterface $request, ResponseInterface $response, callable $next = null)
-    {
-        return $this->execute($request);
-    }
 
     /**
      * Implementing command interface

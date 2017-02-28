@@ -9,13 +9,13 @@
 namespace Compose\Mvc;
 
 
-use Compose\System\Container\ServiceFactoryInterface;
+use Compose\System\Container\ContainerAwareTrait;
 use Compose\System\Http\CommandInterface;
 use Interop\Container\ContainerInterface;
-use Interop\Http\Middleware\DelegateInterface;
-use Zend\Stratigility\MiddlewarePipe;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\ResponseInterface;
+use Zend\Diactoros\Response;
+use Zend\Stratigility\MiddlewarePipe;
 
 /**
  * Class FrontController for Compose apps
@@ -24,14 +24,9 @@ use Psr\Http\Message\ResponseInterface;
  */
 class FrontController extends MiddlewarePipe
 {
-    use CommandResolverTrait;
+    use CommandResolverTrait, ContainerAwareTrait;
 
     protected
-        /**
-         * @var ContainerInterface
-         */
-        $container,
-
         /**
          * @var array
          */
@@ -44,17 +39,8 @@ class FrontController extends MiddlewarePipe
     public function __construct(ContainerInterface $container)
     {
         parent::__construct();
-        $this->container = $container;
-    }
-
-
-    /**
-     * Get the dependency container
-     * @return ContainerInterface
-     */
-    public function getContainer() : ContainerInterface
-    {
-        return $this->container;
+        $this->setResponsePrototype(new Response());
+        $this->setContainer($container);
     }
 
     /**
@@ -70,20 +56,7 @@ class FrontController extends MiddlewarePipe
 
         $path = trim($path, '/');
         $this->routes[$path] = $command;
-
         $this->pipe($path, [$this, 'dispatch']);
-    }
-
-    /**
-     * Implement middleware interface
-     *
-     * @param ServerRequestInterface $request
-     * @param DelegateInterface|null $delegate
-     * @return ResponseInterface
-     */
-    public function process(ServerRequestInterface $request, DelegateInterface $delegate)
-    {
-        return parent::process($request, $delegate);
     }
 
     /**
@@ -99,15 +72,13 @@ class FrontController extends MiddlewarePipe
         $originalUri = $request->getAttribute('originalUri');
         $path = trim(str_replace($uri->getPath(), '', $originalUri->getPath()), '/');
 
-        if(!isset($this->routes[$path])) {
-            throw new \Exception("Unable to dispatch: {$originalUri->getPath()}");
-        }
-
         $command = $this->routes[$path];
+        if(!$command) {
+            throw new \Exception("Unable to find command for path: $path");
+        }
 
         /** @var CommandInterface $instance */
         $instance = $this->resolveCommand($command, $this->container);
-
         return $instance->execute($request);
     }
 }

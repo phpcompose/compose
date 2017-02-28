@@ -8,8 +8,7 @@ namespace Compose\System\Http;
 
 
 use Interop\Container\ContainerInterface;
-use Interop\Http\Middleware\DelegateInterface;
-use Interop\Http\Middleware\ServerMiddlewareInterface;
+use Interop\Http\ServerMiddleware\DelegateInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Zend\Stratigility\MiddlewarePipe;
@@ -20,7 +19,7 @@ use Zend\Stratigility\MiddlewarePipe;
  * Provides application/system pipeline to boot application
  * @package Compose\System
  */
-class Pipeline extends MiddlewarePipe implements ServerMiddlewareInterface
+class Pipeline extends MiddlewarePipe
 {
     protected
         /**
@@ -43,7 +42,6 @@ class Pipeline extends MiddlewarePipe implements ServerMiddlewareInterface
      */
     protected function onInit() : void
     {
-        $this->raiseThrowables();
     }
 
     /**
@@ -54,28 +52,8 @@ class Pipeline extends MiddlewarePipe implements ServerMiddlewareInterface
         return $this->container;
     }
 
-    /**
-     * @param ServerRequestInterface $request
-     * @param ResponseInterface $response
-     * @param callable|null $out
-     * @return ResponseInterface
-     */
-    public function __invoke(ServerRequestInterface $request, ResponseInterface $response, callable $out = null)
-    {
-        $this->preProcess($request);
-        $response = parent::__invoke($request, $response, $out);
-        $this->postProcess($response);
 
-        return $response;
-    }
-
-    /**
-     *
-     * @param ServerRequestInterface $request
-     * @param DelegateInterface $delegate
-     * @return ResponseInterface
-     */
-    public function process(ServerRequestInterface $request, DelegateInterface $delegate)
+    public function process(ServerRequestInterface $request, DelegateInterface $delegate) : ResponseInterface
     {
         $this->preProcess($request);
         $response = parent::process($request, $delegate);
