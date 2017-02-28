@@ -4,11 +4,13 @@
  * User: Alamin
  */
 
-namespace Compose\Support;
+namespace Compose\Adapter\Zend;
 
 
+use Compose\System\Container\ServiceContainer;
 use Interop\Container\ContainerInterface;
 use Zend\ServiceManager\Factory\AbstractFactoryInterface;
+use Zend\ServiceManager\ServiceManager;
 
 
 /**
@@ -22,17 +24,21 @@ use Zend\ServiceManager\Factory\AbstractFactoryInterface;
 class AutowireAbstractFactory implements AbstractFactoryInterface
 {
     protected
-        $resolver,
+        /**
+         * @var ServiceContainer
+         */
+        $resolver;
 
 
-        $services = [];
-
-
-    public function __construct()
+    /**
+     * AutowireAbstractFactory constructor.
+     * @param ServiceManager $serviceManager
+     */
+    public function __construct(ServiceManager $serviceManager)
     {
+        $this->resolver = new ServiceContainer();
+        $this->resolver->setContainer($serviceManager);
     }
-
-
 
     /**
      *
@@ -42,7 +48,7 @@ class AutowireAbstractFactory implements AbstractFactoryInterface
      */
     public function canCreate(ContainerInterface $container, $name)
     {
-        return $this->has($name);
+        return $this->resolver->has($name);
     }
 
     /**
@@ -55,6 +61,6 @@ class AutowireAbstractFactory implements AbstractFactoryInterface
      */
     public function __invoke(ContainerInterface $container, $requestedName, array $options = null)
     {
-
+        return $this->resolver->get($requestedName);
     }
 }
