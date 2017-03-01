@@ -10,12 +10,13 @@ namespace Compose\Support\Error;
 use Compose\Mvc\ViewRendererInterface;
 use Compose\System\Container\ServiceAwareInterface;
 use Compose\System\Http\Exception\HttpException;
-use Compose\System\Http\MiddlewareCommand;
+use Interop\Http\ServerMiddleware\DelegateInterface;
+use Interop\Http\ServerMiddleware\MiddlewareInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Zend\Diactoros\Response;
 
-class NotFoundMiddleware extends MiddlewareCommand implements ServiceAwareInterface
+class NotFoundMiddleware implements MiddlewareInterface, ServiceAwareInterface
 {
     protected
         /**
@@ -28,7 +29,7 @@ class NotFoundMiddleware extends MiddlewareCommand implements ServiceAwareInterf
      *
      * @param ErrorResponseGenerator $generator
      */
-    function __construct(ErrorResponseGenerator $generator)
+    public function __construct(ErrorResponseGenerator $generator)
     {
         $this->generator = $generator;
     }
@@ -38,7 +39,7 @@ class NotFoundMiddleware extends MiddlewareCommand implements ServiceAwareInterf
      * @return ResponseInterface
      * @throws HttpException
      */
-    protected function onExecute(ServerRequestInterface $request): ResponseInterface
+    public function process(ServerRequestInterface $request, DelegateInterface $delegate): ResponseInterface
     {
         $exception = new HttpException(sprintf("%s Not found", $request->getUri()->__toString()), 404);
         $generator = $this->generator;

@@ -4,18 +4,17 @@
  * User: Alamin
  */
 
-namespace Compose\Adapter\Zend;
+namespace Compose\Support;
 
 
 use Compose\System\ConfigurationInterface;
-use Zend\Config\Config;
-use Zend\Config\Factory;
+use Zend\Stdlib\ArrayUtils;
 
 /**
  * Class Configuration
- * @package Compose\Adapter\Zend
+ * @package Compose\Support
  */
-class Configuration extends Config implements ConfigurationInterface
+class Configuration extends \ArrayObject implements ConfigurationInterface
 {
     const AUTOLOAD_GLOB = '{{,*.}global,{,*.}local}.php';
 
@@ -29,6 +28,11 @@ class Configuration extends Config implements ConfigurationInterface
     {
         $glob = rtrim($dir, '/') . '/' . ($globPattern ?: self::AUTOLOAD_GLOB);
 
-        return Factory::fromFiles(glob($glob, GLOB_BRACE));
+        $config = [];
+        foreach (glob($glob, GLOB_BRACE) as $file) {
+            $config = ArrayUtils::merge($config, include $file);
+        }
+
+        return $config;
     }
 }

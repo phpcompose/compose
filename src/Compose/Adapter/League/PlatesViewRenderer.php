@@ -7,6 +7,7 @@
 namespace Compose\Adapter\League;
 
 use Compose\Mvc\ViewRendererInterface;
+use Compose\System\ConfigurationInterface;
 use Compose\System\Container\ServiceAwareInterface;
 use League\Plates\Engine;
 
@@ -15,7 +16,7 @@ use League\Plates\Engine;
  * Class PlatesViewRenderer
  * @package Compose\Adapter\League
  */
-class PlatesViewRenderer implements ViewRendererInterface
+class PlatesViewRenderer implements ViewRendererInterface, ServiceAwareInterface
 {
     const
         DEFAULT_EXTENSION = 'phtml';
@@ -32,19 +33,24 @@ class PlatesViewRenderer implements ViewRendererInterface
 
     /**
      * PlatesViewRenderer constructor.
-     * @param array $templates
+     * @param ConfigurationInterface $config
      */
-    public function __construct(array $templates = [])
+    public function __construct(ConfigurationInterface $config)
     {
-        $engine = new Engine('./', self::DEFAULT_EXTENSION);
+        $templates = $config['templates'] ?? [];
+        $ext = $templates['extension'] ?? self::DEFAULT_EXTENSION;
+        $engine = new Engine('./', $ext);
         $this->engine = $engine;
 
         if(($paths = $templates['paths'] ?? null)) {
-            foreach($templates as $namespace => $dir) {
+            foreach($paths as $namespace => $dir) {
                 $this->addPath($dir, $namespace);
             }
         }
 
+        if(!$this->engine->exists('compose')) {
+            $this->addPath(COMPOSE_DIR_TEMPLATE, 'compose');
+        }
     }
 
     /**
@@ -60,6 +66,7 @@ class PlatesViewRenderer implements ViewRendererInterface
     /**
      * @param $namespace
      * @param $dir
+     * @return mixed|void
      */
     public function addPath($dir, $namespace)
     {

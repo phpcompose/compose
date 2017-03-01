@@ -13,7 +13,7 @@ namespace Compose\Bridge\Symfony;
 use Compose\System\Event\EventInterface;
 use Symfony\Component\EventDispatcher\GenericEvent;
 
-class Event extends \Symfony\Component\EventDispatcher\GenericEvent  implements EventInterface
+class Event extends GenericEvent  implements EventInterface
 {
     protected
         /**

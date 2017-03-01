@@ -20,12 +20,15 @@ use Psr\Http\Message\ServerRequestInterface;
 class ErrorResponseGenerator implements ServiceAwareInterface
 {
     const
-        TEMPLATE_ERROR_KEY = 'http_error',
-        TEMPLATE_404_KEY = 'http_404',
-        TEMPLATE_DEBUG_KEY = 'debug';
+        TEMPLATE_ERROR = 'compose::error/error',
+        TEMPLATE_404 = 'compose::error/404',
+        TEMPLATE_DEBUG = 'compose::error/debug';
 
 
     protected
+        /**
+         * @var ViewRendererInterface
+         */
         $renderer,
 
         /**
@@ -60,20 +63,9 @@ class ErrorResponseGenerator implements ServiceAwareInterface
     {
         $this->renderer = $renderer;
         $this->debug = $debug;
-        $this->template_404 = $templates[self::TEMPLATE_404_KEY] ?? null;
-        $this->template_error = $templates[self::TEMPLATE_ERROR_KEY] ?? null;
-        $this->template_debug = $templates[self::TEMPLATE_DEBUG_KEY] ?? $this->getDebugTemplate();
-    }
-
-    /**
-     * @return string
-     */
-    protected function getDebugTemplate() : string
-    {
-        // @todo must be better way to find path relative to vendor src dir.
-        $script = "templates/error/debug";
-
-        return $script;
+        $this->template_404 = $templates['404'] ?? self::TEMPLATE_404;
+        $this->template_error = $templates['error'] ?? self::TEMPLATE_ERROR;
+        $this->template_debug = $templates['debug'] ?? self::TEMPLATE_DEBUG;
     }
 
     /**
@@ -85,15 +77,8 @@ class ErrorResponseGenerator implements ServiceAwareInterface
      */
     public function __invoke($exception, ServerRequestInterface $request, ResponseInterface $response) : ResponseInterface
     {
-        if(!$this->debug && (!$this->template_404 || !$this->template_error)) {
-            throw new \Exception(sprintf("%s needs templates array with following keys: %s, %s",
-                get_class($this),
-                self::TEMPLATE_ERROR_KEY,
-                self::TEMPLATE_404_KEY));
-        }
-
         if($this->debug) {
-            $template = $this->getDebugTemplate();
+            $template = $this->template_debug;
             $httpStatus = 500;
         } else if($exception instanceof HttpException && $exception->getCode() == 404) {
             $template = $this->template_404;

@@ -8,3 +8,5 @@ vendor/
 config/
 data/
 public/
+
+docker-compose.yml

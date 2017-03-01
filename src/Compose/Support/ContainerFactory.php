@@ -8,7 +8,6 @@ namespace Compose\Support;
 
 
 use Compose\Adapter\League\PlatesViewRenderer;
-use Compose\Adapter\Zend\Configuration;
 use Compose\Mvc\ViewRendererInterface;
 use Compose\Support\Error\ErrorResponseGenerator;
 use Compose\System\ConfigurationInterface;
@@ -34,15 +33,12 @@ class ContainerFactory
         // create all containers
         $container = new CompositeContainer();
         $serviceContainer = new ServiceContainer();
-        $configContainer = new ArrayContainer($config);
 
         // start added containers in priority order
         if($defaultContainer) $container->addDelegate($defaultContainer); // should be high priority
         $container->addDelegate($serviceContainer);
-        $container->addDelegate($configContainer);
 
         // configure service container
-        $serviceContainer->set(ConfigurationInterface::class, new Configuration($config, false));
         $this->configureServices($serviceContainer, $config);
 
         // finally returns the composite container
@@ -61,19 +57,37 @@ class ContainerFactory
         return (new self())($config, $defaultContainer);
     }
 
-
     /**
      * @param ServiceContainer $container
      * @param array $config
      */
     protected function configureServices(ServiceContainer $container, array $config) : void
     {
-        $container->set(ViewRendererInterface::class, PlatesViewRenderer::class);
-        $container->set(ErrorHandler::class, function(ContainerInterface $container) {
-            return new ErrorHandler(
-                new Response(),
-                $container->get(ErrorResponseGenerator::class)
-            );
-        });
+        $services = $config['services'] ?? [];
+
+//        if(!$container->has(ConfigurationInterface::class)) {
+        $container->set(ConfigurationInterface::class, new Configuration($config, false));
+//        }
+
+        foreach($services as $name => $service) {
+            $container->set($name, $service);
+        }
+
+        // setup default/required services if not provided in the configuration
+        if(!$container->has(ViewRendererInterface::class)) {
+            $container->set(ViewRendererInterface::class, PlatesViewRenderer::class);
+        }
+
+        if(!$container->has(ErrorHandler::class)) {
+            $container->set(ErrorHandler::class, function(ContainerInterface $container) {
+                return new ErrorHandler(
+                    new Response(),
+                    $container->get(ErrorResponseGenerator::class)
+                );
+            });
+        }
+
+
+
     }
 }

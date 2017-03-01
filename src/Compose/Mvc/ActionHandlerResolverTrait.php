@@ -72,8 +72,7 @@ trait ActionHandlerResolverTrait
      */
     protected function extractRequestParams(ServerRequestInterface $request) : array
     {
-        // get the param path.  If routed by the dispatcher, it will use use that first.
-        $path = $request->getAttribute(Dispatcher::PARAM_PATH) ?? $request->getUri()->getPath();
+        $path = $request->getUri()->getPath();
 
         if(!empty($path)) {
             $params = array_values(array_filter(explode('/', $path)));

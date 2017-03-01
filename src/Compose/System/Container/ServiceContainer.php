@@ -134,7 +134,9 @@ class ServiceContainer implements ContainerInterface, DelegateContainerInterface
      */
     protected function autowire(ContainerInterface $container, $requestedName)
     {
-        if($this->doesImplement($requestedName, ServiceAwareInterface::class)) {
+        if($this->doesImplement($requestedName, ServiceFactoryInterface::class)) {
+            $instance = $requestedName::create($container);
+        } else if($this->doesImplement($requestedName, ServiceAwareInterface::class)) {
             // we will attempt to resolve dependencies and instantiate the object
             $instance = $this->getResolver()->instantiate($requestedName);
         } else {

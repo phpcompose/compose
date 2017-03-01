@@ -8,69 +8,59 @@
 namespace Compose;
 
 
-use Compose\Adapter\Zend\ServiceContainerFactory;
-use Compose\Support\ContainerFactory;
+use Compose\Support\Error\ErrorResponseGenerator;
 use Compose\Support\Error\NotFoundMiddleware;
 use Interop\Container\ContainerInterface;
+use Zend\Diactoros\Response;
 use Zend\Diactoros\Server;
 use Zend\Diactoros\ServerRequestFactory;
 use Zend\Stratigility\Middleware\ErrorHandler;
-use Zend\Stratigility\MiddlewarePipe;
+use Zend\Stratigility\Middleware\OriginalMessages;
+use Zend\Stratigility\NoopFinalHandler;
 
 define('COMPOSE_DIR', dirname(dirname(__FILE__)));
 define('COMPOSE_DIR_TEMPLATE', COMPOSE_DIR . '/../templates');
 
 
-class Loader
+class Starter
 {
-    const
-        CONFIG_KEY_SERVICES = 'services';
-
-    public function __construct()
-    {
-    }
-
-
     /**
-     * @param array $config
+     * @param ContainerInterface $container
+     * @param \Closure|null $readyCallback
      */
-    public function load(array $config)
+    public function __invoke(ContainerInterface $container, \Closure $readyCallback = null)
     {
-        $container = $this->loadContainer($config);
-        $pipeline = $this->loadPipeline($container);
-    }
+        $response = new Response(); // response prototype
 
-    /**
-     * @param array $config
-     * @return \Interop\Container\ContainerInterface
-     */
-    protected function loadContainer(array $config)
-    {
-        $serviceContainer = ServiceContainerFactory::createFromConfig($config[CONFIG_KEY_SERVICES] ?? []);
-        return ContainerFactory::createFromConfig($config, $serviceContainer);
+        // create and setup the pipeline
+        $app = new Application($container);
+        $app->setResponsePrototype($response);
+        $app->pipe(new OriginalMessages());
+        $app->pipe(new ErrorHandler($response, $container->get(ErrorResponseGenerator::class)));
+
+        // application ready callback
+        if($readyCallback) {
+            $readyCallback($app, $container);
+        }
+
+        // final/not found handler
+        $app->pipe($container->get(NotFoundMiddleware::class));
+
+        // create and start the server
+        $server = Server::createServerFromRequest(
+            $app,
+            ServerRequestFactory::fromGlobals()
+        );
+        $server->listen(new NoopFinalHandler());
     }
 
     /**
      * @param ContainerInterface $container
-     * @return MiddlewarePipe
+     * @param \Closure|null $ready
      */
-    protected function loadPipeline(ContainerInterface $container)
+    static public function start(ContainerInterface $container, \Closure $ready = null)
     {
-        $pipeline = new MiddlewarePipe();
-        $pipeline->pipe($container->get(ErrorHandler::class));
-
-        return $pipeline;
-    }
-
-    /**
-     * @param MiddlewarePipe $pipe
-     */
-    static public function start(MiddlewarePipe $pipe) : void
-    {
-        $server = Server::createServerFromRequest(
-            $pipe,
-            ServerRequestFactory::fromGlobals()
-        );
-        $server->listen();
+        $starter = new static();
+        $starter($container, $ready);
     }
 }

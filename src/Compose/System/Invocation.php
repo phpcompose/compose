@@ -10,13 +10,11 @@ namespace Compose\System;
 
 
 
-use Compose\Standard\System\Invocable;
-
 /**
  * Class Invocation
  * @package Compose\System
  */
-class Invocation implements Invocable
+class Invocation
 {
     protected
         /**
