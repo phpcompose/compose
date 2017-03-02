@@ -9,20 +9,16 @@
 namespace Compose\System\Container;
 
 
-use Interop\Container\ContainerInterface;
+use Psr\Container\ContainerInterface;
 
 /**
  * Class ArrayContainer
+ *
+ * Simple Array based Container
  * @package Compose\Support
  */
 class ArrayContainer extends \ArrayObject  implements ContainerInterface
 {
-    protected
-        /**
-         * @var array
-         */
-        $data = [];
-
     /**
      * ArrayContainer constructor.
      * @param array|null $data

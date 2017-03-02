@@ -7,9 +7,19 @@
 namespace Compose\System\Container;
 
 
-use Interop\Container\ContainerInterface;
+use Psr\Container\ContainerInterface;
 
+/**
+ * Interface DelegateContainerInterface
+ *
+ * Delegate for the Composite Container
+ * @package Compose\System\Container
+ */
 interface DelegateContainerInterface
 {
+    /**
+     * @param ContainerInterface $container
+     * @return mixed
+     */
     public function setContainer(ContainerInterface $container);
 }

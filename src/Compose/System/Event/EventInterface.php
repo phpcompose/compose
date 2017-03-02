@@ -9,6 +9,10 @@
 namespace Compose\System\Event;
 
 
+/**
+ * Interface EventInterface
+ * @package Compose\System\Event
+ */
 interface EventInterface
 {
     /**

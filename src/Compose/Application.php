@@ -7,9 +7,8 @@
 namespace Compose;
 
 
-use Compose\Mvc\Dispatcher;
 use Compose\Mvc\FrontController;
-use Interop\Container\ContainerInterface;
+use Psr\Container\ContainerInterface;
 
 /**
  * Class Application

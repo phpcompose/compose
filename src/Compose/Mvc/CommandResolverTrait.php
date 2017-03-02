@@ -11,8 +11,12 @@ namespace Compose\Mvc;
 
 use Compose\System\Http\CallableCommand;
 use Compose\System\Http\CommandInterface;
-use Interop\Container\ContainerInterface;
+use Psr\Container\ContainerInterface;
 
+/**
+ * Class CommandResolverTrait
+ * @package Compose\Mvc
+ */
 trait CommandResolverTrait
 {
     /**

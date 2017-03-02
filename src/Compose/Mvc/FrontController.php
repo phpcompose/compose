@@ -11,15 +11,16 @@ namespace Compose\Mvc;
 
 use Compose\System\Container\ContainerAwareTrait;
 use Compose\System\Http\CommandInterface;
-use Interop\Container\ContainerInterface;
+use Psr\Container\ContainerInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\ResponseInterface;
 use Zend\Diactoros\Response;
 use Zend\Stratigility\MiddlewarePipe;
 
 /**
- * Class FrontController for Compose apps
+ * Class FrontController
  *
+ * Front Controller for Compose MVC application
  * @package Compose\Mvc
  */
 class FrontController extends MiddlewarePipe

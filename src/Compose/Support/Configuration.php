@@ -16,6 +16,9 @@ use Zend\Stdlib\ArrayUtils;
  */
 class Configuration extends \ArrayObject implements ConfigurationInterface
 {
+    /**
+     * default glob pattern (expressive skeleton)
+     */
     const AUTOLOAD_GLOB = '{{,*.}global,{,*.}local}.php';
 
     /**

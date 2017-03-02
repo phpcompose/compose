@@ -8,7 +8,12 @@
 
 namespace Compose\Mvc;
 
-
+/**
+ * Class Controller
+ *
+ * MVC Controller.  Supports multiple actions and SCRUD for each actions
+ * @package Compose\Mvc
+ */
 class Controller extends Action
 {
     /**

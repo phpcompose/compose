@@ -17,7 +17,6 @@ namespace Compose\System\Container;
  *
  * The purpose of this Interface is for Container to recognize the class so that it can try to instantiate or delegate
  *
- * THIS WILL ONLY RESOLVE CONSTRUCTOR DEPENDENCIES
  * @package Compose\Standard\Cointainer
  */
 interface ServiceInterface {}

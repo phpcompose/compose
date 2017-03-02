@@ -9,6 +9,12 @@ namespace Compose\Mvc;
 use Psr\Http\Message\ServerRequestInterface;
 use Compose\System\Invocation;
 
+/**
+ * Class ActionHandlerResolverTrait
+ *
+ * Helper trait to resolve Invocation for the requested action
+ * @package Compose\Mvc
+ */
 trait ActionHandlerResolverTrait
 {
     protected

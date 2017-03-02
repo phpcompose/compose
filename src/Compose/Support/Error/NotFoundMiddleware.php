@@ -7,7 +7,6 @@
 namespace Compose\Support\Error;
 
 
-use Compose\Mvc\ViewRendererInterface;
 use Compose\System\Container\ServiceAwareInterface;
 use Compose\System\Http\Exception\HttpException;
 use Interop\Http\ServerMiddleware\DelegateInterface;

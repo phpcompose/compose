@@ -16,7 +16,7 @@ use Psr\Http\Message\ServerRequestInterface;
  * Interface CommandInterface
  *
  * Provides interface for Command pattern
- * @package Compose\Core\Http
+ * @package Compose\System\Http
  */
 interface CommandInterface
 {

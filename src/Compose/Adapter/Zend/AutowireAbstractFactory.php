@@ -8,7 +8,7 @@ namespace Compose\Adapter\Zend;
 
 
 use Compose\System\Container\ServiceContainer;
-use Interop\Container\ContainerInterface;
+use Psr\Container\ContainerInterface;
 use Zend\ServiceManager\Factory\AbstractFactoryInterface;
 use Zend\ServiceManager\ServiceManager;
 

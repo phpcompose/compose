@@ -9,7 +9,7 @@
 namespace Compose\System\Container;
 
 
-use Interop\Container\ContainerInterface;
+use Psr\Container\ContainerInterface;
 use Interop\Container\Exception\NotFoundException;
 
 /**

@@ -24,7 +24,6 @@ class ErrorResponseGenerator implements ServiceAwareInterface
         TEMPLATE_404 = 'compose::error/404',
         TEMPLATE_DEBUG = 'compose::error/debug';
 
-
     protected
         /**
          * @var ViewRendererInterface

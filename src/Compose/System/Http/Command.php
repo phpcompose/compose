@@ -9,6 +9,12 @@ namespace Compose\System\Http;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 
+/**
+ * Class Command
+ *
+ * Implements command pattern and provides simple class life cycle for organizing code
+ * @package Compose\System\Http
+ */
 abstract class Command implements CommandInterface
 {
     protected

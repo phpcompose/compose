@@ -10,7 +10,7 @@ namespace Compose;
 
 use Compose\Support\Error\ErrorResponseGenerator;
 use Compose\Support\Error\NotFoundMiddleware;
-use Interop\Container\ContainerInterface;
+use Psr\Container\ContainerInterface;
 use Zend\Diactoros\Response;
 use Zend\Diactoros\Server;
 use Zend\Diactoros\ServerRequestFactory;
@@ -21,7 +21,12 @@ use Zend\Stratigility\NoopFinalHandler;
 define('COMPOSE_DIR', dirname(dirname(__FILE__)));
 define('COMPOSE_DIR_TEMPLATE', COMPOSE_DIR . '/../templates');
 
-
+/**
+ * Class Starter
+ *
+ * Helper class to bootstart and start Compose application
+ * @package Compose
+ */
 class Starter
 {
     /**

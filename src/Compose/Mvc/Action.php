@@ -18,6 +18,9 @@ use Psr\Http\Message\ServerRequestInterface;
 
 /**
  * Class Action
+ *
+ * Action handler for MVC application
+ * Supports Restful SCRUD Actions:
  * @package Compose\Mvc
  */
 abstract class Action extends Command implements ServiceAwareInterface , ContainerAwareInterface

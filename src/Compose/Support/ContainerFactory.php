@@ -13,7 +13,7 @@ use Compose\Support\Error\ErrorResponseGenerator;
 use Compose\System\ConfigurationInterface;
 use Compose\System\Container\CompositeContainer;
 use Compose\System\Container\ServiceContainer;
-use Interop\Container\ContainerInterface;
+use Psr\Container\ContainerInterface;
 use Zend\Diactoros\Response;
 use Zend\Stratigility\Middleware\ErrorHandler;
 
@@ -64,10 +64,7 @@ class ContainerFactory
     protected function configureServices(ServiceContainer $container, array $config) : void
     {
         $services = $config['services'] ?? [];
-
-//        if(!$container->has(ConfigurationInterface::class)) {
         $container->set(ConfigurationInterface::class, new Configuration($config, false));
-//        }
 
         foreach($services as $name => $service) {
             $container->set($name, $service);
@@ -86,8 +83,5 @@ class ContainerFactory
                 );
             });
         }
-
-
-
     }
 }
