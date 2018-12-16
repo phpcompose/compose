@@ -97,6 +97,10 @@ abstract class Controller extends RequestHandler implements ContainerAwareInterf
         $action = $this->resolveActionName($route);
         $params = $route->params;
 
+        if(!method_exists($this, $action)) {
+            throw new HttpException("Unable to find action for request: {$route->method}: {$route->path} in " . get_class($this), 404);
+        }
+
         $invocation = new Invocation([$this, $action]);
         if($invocation->getArgumentTypeAtIndex(0) == ServerRequestInterface::class) {
             array_unshift($params, $request); // add the request as the first param
@@ -137,11 +141,7 @@ abstract class Controller extends RequestHandler implements ContainerAwareInterf
         $action = $this->filterActionName(array_shift($route->params));
         $actionMethod = $restMethod . ucfirst($action);
 
-        if(method_exists($this, $actionMethod)) {
-            return $actionMethod;
-        }
-
-        throw new HttpException("Unable to route to action: $restMethod or $actionMethod", 404);
+        return $actionMethod;
     }
 
     /**
@@ -215,7 +215,7 @@ abstract class Controller extends RequestHandler implements ContainerAwareInterf
      * @return ResponseInterface
      * @throws \Exception
      */
-    protected function render(string $script, array $data = null, int $status = 200, array $headers = []) : ResponseInterface
+    protected function render(string $script, array $data = null, int $status = null, array $headers = []) : ResponseInterface
     {
         return $this->view(new View($script, $data), $status, $headers);
     }

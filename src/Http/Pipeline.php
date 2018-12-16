@@ -16,7 +16,10 @@ use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use Zend\Stratigility\Middleware\CallableMiddlewareDecorator;
 use Zend\Stratigility\MiddlewarePipe;
-use Zend\Diactoros\Server;
+use Zend\HttpHandlerRunner\RequestHandlerRunner;
+use Zend\HttpHandlerRunner\Emitter\SapiEmitter;
+use Compose\Support\Error\ErrorResponseGenerator;
+use Zend\Diactoros\ServerRequestFactory;
 
 /**
  * Lazy Middleware factory
@@ -55,11 +58,6 @@ class Pipeline  implements ContainerAwareInterface
 
     protected
         /**
-         * @var Server
-         */
-        $server,
-
-        /**
          * @var MiddlewarePipe
          */
         $pipe;
@@ -70,10 +68,6 @@ class Pipeline  implements ContainerAwareInterface
     public function __construct()
     {
         $this->pipe = new MiddlewarePipe();
-        $this->server = Server::createServer(
-            $this,
-            $_SERVER, $_GET, $_POST, $_COOKIE, $_FILES
-        );
     }
 
     /**
@@ -119,9 +113,17 @@ class Pipeline  implements ContainerAwareInterface
     }
 
     /**
+     * Starts listening for incoming request through the pipeline
      */
     public function listen()
     {
-        $this->server->listen();
+        $container = $this->getContainer();
+        $runner = new RequestHandlerRunner(
+            $this->pipe,
+            new SapiEmitter(),
+            [ServerRequestFactory::class, 'fromGlobals'],
+            $container->get(ErrorResponseGenerator::class)
+        );
+        $runner->run();
     }
 }

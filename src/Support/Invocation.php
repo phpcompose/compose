@@ -89,7 +89,7 @@ class Invocation
 
         $this->verify($reflection, $params);
 
-        return $reflection->invokeArgs($params);
+        return call_user_func_array($this->callable, $params);
     }
 
 
