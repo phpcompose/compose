@@ -1,0 +1,23 @@
+{
+    "name": "phpcompose/compose",
+    "type": "library",
+    "description": "A PHP framework",
+    "autoload": {
+        "psr-4": {
+            "Compose\\": "src/"
+        }
+    },
+    "require": {
+        "php": "~7.1",
+        "zendframework/zend-diactoros": "^2.0",
+        "zendframework/zend-stratigility": "^3.0",
+        "zendframework/zend-config-aggregator": "^1.1",
+        "psr/container": "^1.0",
+        "zendframework/zend-httphandlerrunner": "^1.0"
+    },
+    "scripts": {
+        "serve": "php -S 0.0.0.0:8080 -t public/"
+    },
+
+    "minimum-stability": "dev"
+}
