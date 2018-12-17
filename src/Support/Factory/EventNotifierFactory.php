@@ -30,4 +30,9 @@ class EventNotifierFactory implements ServiceFactoryInterface
 
         return $notifier;
     }
+
+    public function __invoke(ContainerInterface $container, $id)
+    {
+        return self::create($container, $id);
+    }
 }

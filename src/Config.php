@@ -57,6 +57,18 @@ class Config
                 Compose\Mvc\Helper\HelperRegistry::class => Compose\Support\Factory\HelperRegistryFactory::class
             ],
 
+            'dependencies' => [
+                'factories' => [
+                    ErrorHandler::class => Compose\Support\Factory\ErrorHandlerFactory::class,
+                    Compose\Event\EventNotifierInterface::class => Compose\Support\Factory\EventNotifierFactory::class,
+                    Compose\Http\Session::class => Compose\Support\Factory\SessionFactory::class,
+                    Compose\Mvc\ViewRenderer::class => Compose\Support\Factory\ViewRendererFactory::class,
+//                    Compose\Mvc\ViewRendererInterface::class => Compose\Mvc\ViewRenderer::class,
+                    Compose\Mvc\MvcMiddleware::class => Compose\Support\Factory\MvcMiddlewareFactory::class,
+                    Compose\Mvc\Helper\HelperRegistry::class => Compose\Support\Factory\HelperRegistryFactory::class
+                ]
+            ],
+
             /**
              * middleware
              *
@@ -75,6 +87,8 @@ class Config
                 'folders' => [
                     'compose' => COMPOSE_DIR_TEMPLATE
                 ],
+
+                // 'layout' => path/to/default/layout.phtml
             ],
 
             /**

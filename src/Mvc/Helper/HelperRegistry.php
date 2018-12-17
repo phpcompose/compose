@@ -59,6 +59,7 @@ class HelperRegistry implements ContainerAwareInterface
     }
 
     /**
+     * Apply methods of give class (static) or object to the helper registry
      * @param $objectOrClass
      * @param array|null $helpers
      * @throws \ReflectionException
@@ -76,8 +77,8 @@ class HelperRegistry implements ContainerAwareInterface
                 $this->register($name, $objectOrClass);
             }
         } else {
-            foreach($methods as $helper) {
-                $this->register($helper, $objectOrClass);
+            foreach($methods as $name) {
+                $this->register($name, $objectOrClass);
             }
         }
     }

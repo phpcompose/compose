@@ -42,4 +42,9 @@ class SessionFactory implements ServiceFactoryInterface
 
         return $session;
     }
+
+    public function __invoke(ContainerInterface $container, $id)
+    {
+        return self::create($container, $id);
+    }
 }

@@ -35,4 +35,9 @@ class ErrorHandlerFactory implements ServiceFactoryInterface
 
         return $errorHandler;
     }
+
+    public function __invoke(ContainerInterface $container, $id)
+    {
+        return self::create($container, $id);
+    }
 }

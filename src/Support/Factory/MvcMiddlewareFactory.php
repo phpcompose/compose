@@ -52,4 +52,10 @@ class MvcMiddlewareFactory implements ServiceFactoryInterface
 
         return $mvc;
     }
+
+
+    public function __invoke(ContainerInterface $container, $id)
+    {
+        return self::create($container, $id);
+    }
 }

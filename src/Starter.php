@@ -10,6 +10,7 @@ use Compose\Http\Pipeline;
 use Compose\Support\Configuration;
 use Compose\Support\Error\NotFoundMiddleware;
 use Psr\Container\ContainerInterface;
+use Zend\ServiceManager\ServiceManager;
 use Zend\Stratigility\Middleware\ErrorHandler;
 use Zend\Stratigility\Middleware\OriginalMessages;
 
@@ -77,13 +78,16 @@ class Starter
 
     /**
      * @param Configuration $configuration
-     * @return ServiceContainer
+     * @return ContainerInterface
      */
-    protected function createContainer(Configuration $configuration) : ServiceContainer
+    protected function createContainer(Configuration $configuration) : ContainerInterface
     {
-        $container = new ServiceContainer();
-        $container->setMany($configuration['services'] ?? []);
-        $container->set(Configuration::class, $configuration);
+//        $container = new ServiceContainer();
+//        $container->setMany($configuration['services'] ?? []);
+//        $container->set(Configuration::class, $configuration);
+
+        $dependencies = $configuration['dependencies'] ?? [];
+        $container = new ServiceManager($dependencies);
 
         return $container;
     }

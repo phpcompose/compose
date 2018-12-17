@@ -119,6 +119,7 @@ class ViewRenderer implements ViewRendererInterface
     }
 
     /**
+     * @inheritdoc
      * @param View $view
      * @return string
      * @throws \Exception
@@ -168,8 +169,9 @@ class ViewRenderer implements ViewRendererInterface
     }
 
     /**
+     * @inheritdoc
      * @param string $script
-     * @param null $data
+     * @param array|null $data
      * @return string
      * @throws \Exception
      */

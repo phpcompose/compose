@@ -11,10 +11,9 @@ use Psr\Container\ContainerInterface;
 interface ServiceFactoryInterface extends ResolvableInterface
 {
     /**
-     * MUST return object
-     *
      * @param ContainerInterface $container
-     * @return object
+     * @param string $name
+     * @return mixed
      */
     static public function create(ContainerInterface $container, string $name);
 }
