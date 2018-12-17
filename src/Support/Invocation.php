@@ -112,7 +112,8 @@ class Invocation
     }
 
     /**
-     * @return \ReflectionFunctionAbstract
+     * @return \ReflectionFunction
+     * @throws \ReflectionException
      */
     public function getReflection() : \ReflectionFunction
     {

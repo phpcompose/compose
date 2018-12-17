@@ -41,7 +41,7 @@ class FormatterHelper {
      *
      * @access public
      * @param mixed $date
-     * @param string $format (default: null)
+     * @param string $format
      * @param string $default
      * @return string
      */

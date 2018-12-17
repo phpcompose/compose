@@ -3,6 +3,7 @@ namespace Compose;
 
 
 use Compose\Container\ServiceContainer;
+use Compose\Container\ServiceResolver;
 use Compose\Event\EventNotifierInterface;
 use Compose\Http\BodyParsingMiddleware;
 use Compose\Mvc\MvcMiddleware;
@@ -31,7 +32,7 @@ class Starter
      * @throws \Psr\Container\ContainerExceptionInterface
      * @throws \Psr\Container\NotFoundExceptionInterface
      */
-    protected function onInit(ServiceContainer $container, Pipeline $pipeline)
+    protected function onInit(ContainerInterface $container, Pipeline $pipeline)
     {
         $configuration = $container->get(Configuration::class);
         $pipeline->pipe(new OriginalMessages());
@@ -88,6 +89,14 @@ class Starter
 
         $dependencies = $configuration['dependencies'] ?? [];
         $container = new ServiceManager($dependencies);
+
+        $services = [
+            'factories' => $configuration['services']
+            ];
+        $container->configure($services);
+
+        $container->setService(Configuration::class, $configuration);
+        $container->setService(ServiceResolver::class, new ServiceResolver($container));
 
         return $container;
     }

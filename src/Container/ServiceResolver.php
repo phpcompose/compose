@@ -85,13 +85,14 @@ class ServiceResolver
     {
         $container = $this->getContainer();
         $instance = null;
-        $reflection = new \ReflectionClass($className);
 
-        // if implement ServiceFactoryInterface, use that
-        if($reflection->implementsInterface(ServiceFactoryInterface::class)) {
+        // if factory is provided use that
+        if(isset(class_implements($className)[ServiceFactoryInterface::class])) {
             return $className::create($container, $className);
         }
 
+        // use reflection to resolve and instantiate
+        $reflection = new \ReflectionClass($className);
         $constructor = $reflection->getConstructor();
         if ($constructor === null) {
             // if construction is not used, simply create new object without constructor
@@ -133,7 +134,6 @@ class ServiceResolver
                 $dependencies[] = $container->get($paramName);
             } else if ($parameter->isOptional()) { // check if it is optional
                 $dependencies[] = $parameter->getDefaultValue();
-                continue;
             } else { // unable to resolve required params,
                 throw new \InvalidArgumentException("Unable to resolve param: {$paramName} of type: {$parameter->getType()}");
             }

@@ -10,6 +10,7 @@ namespace Compose\Support\Factory;
 
 
 use Compose\Container\ServiceFactoryInterface;
+use Compose\Container\ZendFactoryMapTrait;
 use Compose\Mvc\DispatchingMiddleware;
 use Compose\Mvc\MvcMiddleware;
 use Compose\Mvc\PagesHandler;
@@ -20,6 +21,8 @@ use Psr\Container\ContainerInterface;
 
 class MvcMiddlewareFactory implements ServiceFactoryInterface
 {
+    use ZendFactoryMapTrait;
+
     public static function create(ContainerInterface $container, string $name)
     {
         $config = $container->get(Configuration::class);
@@ -28,6 +31,7 @@ class MvcMiddlewareFactory implements ServiceFactoryInterface
 
         /** @var PagesHandler $pageHandler */
         $pageHandler = $container->get(PagesHandler::class);
+        $pageHandler->setContainer($container);
         $pages = $config['pages'] ?? [];
         $pageDir = $pages['dir'] ?? null;
         if($pageDir) {
@@ -37,6 +41,7 @@ class MvcMiddlewareFactory implements ServiceFactoryInterface
 
         /** @var RoutingMiddleware $routing */
         $routing = $container->get(RoutingMiddleware::class);
+        $routing->setContainer($container);
         $routes = $config['routes'] ?? [];
         if($routes) {
             foreach($routes as $path => $command) {
@@ -48,14 +53,12 @@ class MvcMiddlewareFactory implements ServiceFactoryInterface
         }
 
         $mvc->pipe($routing);
-        $mvc->pipe($container->get(DispatchingMiddleware::class));
+
+        /** @var DispatchingMiddleware $dispatcher */
+        $dispatcher = $container->get(DispatchingMiddleware::class);
+        $dispatcher->setContainer($container);
+        $mvc->pipe($dispatcher);
 
         return $mvc;
-    }
-
-
-    public function __invoke(ContainerInterface $container, $id)
-    {
-        return self::create($container, $id);
     }
 }

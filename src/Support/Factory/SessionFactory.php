@@ -10,6 +10,7 @@ namespace Compose\Support\Factory;
 
 
 use Compose\Container\ServiceFactoryInterface;
+use Compose\Container\ZendFactoryMapTrait;
 use Compose\Http\Session;
 use Compose\Support\Configuration;
 use Psr\Container\ContainerInterface;
@@ -20,6 +21,8 @@ use Psr\Container\ContainerInterface;
  */
 class SessionFactory implements ServiceFactoryInterface
 {
+    use ZendFactoryMapTrait;
+
     /**
      * @param ContainerInterface $container
      * @return Session
@@ -41,10 +44,5 @@ class SessionFactory implements ServiceFactoryInterface
         $session->start($handler);
 
         return $session;
-    }
-
-    public function __invoke(ContainerInterface $container, $id)
-    {
-        return self::create($container, $id);
     }
 }

@@ -10,12 +10,15 @@ namespace Compose\Support\Factory;
 
 
 use Compose\Container\ServiceFactoryInterface;
+use Compose\Container\ZendFactoryMapTrait;
 use Compose\Event\EventNotifier;
 use Compose\Support\Configuration;
 use Psr\Container\ContainerInterface;
 
 class EventNotifierFactory implements ServiceFactoryInterface
 {
+    use ZendFactoryMapTrait;
+
     static public function create(ContainerInterface $container, string $id)
     {
         // TODO: Implement create() method.
@@ -29,10 +32,5 @@ class EventNotifierFactory implements ServiceFactoryInterface
         }
 
         return $notifier;
-    }
-
-    public function __invoke(ContainerInterface $container, $id)
-    {
-        return self::create($container, $id);
     }
 }

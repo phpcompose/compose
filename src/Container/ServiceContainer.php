@@ -11,6 +11,8 @@ use Psr\Container\NotFoundExceptionInterface;
 class ServiceContainer implements ContainerInterface
 {
     protected
+        $aliases = [],
+
         /**
          * @var array
          */
@@ -69,12 +71,8 @@ class ServiceContainer implements ContainerInterface
 
         $service = $this->services[$id] ?? null;
         if($service) { // service custom factory, if available
-            if(is_string($service)) { // check for alias
-                if($id === $service) { // self/manually declared service
-                    $instance = $this->resolve($service);
-                } else { // recursive call to resolve aliases
-                    $instance = $this->get($service);
-                }
+            if(is_string($service) && $id !== $service) { // check for alias recursively :(
+                $instance = $this->get($service);
             } else {
                 $instance = $this->resolve($service);
             }

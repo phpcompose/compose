@@ -1,2 +1,9 @@
+# IDE
 .idea
+
+# vendor/packages
 vendor/
+
+# local testing/prototyping related
+public/
+templates/pages

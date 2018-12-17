@@ -9,7 +9,8 @@
 namespace Compose\Mvc;
 
 
-use Compose\Container\ResolvableInterface;
+use Compose\Container\ContainerAwareInterface;
+use Compose\Container\ContainerAwareTrait;
 use Compose\Container\ServiceResolver;
 use Compose\Support\Configuration;
 use Compose\Support\Invocation;
@@ -23,8 +24,10 @@ use Zend\Diactoros\Response\HtmlResponse;
  * Class PagesHandler
  * @package Compose\Page
  */
-class PagesHandler implements MiddlewareInterface, ResolvableInterface
+class PagesHandler implements MiddlewareInterface, ContainerAwareInterface
 {
+    use ContainerAwareTrait;
+
     protected
         /**
          * @var string default page directory
@@ -93,12 +96,16 @@ class PagesHandler implements MiddlewareInterface, ResolvableInterface
 
             // call if callable is returned
             if(is_callable($return)) {
+                if(is_object($return) && $return instanceof ContainerAwareInterface) {
+                    $return->setContainer($this->getContainer());
+                }
+
                 $invocation = new Invocation($return);
                 if($invocation->getArgumentTypeAtIndex(0) == ServerRequestInterface::class) {
                     array_unshift($templateParams, $request); // add the request as the first param
                 }
                 $data = $invocation(...$templateParams);
-            } else {
+            }  else {
                 $data = $return;
             }
         }

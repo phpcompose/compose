@@ -10,6 +10,7 @@ namespace Compose\Support\Factory;
 
 
 use Compose\Container\ServiceFactoryInterface;
+use Compose\Container\ZendFactoryMapTrait;
 use Compose\Mvc\Helper\HelperRegistry;
 use Compose\Mvc\ViewRenderer;
 use Compose\Support\Configuration;
@@ -17,6 +18,8 @@ use Psr\Container\ContainerInterface;
 
 class ViewRendererFactory implements ServiceFactoryInterface
 {
+    use ZendFactoryMapTrait;
+
     /**
      * @param ContainerInterface $container
      * @return ViewRenderer
@@ -29,11 +32,5 @@ class ViewRendererFactory implements ServiceFactoryInterface
         $renderer = new ViewRenderer($configuration['templates'] ?? [], $container->get(HelperRegistry::class));
 
         return $renderer;
-    }
-
-
-    public function __invoke(ContainerInterface $container, $id)
-    {
-        return self::create($container, $id);
     }
 }

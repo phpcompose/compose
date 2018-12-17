@@ -10,6 +10,9 @@ namespace Compose\Support\Factory;
 
 
 use Compose\Container\ServiceFactoryInterface;
+use Compose\Container\ZendFactoryMapTrait;
+use Compose\Mvc\ViewRenderer;
+use Compose\Mvc\ViewRendererInterface;
 use Compose\Support\Configuration;
 use Compose\Support\Error\ErrorResponseGenerator;
 use Psr\Container\ContainerInterface;
@@ -18,14 +21,17 @@ use Zend\Stratigility\Middleware\ErrorHandler;
 
 class ErrorHandlerFactory implements ServiceFactoryInterface
 {
+    use ZendFactoryMapTrait;
+
     static public function create(ContainerInterface $container, string $id)
     {
         $config = $container->get(Configuration::class);
+        $generator = new ErrorResponseGenerator($container->get(ViewRendererInterface::class), $container->get(Configuration::class));
 
         // error handler
         $errorHandler = new ErrorHandler(
             function() { return new Response(); },
-            $container->get(ErrorResponseGenerator::class)
+            $generator
         );
 
         $errorListeners = $config['error_listeners'] ?? [];
@@ -34,10 +40,5 @@ class ErrorHandlerFactory implements ServiceFactoryInterface
         }
 
         return $errorHandler;
-    }
-
-    public function __invoke(ContainerInterface $container, $id)
-    {
-        return self::create($container, $id);
     }
 }

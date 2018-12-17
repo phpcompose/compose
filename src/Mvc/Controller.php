@@ -199,7 +199,7 @@ abstract class Controller extends RequestHandler implements ContainerAwareInterf
     protected function view(View $view, int $status = 200, array $headers = []): ResponseInterface
     {
         /** @var ViewRenderer $renderer */
-        $renderer = $this->getContainer()->get(ViewRenderer::class);
+        $renderer = $this->getContainer()->get(ViewRendererInterface::class);
         if (!$renderer) {
             throw new \Exception("ViewRenderer not found in the container.");
         }
