@@ -87,11 +87,11 @@ class Config
             ],
 
             /**
-             * controllers
+             * routes
              *
-             * Define MVC controllers for handling requests
+             * Routes for request handling, ie. controllers etc.
              */
-            'controllers' => [
+            'routes' => [
                 // path => controller class
             ],
 

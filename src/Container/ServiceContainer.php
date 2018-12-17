@@ -52,6 +52,9 @@ class ServiceContainer implements ContainerInterface
     }
 
     /**
+     * Attempts to get service from given $id.
+     * Service will be cached for next use
+     * @todo Better logic organization
      * @param string $id
      * @return mixed|object
      * @throws \Psr\Container\ContainerExceptionInterface
@@ -67,12 +70,22 @@ class ServiceContainer implements ContainerInterface
         $service = $this->services[$id] ?? null;
         if($service) { // service custom factory, if available
             if(is_string($service)) { // check for alias
-                $instance = $this->get($service); // recursive call to resolve aliases
+                if($id === $service) { // self/manually declared service
+                    $instance = $this->resolve($service);
+                } else { // recursive call to resolve aliases
+                    $instance = $this->get($service);
+                }
             } else {
                 $instance = $this->resolve($service);
             }
         } else {
+            // this could be for few request
+            // the class implements ResolvableInterface
+            // or manually registered itself as service
             $service = $id;
+            if(!$this->getResolver()->isService($service)) {
+                throw new NotFoundException("Service class: {$service} must implement ResolvableInterface or be registered as service.");
+            }
             $instance = $this->resolve($service);
         }
 
@@ -101,9 +114,6 @@ class ServiceContainer implements ContainerInterface
         if(is_callable($service)) { // callable factory
             $instance = call_user_func($service, $this, $service);
         } else if(is_string($service)) {
-            if(!$resolver->isService($service)) {
-                throw new NotFoundException("Service class: {$service} must implement ResolvableInterface or be registered as service.");
-            }
             $instance = $resolver->instantiate($service, $args);
         } else if(is_object($service)) { // impossible, will be set to instance by set method
             $instance = $service;
@@ -129,7 +139,9 @@ class ServiceContainer implements ContainerInterface
             throw new \LogicException("Service Instance already available for: {$id}");
         }
 
-        if(is_null($service) || is_callable($service) || is_string($service)) {
+        if(is_null($service) || $service === $id) {
+            $this->services[$id] = $id;
+        } else if(is_callable($service) || is_string($service)) {
             $this->services[$id] = $service;
         } else if(is_object($service)) { // any object other then closure is instance
             $this->instances[$id] = $service;
@@ -144,6 +156,9 @@ class ServiceContainer implements ContainerInterface
     public function setMany(array $services)
     {
         foreach($services as $id => $service) {
+            if(is_integer($id)) {
+                $id = $service;
+            }
             $this->set($id, $service);
         }
     }

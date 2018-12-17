@@ -144,10 +144,14 @@ final class ServiceContainerTest extends TestCase
         });
 
         $this->container->set('service6', 'service5'); // setup alias
+        $this->container->set('service7', 'service6');
         $service6 = $this->container->get('service6');
         $service5 = $this->container->get('service5');
+        $service7 = $this->container->get('service7');
 
         $this->assertSame($service5, $service6);
+        $this->assertSame($service7, $service5);
+        $this->assertSame($service7, $service6);
     }
 
     /**
@@ -219,10 +223,6 @@ final class ServiceContainerTest extends TestCase
 
     public function testCanRegisterAnyClass() : void
     {
-        // Service1 is not a Service so it should fail
-        $this->expectException(NotFoundException::class);
-        $this->container->get(Service4::class);
-
         $this->container->set(Service4::class);
         $service = $this->container->get(Service4::class);
         $this->assertInstanceOf(Service4::class, $service);
