@@ -8,6 +8,9 @@
 
 namespace Compose\Event;
 
+use Psr\EventDispatcher\ListenerProviderInterface;
+use Psr\EventDispatcher\MessageNotifierInterface;
+
 /**
  * Interface EventManagerInterface
  *
@@ -17,7 +20,7 @@ namespace Compose\Event;
  *
  * @package Compose\Event
  */
-interface EventNotifierInterface
+interface EventDispatcherInterface extends ListenerProviderInterface, MessageNotifierInterface
 {
     /**
      * @param string $event
@@ -33,14 +36,6 @@ interface EventNotifierInterface
      * @return mixed
      */
     public function detach(string $event, callable $callback): void;
-
-    /**
-     * @param string $event
-     * @param null $sender
-     * @param array $args
-     * @return mixed
-     */
-    public function notify(string $event, array $args = [], $sender = null);
 
     /**
      * @param SubscriberInterface $subscriber

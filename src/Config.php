@@ -52,7 +52,7 @@ class Config
                 Compose\Support\Error\ErrorResponseGenerator::class => ReflectionBasedAbstractFactory::class,
                 Compose\Support\Error\NotFoundMiddleware::class => ReflectionBasedAbstractFactory::class,
                 ErrorHandler::class => Compose\Support\Factory\ErrorHandlerFactory::class,
-                Compose\Event\EventNotifierInterface::class => Compose\Support\Factory\EventNotifierFactory::class,
+                Compose\Event\EventDispatcherInterface::class => Compose\Support\Factory\EventDispatcherFactory::class,
                 Compose\Http\Session::class => Compose\Support\Factory\SessionFactory::class,
                 Compose\Mvc\ViewRendererInterface::class => Compose\Support\Factory\ViewRendererFactory::class,
                 Compose\Mvc\MvcMiddleware::class => Compose\Support\Factory\MvcMiddlewareFactory::class,

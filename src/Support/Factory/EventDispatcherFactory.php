@@ -11,11 +11,11 @@ namespace Compose\Support\Factory;
 
 use Compose\Container\ServiceFactoryInterface;
 use Compose\Container\ZendFactoryMapTrait;
-use Compose\Event\EventNotifier;
+use Compose\Event\EventDispatcher;
 use Compose\Support\Configuration;
 use Psr\Container\ContainerInterface;
 
-class EventNotifierFactory implements ServiceFactoryInterface
+class EventDispatcherFactory implements ServiceFactoryInterface
 {
     use ZendFactoryMapTrait;
 
@@ -23,7 +23,7 @@ class EventNotifierFactory implements ServiceFactoryInterface
     {
         // TODO: Implement create() method.
         $config = $container->get(Configuration::class);
-        $notifier = new EventNotifier();
+        $notifier = new EventDispatcher();
         $subscribers = $config['subscribers'];
         if($subscribers) {
             foreach($subscribers as $subscriber) {

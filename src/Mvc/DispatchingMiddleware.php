@@ -4,7 +4,9 @@ namespace Compose\Mvc;
 
 use Compose\Container\ContainerAwareInterface;
 use Compose\Container\ContainerAwareTrait;
-use Compose\Event\EventNotifierInterface;
+use Compose\Event\EventDispatcherInterface;
+use Compose\Event\ExceptionMessage;
+use Compose\Event\Message;
 use Psr\Container\ContainerInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\ResponseInterface;
@@ -37,26 +39,26 @@ class DispatchingMiddleware implements MiddlewareInterface, ContainerAwareInterf
      */
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler) : ResponseInterface
     {
-        /** @var EventNotifierInterface $notifier */
-        $notifier = $this->getContainer()->get(EventNotifierInterface::class);
+        /** @var EventDispatcherInterface $notifier */
+        $notifier = $this->getContainer()->get(EventDispatcherInterface::class);
 
         try {
             $route = $request->getAttribute(RouteInfo::class);
 
             if($route) {
-                $notifier->notify(self::EVENT_DISPATCH, ['routeMap' => $route, 'request' => $request], $this);
+                $notifier->notify(new Message(self::EVENT_DISPATCH, ['routeMap' => $route, 'request' => $request], $this));
                 $handler = $route->handler;
 
                 /** @var RequestHandlerInterface $instance */
                 $instance = $this->resolveCommand($handler);
                 $response = $instance->handle($request);
 
-                $notifier->notify(self::EVENT_RESPONSE, ['response' => $response], $this);
+                $notifier->notify(new Message(self::EVENT_RESPONSE, ['response' => $response], $this));
                 return $response;
             }
 
         } catch (\Exception $e) {
-            $notifier->notify(self::EVENT_ERROR, [$e]);
+            $notifier->notify(new ExceptionMessage($e));
             throw $e; // for now just passing to the error handler
         }
 

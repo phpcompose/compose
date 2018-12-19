@@ -7,20 +7,38 @@
  */
 
 namespace Compose\Event;
-use Compose\Container\ResolvableInterface;
+use Psr\EventDispatcher\EventInterface;
+use Psr\EventDispatcher\MessageInterface;
 
 
 /**
  * Class EventNotifier
  * @package Compose\Event
  */
-class EventNotifier implements EventNotifierInterface, ResolvableInterface
+class EventDispatcher implements EventDispatcherInterface
 {
     protected
         /**
          * @var array
          */
         $listeners = [];
+
+    /**
+     * @inheritdoc
+     * @param EventInterface $event
+     * @return iterable
+     */
+    public function getListenersForEvent(EventInterface $event): iterable
+    {
+        $name = null;
+        if($event instanceof Message) {
+            $name = $event->getName();
+        } else {
+            $name = get_class($event);
+        }
+
+        return $this->listeners[$name] ?? [];
+    }
 
     /**
      * @inheritdoc
@@ -90,23 +108,19 @@ class EventNotifier implements EventNotifierInterface, ResolvableInterface
 
     /**
      * @inheritdoc
-     * @param string $event
-     * @param array|null $args
-     * @param null $sender
+     * @param MessageInterface $message
      * @throws \Exception
      */
-    public function notify(string $event, array $args = [], $sender = null)
+    public function notify(MessageInterface $message) : void
     {
-        $eventArgs = new EventArgs($event, $args, $sender);
-        $listeners = $this->listeners[$event] ?? [];
+        $listeners = $this->getListenersForEvent($message);
 
         try {
             foreach($listeners as $listener) {
-                call_user_func($listener, $eventArgs);
+                $listener($message);
             }
         } catch (\Exception $e) {
             throw $e;
         }
-
     }
 }

@@ -4,7 +4,8 @@ namespace Compose\Mvc;
 
 use Compose\Container\ContainerAwareInterface;
 use Compose\Container\ContainerAwareTrait;
-use Compose\Event\EventNotifierInterface;
+use Compose\Event\EventDispatcherInterface;
+use Compose\Event\Message;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Server\MiddlewareInterface;
@@ -102,10 +103,10 @@ class RoutingMiddleware implements MiddlewareInterface, ContainerAwareInterface
      */
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler) : ResponseInterface
     {
-        /** @var EventNotifierInterface $notifier */
-        $notifier = $this->getContainer()->get(EventNotifierInterface::class);
+        /** @var EventDispatcherInterface $notifier */
+        $notifier = $this->getContainer()->get(EventDispatcherInterface::class);
 
-        $notifier->notify(self::EVENT_ROUTE, ['request' => $request], $this);
+        $notifier->notify(new Message(self::EVENT_ROUTE, ['request' => $request], $this));
         $route = $this->match($request);
 
         if($route) {

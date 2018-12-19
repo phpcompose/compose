@@ -10,10 +10,16 @@ namespace Compose\Event;
 
 use function Clue\StreamFilter\fun;
 use PHPUnit\Framework\TestCase;
+use Psr\EventDispatcher\MessageInterface;
 
-class EventNotifierTest extends TestCase
+class MessageOne implements MessageInterface
 {
-    /** @var EventNotifier */
+
+}
+
+class EventDispatcherTest extends TestCase
+{
+    /** @var EventDispatcher */
     protected $notifier;
 
     /** @var \ArrayObject */
@@ -21,7 +27,7 @@ class EventNotifierTest extends TestCase
 
     public function setUp()
     {
-        $this->notifier = new EventNotifier();
+        $this->notifier = new EventDispatcher();
         $this->results = new \ArrayObject();
     }
 
@@ -31,13 +37,28 @@ class EventNotifierTest extends TestCase
     public function testBasicListeningAndDispatching()
     {
         $results = new \ArrayObject();
-        $this->notifier->attach('event.abc', function(EventArgs $args) use($results) {
+        $this->notifier->attach(MessageOne::class, function(MessageInterface $message) use($results) {
             $results['test1'] = 'value1';
         });
 
         $this->assertArrayNotHasKey('test1', $results);
-        $this->notifier->notify('event.abc');
+        $this->notifier->notify(new MessageOne());
         $this->assertEquals('value1', $results['test1']);
+    }
+
+    /**
+     * @throws \Exception
+     */
+    public function testCustomMessageObjectListening()
+    {
+        $this->notifier->attach('message.two', function(Message $message) {
+            $message['arg1'] = 'changed';
+        });
+
+        $message = new Message('message.two', ['arg1' => 'val1']);
+        $this->notifier->notify($message);
+
+        $this->assertEquals('changed', $message['arg1']);
     }
 
     /**
@@ -52,21 +73,21 @@ class EventNotifierTest extends TestCase
         };
 
         $this->notifier->attach('event1', $listener);
-        $this->notifier->notify('event1');
-        $this->notifier->notify('event1');
+        $this->notifier->notify(new Message('event1'));
+        $this->notifier->notify(new Message('event1'));
 
         $this->assertEquals(2, $count);
 
         // now detach
         $this->notifier->detach('event1', $listener);
-        $this->notifier->notify('event1');
+        $this->notifier->notify(new Message('event1'));
         $this->assertEquals(2, $count);
     }
 
     /**
      * @throws \Exception
      */
-    public function testEventArgs()
+    public function _testEventArgs()
     {
         $args = new EventArgs('event2', ['param1' => 'value2']);
         $this->assertEquals('event2', $args->getName());
@@ -84,6 +105,9 @@ class EventNotifierTest extends TestCase
         $this->notifier->notify('event2', ['param1' => 'value1']);
     }
 
+    /**
+     * @throws \Exception
+     */
     public function testSubscription()
     {
         $result = new \ArrayObject();
@@ -100,8 +124,8 @@ class EventNotifierTest extends TestCase
                 return ['event3' => 'onEvent3', 'event4' => 'onEvent4'];
             }
 
-            public function onEvent3(EventArgs $args) {
-                $this->object['param1'] = $args['param1'];
+            public function onEvent3(Message $message) {
+                $this->object['param1'] = $message['param1'];
             }
 
             public function onEvent4()
@@ -111,7 +135,7 @@ class EventNotifierTest extends TestCase
         };
 
         $this->notifier->subscribe($subscriber);
-        $this->notifier->notify('event3', ['param1' => 'value1']);
+        $this->notifier->notify(new Message('event3', ['param1' => 'value1']));
 
         $this->assertEquals('value1', $result['param1']);
     }

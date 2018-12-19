@@ -4,7 +4,8 @@ namespace Compose;
 
 use Compose\Container\ServiceContainer;
 use Compose\Container\ServiceResolver;
-use Compose\Event\EventNotifierInterface;
+use Compose\Event\EventDispatcherInterface;
+use Compose\Event\Message;
 use Compose\Http\BodyParsingMiddleware;
 use Compose\Mvc\MvcMiddleware;
 use Compose\Http\Pipeline;
@@ -61,15 +62,15 @@ class Starter
         $container = $this->createContainer($configuration);
         $pipeline = $this->createPipeline($container);
 
-        /** @var EventNotifierInterface $notifier */
-        $notifier = $container->get(EventNotifierInterface::class);
-        $notifier->notify(self::EVENT_INIT, ['container' => $container], $this);
+        /** @var EventDispatcherInterface $notifier */
+        $notifier = $container->get(EventDispatcherInterface::class);
+        $notifier->notify(new Message(self::EVENT_INIT, ['container' => $container], $this));
 
         $pipeline->pipe($container->get(ErrorHandler::class));
 
         $this->onInit($container, $pipeline);
 
-        $notifier->notify(self::EVENT_READY, ['container' => $container], $this);
+        $notifier->notify(new Message(self::EVENT_READY, ['container' => $container], $this));
 
         // now final handler/not found handler
         $pipeline->pipe($container->get(NotFoundMiddleware::class));
