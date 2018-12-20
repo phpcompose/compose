@@ -10,7 +10,6 @@ namespace Compose\Support\Factory;
 
 
 use Compose\Container\ServiceFactoryInterface;
-use Compose\Container\ZendFactoryMapTrait;
 use Compose\Mvc\DispatchingMiddleware;
 use Compose\Mvc\MvcMiddleware;
 use Compose\Mvc\PagesHandler;

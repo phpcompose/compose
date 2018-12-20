@@ -11,7 +11,6 @@ namespace Compose\Support\Factory;
 
 use Compose\Container\ServiceFactoryInterface;
 use Compose\Container\ServiceResolver;
-use Compose\Container\ZendFactoryMapTrait;
 use Compose\Mvc\Helper\HelperRegistry;
 use Compose\Support\Configuration;
 use Psr\Container\ContainerInterface;

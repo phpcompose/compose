@@ -10,7 +10,6 @@ namespace Compose\Support\Factory;
 
 
 use Compose\Container\ServiceFactoryInterface;
-use Compose\Container\ZendFactoryMapTrait;
 use Compose\Event\EventDispatcher;
 use Compose\Support\Configuration;
 use Psr\Container\ContainerInterface;

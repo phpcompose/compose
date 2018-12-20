@@ -10,8 +10,6 @@ namespace Compose\Support\Factory;
 
 
 use Compose\Container\ServiceFactoryInterface;
-use Compose\Container\ZendFactoryMapTrait;
-use Compose\Mvc\ViewRenderer;
 use Compose\Mvc\ViewRendererInterface;
 use Compose\Support\Configuration;
 use Compose\Support\Error\ErrorResponseGenerator;
