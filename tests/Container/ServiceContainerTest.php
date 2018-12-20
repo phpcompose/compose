@@ -76,11 +76,6 @@ final class ServiceContainerTest extends TestCase
         $this->container = new ServiceContainer();
     }
 
-    public function testRandom() : void
-    {
-        $this->assertNotSame(new \stdClass(), new \stdClass());
-    }
-
     public function testCannotSetScalar() : void
     {
         $this->expectException(\LogicException::class);
@@ -88,7 +83,7 @@ final class ServiceContainerTest extends TestCase
         $this->container->set('abc', 12);
     }
 
-    public function testCanSetCallableArray() : void
+    public function testCanSetCallable() : void
     {
         $this->assertNull($this->container->set('abc', [InvokableClass::class, 'create']));
     }

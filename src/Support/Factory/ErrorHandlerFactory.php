@@ -21,8 +21,6 @@ use Zend\Stratigility\Middleware\ErrorHandler;
 
 class ErrorHandlerFactory implements ServiceFactoryInterface
 {
-    use ZendFactoryMapTrait;
-
     static public function create(ContainerInterface $container, string $id)
     {
         $config = $container->get(Configuration::class);

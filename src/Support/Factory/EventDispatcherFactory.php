@@ -17,8 +17,6 @@ use Psr\Container\ContainerInterface;
 
 class EventDispatcherFactory implements ServiceFactoryInterface
 {
-    use ZendFactoryMapTrait;
-
     static public function create(ContainerInterface $container, string $id)
     {
         // TODO: Implement create() method.

@@ -21,8 +21,6 @@ use Psr\Container\ContainerInterface;
  */
 class SessionFactory implements ServiceFactoryInterface
 {
-    use ZendFactoryMapTrait;
-
     /**
      * @param ContainerInterface $container
      * @return Session

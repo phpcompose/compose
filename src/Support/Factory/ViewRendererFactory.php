@@ -18,8 +18,6 @@ use Psr\Container\ContainerInterface;
 
 class ViewRendererFactory implements ServiceFactoryInterface
 {
-    use ZendFactoryMapTrait;
-
     /**
      * @param ContainerInterface $container
      * @return ViewRenderer

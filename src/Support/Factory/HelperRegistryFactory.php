@@ -18,8 +18,6 @@ use Psr\Container\ContainerInterface;
 
 class HelperRegistryFactory implements ServiceFactoryInterface
 {
-    use ZendFactoryMapTrait;
-
     /**
      * @param ContainerInterface $container
      * @param string $class

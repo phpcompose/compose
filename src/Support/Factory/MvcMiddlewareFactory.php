@@ -21,8 +21,6 @@ use Psr\Container\ContainerInterface;
 
 class MvcMiddlewareFactory implements ServiceFactoryInterface
 {
-    use ZendFactoryMapTrait;
-
     public static function create(ContainerInterface $container, string $name)
     {
         $config = $container->get(Configuration::class);

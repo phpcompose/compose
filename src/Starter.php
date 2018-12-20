@@ -3,7 +3,6 @@ namespace Compose;
 
 
 use Compose\Container\ServiceContainer;
-use Compose\Container\ServiceResolver;
 use Compose\Event\EventDispatcherInterface;
 use Compose\Event\Message;
 use Compose\Http\BodyParsingMiddleware;
@@ -12,7 +11,6 @@ use Compose\Http\Pipeline;
 use Compose\Support\Configuration;
 use Compose\Support\Error\NotFoundMiddleware;
 use Psr\Container\ContainerInterface;
-use Zend\ServiceManager\ServiceManager;
 use Zend\Stratigility\Middleware\ErrorHandler;
 use Zend\Stratigility\Middleware\OriginalMessages;
 
@@ -84,20 +82,9 @@ class Starter
      */
     protected function createContainer(Configuration $configuration) : ContainerInterface
     {
-//        $container = new ServiceContainer();
-//        $container->setMany($configuration['services'] ?? []);
-//        $container->set(Configuration::class, $configuration);
-
-        $dependencies = $configuration['dependencies'] ?? [];
-        $container = new ServiceManager($dependencies);
-
-        $services = [
-            'factories' => $configuration['services']
-            ];
-        $container->configure($services);
-
-        $container->setService(Configuration::class, $configuration);
-        $container->setService(ServiceResolver::class, new ServiceResolver($container));
+        $container = new ServiceContainer();
+        $container->setMany($configuration['services'] ?? []);
+        $container->set(Configuration::class, $configuration);
 
         return $container;
     }
