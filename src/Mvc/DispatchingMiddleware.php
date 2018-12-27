@@ -50,7 +50,7 @@ class DispatchingMiddleware implements MiddlewareInterface, ContainerAwareInterf
                 $handler = $route->handler;
 
                 /** @var RequestHandlerInterface $instance */
-                $instance = $this->resolveCommand($handler);
+                $instance = $this->resolveHandler($handler);
                 $response = $instance->handle($request);
 
                 $notifier->notify(new Message(self::EVENT_RESPONSE, ['response' => $response], $this));
@@ -73,7 +73,7 @@ class DispatchingMiddleware implements MiddlewareInterface, ContainerAwareInterf
      * @return RequestHandlerInterface
      * @throws \Exception
      */
-    protected function resolveCommand($mixed) : RequestHandlerInterface
+    protected function resolveHandler($mixed) : RequestHandlerInterface
     {
         $container = $this->getContainer();
         $handler = null;

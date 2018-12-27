@@ -20,6 +20,11 @@ class Config
     public function __invoke()
     {
         return [
+            'app' => [
+                'name' => 'php-compose app',
+                'description' => 'A PHP-Compose based application',
+            ],
+
             /**
              * debug
              *

@@ -215,7 +215,7 @@ abstract class Controller extends RequestHandler implements ContainerAwareInterf
      * @return ResponseInterface
      * @throws \Exception
      */
-    protected function render(string $script, array $data = null, int $status = null, array $headers = []) : ResponseInterface
+    protected function render(string $script, array $data = null, int $status = 200, array $headers = []) : ResponseInterface
     {
         return $this->view(new View($script, $data), $status, $headers);
     }
