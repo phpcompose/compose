@@ -114,6 +114,14 @@ class View extends \ArrayObject
     }
 
     /**
+     * @return array
+     */
+    public function toArray() : array
+    {
+        return $this->getArrayCopy();
+    }
+
+    /**
      * Delegates method calls to helpers
      *
      * @param $name
