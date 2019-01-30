@@ -16,15 +16,8 @@ namespace Compose\Mvc;
 interface ViewRendererInterface
 {
     /**
-     * @param string $script
-     * @param array|null $data
-     * @return string
-     */
-    public function render(string $script, array $data = null) : string;
-
-    /**
      * @param View $view
      * @return string
      */
-    public function renderView(View $view) : string;
+    public function render(View $view) : string;
 }

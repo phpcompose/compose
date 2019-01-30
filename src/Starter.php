@@ -55,16 +55,16 @@ class Starter
      */
     public function __invoke(Configuration $configuration) : Pipeline
     {
-        // order 1: first initial application setup and required middleware
         // application http pipeline setup
         $container = $this->createContainer($configuration);
         $pipeline = $this->createPipeline($container);
 
+        // register the main error handler
+        $pipeline->pipe($container->get(ErrorHandler::class)); 
+
         /** @var EventDispatcherInterface $notifier */
         $notifier = $container->get(EventDispatcherInterface::class);
         $notifier->notify(new Message(self::EVENT_INIT, ['container' => $container], $this));
-
-        $pipeline->pipe($container->get(ErrorHandler::class));
 
         $this->onInit($container, $pipeline);
 
@@ -72,7 +72,6 @@ class Starter
 
         // now final handler/not found handler
         $pipeline->pipe($container->get(NotFoundMiddleware::class));
-
         return $pipeline;
     }
 

@@ -107,24 +107,12 @@ class ViewRenderer implements ViewRendererInterface
     }
 
     /**
-     * @param string $script
-     * @param array|null $data
-     * @return View
-     */
-    public function createView(string $script, array $data = null) : View
-    {
-        $view = new View($script, $data);
-
-        return $view;
-    }
-
-    /**
      * @inheritdoc
      * @param View $view
      * @return string
      * @throws \Exception
      */
-    public function renderView(View $view) : string
+    public function render(View $view) : string
     {
         $view->setHelperRegistry($this->getHelperRegistry());
 
@@ -166,18 +154,5 @@ class ViewRenderer implements ViewRendererInterface
         }, $bind);
 
         return $closure($filename, $locals);
-    }
-
-    /**
-     * @inheritdoc
-     * @param string $script
-     * @param array|null $data
-     * @return string
-     * @throws \Exception
-     */
-    public function render(string $script, array $data = null) : string
-    {
-        $view = $this->createView($script, $data);
-        return $this->renderView($view);
     }
 }

@@ -204,7 +204,7 @@ abstract class Controller extends RequestHandler implements ContainerAwareInterf
             throw new \Exception("ViewRenderer not found in the container.");
         }
 
-        return $this->html($renderer->renderView($view), $status, $headers);
+        return $this->html($renderer->render($view), $status, $headers);
     }
 
     /**

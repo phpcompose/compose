@@ -68,6 +68,13 @@ class Config
             'middleware' => [
             ],
 
+            'pipeline' => [
+                'init' => [],
+                'ready' => [],
+                'routing' => [],
+                'final' => []
+            ],
+
             /**
              * templates
              */
