@@ -6,6 +6,7 @@ use Compose\Container\ResolvableInterface;
 use Compose\Container\ServiceAwareInterface;
 use Compose\Container\ServiceInterface;
 use Compose\Http\Exception\HttpException;
+use Compose\Mvc\View;
 use Compose\Mvc\ViewRenderer;
 use Compose\Mvc\ViewRendererInterface;
 use Compose\Support\Configuration;
@@ -78,8 +79,7 @@ class ErrorResponseGenerator implements ResolvableInterface
 
         $response = $response->withStatus($httpStatus);
         $response->getBody()->write($this->renderer->render(
-            $template,
-            compact('exception', 'request'))
+            new View($template, compact('exception', 'request')))
         );
 
         return $response;
