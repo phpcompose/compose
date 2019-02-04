@@ -97,11 +97,12 @@ abstract class Controller extends RequestHandler implements ContainerAwareInterf
         $action = $this->resolveActionName($route);
         $params = $route->params;
 
-        if(!is_callable([$this, $action])) {
+        
+
+        $invocation = Invocation::fromCallable([$this, $action]);
+        if(!$invocation) {
             throw new HttpException("Unable to find action for request: {$route->method}: {$route->path} in " . get_class($this), 404);
         }
-
-        $invocation = new Invocation([$this, $action]);
         if($invocation->getArgumentTypeAtIndex(0) == ServerRequestInterface::class) {
             array_unshift($params, $request); // add the request as the first param
         }

@@ -45,6 +45,18 @@ class Invocation
     }
 
     /**
+     * 
+     */
+    static public function fromCallable($callable, array $params = null) : ?self
+    {
+        if(!\is_callable($callable)) {
+            return null;
+        }
+        
+        return new self($callable, $params);
+    }
+
+    /**
      * @return callable
      */
     public function getCallable() : callable
