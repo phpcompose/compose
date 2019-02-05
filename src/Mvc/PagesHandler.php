@@ -11,7 +11,6 @@ namespace Compose\Mvc;
 
 use Compose\Container\ContainerAwareInterface;
 use Compose\Container\ContainerAwareTrait;
-use Compose\Container\ServiceResolver;
 use Compose\Support\Configuration;
 use Compose\Support\Invocation;
 use Psr\Http\Server\MiddlewareInterface;
@@ -34,10 +33,7 @@ class PagesHandler implements MiddlewareInterface, ContainerAwareInterface
          */
         $dir,
 
-        /**
-         * @var ServiceResolver
-         */
-        $resolver,
+        $folders = [],
 
         /**
          * @var ViewRendererInterface
@@ -54,9 +50,9 @@ class PagesHandler implements MiddlewareInterface, ContainerAwareInterface
      * @param Configuration $configuration
      * @param ViewRendererInterface $renderer
      */
-    public function __construct(ServiceResolver $resolver, ViewRendererInterface $renderer)
+    public function __construct(ViewRendererInterface $renderer)
     {
-        $this->resolver = $resolver;
+        $this->renderer = $renderer;
         $this->renderer = $renderer;
     }
 
@@ -66,6 +62,26 @@ class PagesHandler implements MiddlewareInterface, ContainerAwareInterface
     public function setDirectory(string $dir)
     {
         $this->dir = $dir;
+    }
+
+    /**
+     * Map specific url path to a folder
+     * @param string $page
+     * @param string $dir
+     */
+    public function addFolder(string $path, string $dir)
+    {
+        $this->folders[$path] = $dir;
+    }
+
+    /**
+     * Set path mapping folder.  Existing maps will be replaced
+     * 
+     * @param array $folders
+     */
+    public function setFolders(array $folders) 
+    {
+        $this->folders = $folders;
     }
 
     /**
@@ -124,9 +140,7 @@ class PagesHandler implements MiddlewareInterface, ContainerAwareInterface
     protected function resolveTemplate(string $page) : ?array
     {
         $dir = $this->dir;
-        if(!$dir) {
-            return null;
-        }
+        $folders = $this->folders;
 
         $params = [];
         $template = null;
@@ -136,8 +150,17 @@ class PagesHandler implements MiddlewareInterface, ContainerAwareInterface
         $page = trim($page, '/');
 
         $parts = explode('/', $page);
+      
+        // check if path to folder mapping available
+        if(isset($folders[$parts[0]])) {
+            $foldername = \array_shift($parts);
+            $dirname = $folders[$foldername];
+        } else {
+            $dirname = $dir;
+        }
+
         while(count($parts)) {
-            $path = $dir . '/' . implode('/', $parts);
+            $path = $dirname . '/' . implode('/', $parts);
             if(is_dir($path)) { // first check if
                 $template = "{$path}/{$this->defaultPage}.phtml";
             } else {

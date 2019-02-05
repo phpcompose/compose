@@ -34,6 +34,11 @@ class MvcMiddlewareFactory implements ServiceFactoryInterface
         if($pageDir) {
             $pageHandler->setDirectory($pageDir);
         }
+
+        $folders = $pages['folders'] ?? null;
+        if($folders) {
+            $pageHandler->setFolders($folders);
+        }
         $mvc->pipe($pageHandler);
 
         /** @var RoutingMiddleware $routing */
