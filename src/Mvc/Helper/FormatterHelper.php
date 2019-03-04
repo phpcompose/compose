@@ -108,4 +108,20 @@ class FormatterHelper {
         if(!is_int($time)) $time = strtotime($time);
         return date("Y-m-d H:i:s", $time);
     }
+
+    /**
+     * @param $size
+     * @param int $precision
+     * @return string
+     */
+    function fileSize($size, $precision = 2) {
+        $units = array('B','kB','MB','GB','TB','PB','EB','ZB','YB');
+        $step = 1024;
+        $i = 0;
+        while (($size / $step) > 0.9) {
+            $size = $size / $step;
+            $i++;
+        }
+        return round($size, $precision).$units[$i];
+    }
 }

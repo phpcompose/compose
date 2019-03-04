@@ -126,6 +126,10 @@ class PagesHandler implements MiddlewareInterface, ContainerAwareInterface
             }
         }
 
+        if($data instanceof ResponseInterface) {
+            return $data;
+        }
+
         return new HtmlResponse(
             $this->renderer->render(new View($templateScript, $data))
         );
