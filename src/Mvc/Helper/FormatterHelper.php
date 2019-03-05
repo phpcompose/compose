@@ -115,7 +115,7 @@ class FormatterHelper {
      * @return string
      */
     function fileSize($size, $precision = 2) {
-        $units = array('B','kB','MB','GB','TB','PB','EB','ZB','YB');
+        $units = array('B','KB','MB','GB','TB','PB','EB','ZB','YB');
         $step = 1024;
         $i = 0;
         while (($size / $step) > 0.9) {
