@@ -45,6 +45,31 @@ class Configuration extends \ArrayObject
     }
 
     /**
+     * @param string $path
+     * @param null $default
+     * @param string|null $separator
+     * @return Configuration|mixed|null
+     */
+    public function getNestedValue(string $keyPath, $default = null, string $keyPathSeparator = '.')
+    {
+        $keys = explode($keyPathSeparator, $keyPath);
+
+        if (empty($keys)) {
+            return $default;
+        }
+
+        $var = $this;
+        foreach ($keys as $key) {
+            if (!isset($var[$key])) {
+                return $default;
+            }
+            $var = $var[$key];
+        }
+
+        return $var;
+    }
+
+    /**
      * @param array $array
      */
     public function merge(array $array) : void
