@@ -112,11 +112,13 @@ $rootDir = dirname($_SERVER['DOCUMENT_ROOT']) . '/';
                         <td><?= $trace['function']?></td>
                     </tr>
                     <?php foreach($traces as $trace): ?>
+                    <?php if(isset($trace['file'])) :?>
                         <tr>
                             <td><?= str_replace($rootDir, '', $trace['file']) ?></td>
                             <td><?= $trace['line'] ?></td>
                             <td><?= $trace['function'] ?></td>
                         </tr>
+                    <?php endif; ?>
                     <?php endforeach ?>
                     </tbody>
                 </table>
