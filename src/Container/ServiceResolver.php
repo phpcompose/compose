@@ -126,10 +126,10 @@ class ServiceResolver
         $params = $function->getParameters();
         $dependencies = [];
         foreach ($params as $parameter) {
-            $paramName = ($parameter->getClass()) ? $parameter->getClass()->getName() : $parameter->getName();
-
-            if (isset($args[$paramName])) { // first check if passed $args has the param name,
-                $dependencies[] = $args[$paramName];
+            $pname = $parameter->getName();
+            $paramName = ($parameter->getClass()) ? $parameter->getClass()->getName() : $pname;
+            if (isset($args[$pname])) { // first check if passed $args has the param name,
+                $dependencies[] = $args[$pname];
             } else if ($container->has($paramName)) { // if now check if container has it
                 $dependencies[] = $container->get($paramName);
             } else if ($parameter->isOptional()) { // check if it is optional

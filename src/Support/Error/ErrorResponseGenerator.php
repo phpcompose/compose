@@ -79,7 +79,7 @@ class ErrorResponseGenerator implements ResolvableInterface
 
         $response = $response->withStatus($httpStatus);
         $response->getBody()->write($this->renderer->render(
-            new View($template, compact('exception', 'request')))
+            new View($template, compact('exception', 'request')), $request)
         );
 
         return $response;
