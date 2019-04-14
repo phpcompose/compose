@@ -117,7 +117,8 @@ class Config
             'helpers' => [
                 Compose\Mvc\Helper\TagHelper::class,
                 Compose\Mvc\Helper\FormatterHelper::class,
-                Compose\Mvc\Helper\LayoutHelper::class
+                Compose\Mvc\Helper\LayoutHelper::class,
+                Compose\Mvc\Helper\RequestHelper::class
             ],
         ];
     }
