@@ -8,8 +8,6 @@
 
 namespace Compose\Event;
 
-use Psr\EventDispatcher\ListenerProviderInterface;
-use Psr\EventDispatcher\MessageNotifierInterface;
 
 /**
  * Interface EventManagerInterface
@@ -20,7 +18,7 @@ use Psr\EventDispatcher\MessageNotifierInterface;
  *
  * @package Compose\Event
  */
-interface EventDispatcherInterface extends ListenerProviderInterface, MessageNotifierInterface
+interface EventDispatcherInterface
 {
     /**
      * @param string $event
@@ -48,4 +46,17 @@ interface EventDispatcherInterface extends ListenerProviderInterface, MessageNot
      * @return mixed
      */
     public function unsubscribe(SubscriberInterface $subscriber);
+
+    /**
+     * @param EventInterface $event
+     * @return mixed
+     */
+    public function dispatch(EventInterface $event);
+
+
+    /**
+     * @param EventInterface $event
+     * @return iterable
+     */
+    public function getListenersForEvent(EventInterface $event) : iterable;
 }

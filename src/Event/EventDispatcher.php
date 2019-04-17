@@ -7,8 +7,6 @@
  */
 
 namespace Compose\Event;
-use Psr\EventDispatcher\EventInterface;
-use Psr\EventDispatcher\MessageInterface;
 
 
 /**
@@ -111,7 +109,7 @@ class EventDispatcher implements EventDispatcherInterface
      * @param MessageInterface $message
      * @throws \Exception
      */
-    public function notify(MessageInterface $message) : void
+    public function dispatch(EventInterface $message) : void
     {
         $listeners = $this->getListenersForEvent($message);
 

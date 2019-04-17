@@ -106,7 +106,7 @@ class RoutingMiddleware implements MiddlewareInterface, ContainerAwareInterface
         /** @var EventDispatcherInterface $notifier */
         $notifier = $this->getContainer()->get(EventDispatcherInterface::class);
 
-        $notifier->notify(new Message(self::EVENT_ROUTE, ['request' => $request], $this));
+        $notifier->dispatch(new Message(self::EVENT_ROUTE, ['request' => $request], $this));
         $route = $this->match($request);
 
         if($route) {
