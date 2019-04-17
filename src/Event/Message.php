@@ -9,8 +9,6 @@
 namespace Compose\Event;
 
 
-use Psr\EventDispatcher\MessageInterface;
-
 class Message extends \ArrayObject implements EventInterface
 {
     protected
