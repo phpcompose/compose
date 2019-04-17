@@ -12,6 +12,8 @@ namespace Compose\Mvc\Helper;
 use Compose\Container\ContainerAwareInterface;
 use Compose\Container\ContainerAwareTrait;
 use Compose\Container\ServiceResolver;
+use Compose\Mvc\View;
+use Psr\Http\Message\ServerRequestInterface;
 
 /**
  * Class HelperRegistry
@@ -20,6 +22,17 @@ use Compose\Container\ServiceResolver;
 class HelperRegistry implements ContainerAwareInterface
 {
     use ContainerAwareTrait;
+
+    public
+        /**
+         * @var View
+         */
+        $currentView,
+
+        /**
+         * @var ServerRequestInterface
+         */
+        $currentRequest;
 
     protected
         $resolver,
@@ -99,6 +112,10 @@ class HelperRegistry implements ContainerAwareInterface
             $instance = $this->instances[$helper] ?? null;
             if(!$instance) {
                 $instance = $this->resolver->resolve($helper);
+                if(property_exists($instance, 'registry')) {
+                    $instance->registry = $this;
+                }
+
                 $this->instances[$helper] = $instance;
             }
 

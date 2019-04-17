@@ -141,6 +141,7 @@ class Session
      */
     public function unset(string $name)
     {
+        $_SESSION[$name] = null;
         unset($_SESSION[$name]);
     }
 

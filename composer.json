@@ -10,11 +10,10 @@
     "require": {
         "php": "~7.1",
         "psr/container": "^1.0",
-        "psr/event-dispatcher": "^1.0",
-        "zendframework/zend-diactoros": "^2.0",
-        "zendframework/zend-stratigility": "^3.0",
+        "zendframework/zend-diactoros": "^2.1",
+        "zendframework/zend-stratigility": "^3.1",
         "zendframework/zend-config-aggregator": "^1.1",
-        "zendframework/zend-httphandlerrunner": "^1.0"
+        "zendframework/zend-httphandlerrunner": "^1.1"
     },
 
     "require-dev": {

@@ -9,6 +9,8 @@
 namespace Compose\Mvc;
 
 
+use Psr\Http\Message\ServerRequestInterface;
+
 /**
  * Interface ViewRendererInterface
  * @package Compose\Mvc
@@ -19,5 +21,5 @@ interface ViewRendererInterface
      * @param View $view
      * @return string
      */
-    public function render(View $view) : string;
+    public function render(View $view, ServerRequestInterface $request = null) : string;
 }

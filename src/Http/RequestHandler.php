@@ -17,6 +17,11 @@ use Psr\Http\Message\ResponseInterface;
 abstract class RequestHandler implements MiddlewareInterface, RequestHandlerInterface
 {
     use ResponseHelperTrait;
+    protected
+        /**
+         * @var ServerRequestInterface
+         */
+        $request;
 
     /**
      * Implementing command interface
@@ -38,6 +43,7 @@ abstract class RequestHandler implements MiddlewareInterface, RequestHandlerInte
     final public function handle(ServerRequestInterface $request): ResponseInterface
     {
         try {
+            $this->request = $request;
             $this->onInit($request);
 
             $response = $this->onHandle($request);
@@ -77,6 +83,7 @@ abstract class RequestHandler implements MiddlewareInterface, RequestHandlerInte
      */
     protected function onException(ServerRequestInterface $request, \Throwable $e) : ?ResponseInterface
     {
+        $e->request = $request;
         throw $e;
     }
 

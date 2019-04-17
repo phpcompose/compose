@@ -3,6 +3,7 @@ namespace Compose\Mvc;
 
 
 use Compose\Mvc\Helper\HelperRegistry;
+use Psr\Http\Message\ServerRequestInterface;
 
 /**
  * Class ViewRenderer
@@ -107,26 +108,34 @@ class ViewRenderer implements ViewRendererInterface
     }
 
     /**
-     * @inheritdoc
      * @param View $view
+     * @param ServerRequestInterface|null $request
      * @return string
      * @throws \Exception
      */
-    public function render(View $view) : string
+    public function render(View $view, ServerRequestInterface $request = null) : string
     {
-        $view->setHelperRegistry($this->getHelperRegistry());
+        $registry = $this->getHelperRegistry();
+        $registry->currentRequest = $request;
+        $registry->currentView = $view;
+
+        $view->setHelperRegistry($registry);
 
         // initially set default layout
         // view will have option to reset or set different view
         $view->layout = $this->_defaultLayout;
 
+        // render the content view
         $content = $this->renderScript($view->getScript(), $view->getArrayCopy(), $view);
 
+        // render the layout if available
         if($view->layout) {
             $view->content($content); // store the content
-            return $this->renderScript($view->layout, [], $view);
+            $content = $this->renderScript($view->layout, [], $view);
         }
 
+        $registry->currentView = null;
+        $registry->currentRequest = null;
         return $content;
     }
 
