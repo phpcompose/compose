@@ -64,11 +64,11 @@ class Starter
 
         /** @var EventDispatcherInterface $notifier */
         $notifier = $container->get(EventDispatcherInterface::class);
-        $notifier->notify(new Message(self::EVENT_INIT, ['container' => $container], $this));
+        $notifier->dispatch(new Message(self::EVENT_INIT, ['container' => $container], $this));
 
         $this->onInit($container, $pipeline);
 
-        $notifier->notify(new Message(self::EVENT_READY, ['container' => $container], $this));
+        $notifier->dispatch(new Message(self::EVENT_READY, ['container' => $container], $this));
 
         // now final handler/not found handler
         $pipeline->pipe($container->get(NotFoundMiddleware::class));

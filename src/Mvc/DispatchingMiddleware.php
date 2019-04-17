@@ -46,19 +46,19 @@ class DispatchingMiddleware implements MiddlewareInterface, ContainerAwareInterf
             $route = $request->getAttribute(RouteInfo::class);
 
             if($route) {
-                $notifier->notify(new Message(self::EVENT_DISPATCH, ['routeMap' => $route, 'request' => $request], $this));
+                $notifier->dispatch(new Message(self::EVENT_DISPATCH, ['routeMap' => $route, 'request' => $request], $this));
                 $handler = $route->handler;
 
                 /** @var RequestHandlerInterface $instance */
                 $instance = $this->resolveHandler($handler);
                 $response = $instance->handle($request);
 
-                $notifier->notify(new Message(self::EVENT_RESPONSE, ['response' => $response], $this));
+                $notifier->dispatch(new Message(self::EVENT_RESPONSE, ['response' => $response], $this));
                 return $response;
             }
 
         } catch (\Exception $e) {
-            $notifier->notify(new ExceptionMessage($e));
+            $notifier->dispatch(new ExceptionMessage($e));
             throw $e; // for now just passing to the error handler
         }
 
