@@ -5,7 +5,7 @@ namespace Compose\Support\Error;
 use Compose\Container\ResolvableInterface;
 use Compose\Container\ServiceAwareInterface;
 use Compose\Container\ServiceInterface;
-use Compose\Http\Exception\HttpException;
+use Compose\Http\HttpException;
 use Compose\Mvc\View;
 use Compose\Mvc\ViewRenderer;
 use Compose\Mvc\ViewRendererInterface;
