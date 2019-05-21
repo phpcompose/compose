@@ -17,7 +17,7 @@ class RequestHelper
     /**
      * @return ServerRequestInterface
      */
-    public function request(string $key, $default = null) : ServerRequestInterface
+    public function request() : ServerRequestInterface
     {
         return $this->registry->currentRequest;
     }
