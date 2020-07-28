@@ -7,7 +7,9 @@ use Compose\Container\ContainerAwareTrait;
 use Compose\Event\EventDispatcherInterface;
 use Compose\Event\ExceptionMessage;
 use Compose\Event\Message;
-use Psr\Container\ContainerInterface;
+use Exception;
+use Psr\Container\ContainerExceptionInterface;
+use Psr\Container\NotFoundExceptionInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Server\MiddlewareInterface;
@@ -33,9 +35,9 @@ class DispatchingMiddleware implements MiddlewareInterface, ContainerAwareInterf
      * @param ServerRequestInterface $request
      * @param RequestHandlerInterface $handler
      * @return ResponseInterface
-     * @throws \Exception
-     * @throws \Psr\Container\ContainerExceptionInterface
-     * @throws \Psr\Container\NotFoundExceptionInterface
+     * @throws Exception
+     * @throws ContainerExceptionInterface
+     * @throws NotFoundExceptionInterface
      */
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler) : ResponseInterface
     {
@@ -49,7 +51,6 @@ class DispatchingMiddleware implements MiddlewareInterface, ContainerAwareInterf
                 $notifier->dispatch(new Message(self::EVENT_DISPATCH, ['routeMap' => $route, 'request' => $request], $this));
                 $handler = $route->handler;
 
-                /** @var RequestHandlerInterface $instance */
                 $instance = $this->resolveHandler($handler);
                 $response = $instance->handle($request);
 
@@ -57,7 +58,7 @@ class DispatchingMiddleware implements MiddlewareInterface, ContainerAwareInterf
                 return $response;
             }
 
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $notifier->dispatch(new ExceptionMessage($e));
             throw $e; // for now just passing to the error handler
         }
@@ -69,9 +70,8 @@ class DispatchingMiddleware implements MiddlewareInterface, ContainerAwareInterf
 
     /**
      * @param $mixed
-     * @param ContainerInterface $container
      * @return RequestHandlerInterface
-     * @throws \Exception
+     * @throws Exception
      */
     protected function resolveHandler($mixed) : RequestHandlerInterface
     {
@@ -84,12 +84,12 @@ class DispatchingMiddleware implements MiddlewareInterface, ContainerAwareInterf
         }
 
         if(!$handler) {
-            throw new \Exception(sprintf("Unable to resolve Command %s",
+            throw new Exception(sprintf("Unable to resolve Command %s",
                 is_object($mixed) ? get_class($mixed) : $mixed));
         }
 
         if(!$handler instanceof RequestHandlerInterface) {
-            throw new \Exception("Command must be instance of RequestHandlerInterface.");
+            throw new Exception("Command must be instance of RequestHandlerInterface.");
         }
 
         return $handler;

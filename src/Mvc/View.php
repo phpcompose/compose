@@ -47,7 +47,7 @@ class View extends \ArrayObject
 
     /**
      * View constructor.
-     * @param string|null $template
+     * @param string $script
      * @param array|null $data
      */
     public function __construct(string $script, array $data = null)
@@ -57,7 +57,7 @@ class View extends \ArrayObject
     }
 
     /**
-     * @param HelperRegistry $container
+     * @param HelperRegistry $helpers
      */
     public function setHelperRegistry(HelperRegistry $helpers)
     {

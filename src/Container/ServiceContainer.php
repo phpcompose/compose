@@ -2,6 +2,8 @@
 namespace Compose\Container;
 
 
+use Exception;
+use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\ContainerInterface;
 use Psr\Container\NotFoundExceptionInterface;
 
@@ -34,7 +36,7 @@ class ServiceContainer implements ContainerInterface
 
     /**
      * @return ServiceResolver
-     * @throws \Exception
+     * @throws Exception
      */
     public function getResolver() : ServiceResolver
     {
@@ -44,7 +46,7 @@ class ServiceContainer implements ContainerInterface
     /**
      * @param string $id
      * @return bool
-     * @throws \Exception
+     * @throws Exception
      */
     public function has($id) : bool
     {
@@ -59,9 +61,9 @@ class ServiceContainer implements ContainerInterface
      * @todo Better logic organization
      * @param string $id
      * @return mixed|object
-     * @throws \Psr\Container\ContainerExceptionInterface
-     * @throws \Psr\Container\NotFoundExceptionInterface
-     * @throws \Exception
+     * @throws ContainerExceptionInterface
+     * @throws NotFoundExceptionInterface
+     * @throws Exception
      */
     public function get($id)
     {
@@ -98,12 +100,10 @@ class ServiceContainer implements ContainerInterface
      * Will check service interface implementation validation only when random arbitrary class is being requested to be resolved.
      * However this validation will not happen if any class is explicitly assigned by set method
      *
-     * @param $id
+     * @param $service
+     * @param array|null $args
      * @return mixed|null|object
-     * @throws NotFoundException
-     * @throws NotFoundExceptionInterface
-     * @throws \Exception
-     * @throws \Psr\Container\ContainerExceptionInterface
+     * @throws \ReflectionException
      */
     public function resolve($service, array $args = null)
     {

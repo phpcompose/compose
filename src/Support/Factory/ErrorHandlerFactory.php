@@ -14,8 +14,8 @@ use Compose\Mvc\ViewRendererInterface;
 use Compose\Support\Configuration;
 use Compose\Support\Error\ErrorResponseGenerator;
 use Psr\Container\ContainerInterface;
-use Zend\Diactoros\Response;
-use Zend\Stratigility\Middleware\ErrorHandler;
+use Laminas\Diactoros\Response;
+use Laminas\Stratigility\Middleware\ErrorHandler;
 
 class ErrorHandlerFactory implements ServiceFactoryInterface
 {

@@ -3,6 +3,7 @@ namespace Compose\Mvc;
 
 
 use Compose\Mvc\Helper\HelperRegistry;
+use Exception;
 use Psr\Http\Message\ServerRequestInterface;
 
 /**
@@ -40,6 +41,7 @@ class ViewRenderer implements ViewRendererInterface
     /**
      * ViewRenderer constructor.
      * @param array $templates
+     * @param HelperRegistry $helpers
      */
     public function __construct(array $templates, HelperRegistry $helpers)
     {
@@ -52,7 +54,7 @@ class ViewRenderer implements ViewRendererInterface
     }
 
     /**
-     * @param HelperRegistry $container
+     * @param HelperRegistry $helpers
      */
     public function setHelperRegistry(HelperRegistry $helpers)
     {
@@ -111,7 +113,7 @@ class ViewRenderer implements ViewRendererInterface
      * @param View $view
      * @param ServerRequestInterface|null $request
      * @return string
-     * @throws \Exception
+     * @throws Exception
      */
     public function render(View $view, ServerRequestInterface $request = null) : string
     {
@@ -140,17 +142,18 @@ class ViewRenderer implements ViewRendererInterface
     }
 
     /**
-     * @param string $filename
-     * @param array|null $__data
+     * @param string $script
+     * @param array|null $locals
+     * @param null $bind
      * @return string
-     * @throws \Exception
+     * @throws Exception
      * @internal param $script
      */
     public function renderScript(string $script, array $locals = null, $bind = null) : string
     {
         $filename = $this->resolve($script);
         if(!$filename) {
-            throw new \Exception("Unable to resolve view script: " . $script);
+            throw new Exception("Unable to resolve view script: " . $script);
         }
 
         // render the script within closure with given $bind

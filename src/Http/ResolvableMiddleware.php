@@ -9,6 +9,7 @@
 namespace Compose\Http;
 
 
+use Exception;
 use Psr\Container\ContainerInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
@@ -41,7 +42,7 @@ class ResolvableMiddleware implements MiddlewareInterface
      * @param ServerRequestInterface $request
      * @param RequestHandlerInterface $handler
      * @return ResponseInterface
-     * @throws \Exception
+     * @throws Exception
      */
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
@@ -51,7 +52,7 @@ class ResolvableMiddleware implements MiddlewareInterface
         } else if($instance instanceof RequestHandlerInterface) {
             return $instance->handle($request);
         } else {
-            throw new \Exception("{$this->className} is NOT Middleware or RequestHandler");
+            throw new Exception("{$this->className} is NOT Middleware or RequestHandler");
         }
     }
 }

@@ -10,9 +10,12 @@ use Compose\Mvc\MvcMiddleware;
 use Compose\Http\Pipeline;
 use Compose\Support\Configuration;
 use Compose\Support\Error\NotFoundMiddleware;
+use Exception;
+use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\ContainerInterface;
-use Zend\Stratigility\Middleware\ErrorHandler;
-use Zend\Stratigility\Middleware\OriginalMessages;
+use Laminas\Stratigility\Middleware\ErrorHandler;
+use Laminas\Stratigility\Middleware\OriginalMessages;
+use Psr\Container\NotFoundExceptionInterface;
 
 /**
  * Class Starter
@@ -25,11 +28,9 @@ class Starter
         EVENT_READY = 'starter.ready';
 
     /**
-     * @param ServiceContainer $container
+     * @param ContainerInterface $container
      * @param Pipeline $pipeline
-     * @throws \Exception
-     * @throws \Psr\Container\ContainerExceptionInterface
-     * @throws \Psr\Container\NotFoundExceptionInterface
+     * @throws Exception
      */
     protected function onInit(ContainerInterface $container, Pipeline $pipeline)
     {
@@ -49,9 +50,9 @@ class Starter
     /**
      * @param Configuration $configuration
      * @return Pipeline
-     * @throws \Exception
-     * @throws \Psr\Container\ContainerExceptionInterface
-     * @throws \Psr\Container\NotFoundExceptionInterface
+     * @throws Exception
+     * @throws ContainerExceptionInterface
+     * @throws NotFoundExceptionInterface
      */
     public function __invoke(Configuration $configuration) : Pipeline
     {
@@ -91,9 +92,9 @@ class Starter
     /**
      * @param ContainerInterface $container
      * @return Pipeline
-     * @throws \Exception
-     * @throws \Psr\Container\ContainerExceptionInterface
-     * @throws \Psr\Container\NotFoundExceptionInterface
+     * @throws Exception
+     * @throws ContainerExceptionInterface
+     * @throws NotFoundExceptionInterface
      */
     protected function createPipeline(ContainerInterface $container) : Pipeline
     {
@@ -105,9 +106,9 @@ class Starter
 
     /**
      * @param array $config
-     * @throws \Exception
-     * @throws \Psr\Container\ContainerExceptionInterface
-     * @throws \Psr\Container\NotFoundExceptionInterface
+     * @throws Exception
+     * @throws ContainerExceptionInterface
+     * @throws NotFoundExceptionInterface
      */
     static public function start(array $config)
     {

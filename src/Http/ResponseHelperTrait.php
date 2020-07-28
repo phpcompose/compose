@@ -9,7 +9,7 @@ namespace Compose\Http;
 
 
 use Psr\Http\Message\ResponseInterface;
-use Zend\Diactoros\Response;
+use Laminas\Diactoros\Response;
 
 
 /**

@@ -11,22 +11,26 @@ namespace Compose\Http;
 
 use Compose\Container\ContainerAwareInterface;
 use Compose\Container\ContainerAwareTrait;
+use Exception;
+use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\ContainerInterface;
+use Psr\Container\NotFoundExceptionInterface;
+use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
-use Zend\Stratigility\Middleware\CallableMiddlewareDecorator;
-use Zend\Stratigility\MiddlewarePipe;
-use Zend\HttpHandlerRunner\RequestHandlerRunner;
-use Zend\HttpHandlerRunner\Emitter\SapiEmitter;
+use Laminas\Stratigility\Middleware\CallableMiddlewareDecorator;
+use Laminas\Stratigility\MiddlewarePipe;
+use Laminas\HttpHandlerRunner\RequestHandlerRunner;
+use Laminas\HttpHandlerRunner\Emitter\SapiEmitter;
 use Compose\Support\Error\ErrorResponseGenerator;
-use Zend\Diactoros\ServerRequestFactory;
+use Laminas\Diactoros\ServerRequestFactory;
 
 /**
  * Lazy Middleware factory
  * @param $mixed
  * @param ContainerInterface $container
  * @return MiddlewareInterface
- * @throws \Exception
+ * @throws Exception
  */
 function middleware($mixed, ContainerInterface $container) : MiddlewareInterface
 {
@@ -43,7 +47,7 @@ function middleware($mixed, ContainerInterface $container) : MiddlewareInterface
         }
         return $pipe;
     } else {
-        throw new \Exception("Unable to decorate Middleware");
+        throw new Exception("Unable to decorate Middleware");
     }
 }
 
@@ -72,7 +76,7 @@ class Pipeline  implements ContainerAwareInterface
 
     /**
      * @param ServerRequestInterface $request
-     * @return \Psr\Http\Message\ResponseInterface
+     * @return ResponseInterface
      */
     public function __invoke(ServerRequestInterface $request)
     {
@@ -82,9 +86,9 @@ class Pipeline  implements ContainerAwareInterface
     /**
      * @param $middleware
      * @return Pipeline
-     * @throws \Exception
-     * @throws \Psr\Container\ContainerExceptionInterface
-     * @throws \Psr\Container\NotFoundExceptionInterface
+     * @throws Exception
+     * @throws ContainerExceptionInterface
+     * @throws NotFoundExceptionInterface
      */
     public function pipe($middleware) : self
     {
@@ -97,9 +101,9 @@ class Pipeline  implements ContainerAwareInterface
     /**
      * @param array|null $arr
      * @return Pipeline
-     * @throws \Exception
-     * @throws \Psr\Container\ContainerExceptionInterface
-     * @throws \Psr\Container\NotFoundExceptionInterface
+     * @throws Exception
+     * @throws ContainerExceptionInterface
+     * @throws NotFoundExceptionInterface
      */
     public function pipeMany(array $arr = null): self
     {

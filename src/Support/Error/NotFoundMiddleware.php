@@ -4,9 +4,10 @@ namespace Compose\Support\Error;
 
 use Compose\Container\ResolvableInterface;
 use Compose\Http\HttpException;
+use Exception;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
-use Zend\Diactoros\Response;
+use Laminas\Diactoros\Response;
 use Psr\Http\Server\RequestHandlerInterface;
 use Psr\Http\Server\MiddlewareInterface;
 
@@ -32,7 +33,7 @@ class NotFoundMiddleware implements MiddlewareInterface, ResolvableInterface
      * @param ServerRequestInterface $request
      * @param RequestHandlerInterface $delegate
      * @return ResponseInterface
-     * @throws \Exception
+     * @throws Exception
      */
     public function process(ServerRequestInterface $request, RequestHandlerInterface $delegate): ResponseInterface
     {

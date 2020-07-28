@@ -23,7 +23,6 @@ interface EventDispatcherInterface
     /**
      * @param string $event
      * @param callable $callback
-     * @param int $priority
      * @return mixed
      */
     public function attach(string $event, callable $callback) : void;

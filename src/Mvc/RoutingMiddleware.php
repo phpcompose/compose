@@ -6,6 +6,9 @@ use Compose\Container\ContainerAwareInterface;
 use Compose\Container\ContainerAwareTrait;
 use Compose\Event\EventDispatcherInterface;
 use Compose\Event\Message;
+use Exception;
+use Psr\Container\ContainerExceptionInterface;
+use Psr\Container\NotFoundExceptionInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Server\MiddlewareInterface;
@@ -36,13 +39,13 @@ class RoutingMiddleware implements MiddlewareInterface, ContainerAwareInterface
      * Add a routing map
      *
      * @param RouteInfo $route
-     * @throws \Exception
+     * @throws Exception
      */
     public function route(RouteInfo $route) : void
     {
         $path = $route->path;
         if(isset($this->routes[$path])) {
-            throw new \Exception("Route already mapped for path: {$path}");
+            throw new Exception("Route already mapped for path: {$path}");
         }
 
 
@@ -97,9 +100,9 @@ class RoutingMiddleware implements MiddlewareInterface, ContainerAwareInterface
      * @param ServerRequestInterface $request
      * @param RequestHandlerInterface $handler
      * @return ResponseInterface
-     * @throws \Exception
-     * @throws \Psr\Container\ContainerExceptionInterface
-     * @throws \Psr\Container\NotFoundExceptionInterface
+     * @throws Exception
+     * @throws ContainerExceptionInterface
+     * @throws NotFoundExceptionInterface
      */
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler) : ResponseInterface
     {

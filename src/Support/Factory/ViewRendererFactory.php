@@ -13,15 +13,16 @@ use Compose\Container\ServiceFactoryInterface;
 use Compose\Mvc\Helper\HelperRegistry;
 use Compose\Mvc\ViewRenderer;
 use Compose\Support\Configuration;
+use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\ContainerInterface;
+use Psr\Container\NotFoundExceptionInterface;
 
 class ViewRendererFactory implements ServiceFactoryInterface
 {
     /**
      * @param ContainerInterface $container
+     * @param string $name
      * @return ViewRenderer
-     * @throws \Psr\Container\ContainerExceptionInterface
-     * @throws \Psr\Container\NotFoundExceptionInterface
      */
     static public function create(ContainerInterface $container, string $name)
     {

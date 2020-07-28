@@ -12,7 +12,10 @@ namespace Compose\Support\Factory;
 use Compose\Container\ServiceFactoryInterface;
 use Compose\Http\Session;
 use Compose\Support\Configuration;
+use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\ContainerInterface;
+use Psr\Container\NotFoundExceptionInterface;
+use SessionHandlerInterface;
 
 /**
  * Class SessionFactory
@@ -23,15 +26,15 @@ class SessionFactory implements ServiceFactoryInterface
     /**
      * @param ContainerInterface $container
      * @return Session
-     * @throws \Psr\Container\ContainerExceptionInterface
-     * @throws \Psr\Container\NotFoundExceptionInterface
+     * @throws ContainerExceptionInterface
+     * @throws NotFoundExceptionInterface
      */
     static public function create(ContainerInterface $container, string $id)
     {
         $configuration = $container->get(Configuration::class);
 
-        if($container->has(\SessionHandlerInterface::class)) {
-            $handler = $container->get(\SessionHandlerInterface::class);
+        if($container->has(SessionHandlerInterface::class)) {
+            $handler = $container->get(SessionHandlerInterface::class);
         } else {
             $handler = null;
         }

@@ -13,6 +13,7 @@ use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use Psr\Http\Message\ResponseInterface;
+use Throwable;
 
 abstract class RequestHandler implements MiddlewareInterface, RequestHandlerInterface
 {
@@ -28,7 +29,7 @@ abstract class RequestHandler implements MiddlewareInterface, RequestHandlerInte
      *
      * @param ServerRequestInterface $request
      * @return ResponseInterface
-     * @throws \Throwable
+     * @throws Throwable
      */
     final public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
@@ -38,7 +39,7 @@ abstract class RequestHandler implements MiddlewareInterface, RequestHandlerInte
     /**
      * @param ServerRequestInterface $request
      * @return ResponseInterface
-     * @throws \Throwable
+     * @throws Throwable
      */
     final public function handle(ServerRequestInterface $request): ResponseInterface
     {
@@ -66,6 +67,7 @@ abstract class RequestHandler implements MiddlewareInterface, RequestHandlerInte
 
     /**
      * Command initialize method
+     * @param ServerRequestInterface $request
      */
     protected function onInit(ServerRequestInterface $request) {}
 
@@ -77,11 +79,11 @@ abstract class RequestHandler implements MiddlewareInterface, RequestHandlerInte
 
     /**
      * @param ServerRequestInterface $request
-     * @param \Throwable $e
+     * @param Throwable $e
      * @return null|ResponseInterface
-     * @throws \Throwable
+     * @throws Throwable
      */
-    protected function onException(ServerRequestInterface $request, \Throwable $e) : ?ResponseInterface
+    protected function onException(ServerRequestInterface $request, Throwable $e) : ?ResponseInterface
     {
         $e->request = $request;
         throw $e;

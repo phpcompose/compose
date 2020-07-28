@@ -15,9 +15,9 @@ use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
-use Zend\Stratigility\MiddlewarePipe;
+use Laminas\Stratigility\MiddlewarePipe;
 
-use function Zend\Stratigility\path;
+use function Laminas\Stratigility\path;
 use function Compose\Http\middleware;
 
 class MvcMiddleware implements MiddlewareInterface, ContainerAwareInterface

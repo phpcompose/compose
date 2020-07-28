@@ -10,7 +10,7 @@ namespace Compose;
 
 
 use Compose;
-use Zend\Stratigility\Middleware\ErrorHandler;
+use Laminas\Stratigility\Middleware\ErrorHandler;
 
 define('COMPOSE_DIR', dirname(dirname(__FILE__)));
 define('COMPOSE_DIR_TEMPLATE', COMPOSE_DIR . '/templates');

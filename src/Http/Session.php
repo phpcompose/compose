@@ -9,7 +9,6 @@
 namespace Compose\Http;
 
 
-use Compose\Container\ServiceInterface;
 
 /**
  * Class Session

@@ -7,13 +7,16 @@
  */
 
 namespace Compose\Mvc;
+use ArrayObject;
 use Compose\Http\HttpException;
 use Compose\Http\RequestHandler;
+use Exception;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Compose\Container\ContainerAwareInterface;
 use Compose\Support\Invocation;
 use Compose\Container\ContainerAwareTrait;
+use ReflectionException;
 
 /**
  * Class Controller
@@ -65,7 +68,7 @@ abstract class Controller extends RequestHandler implements ContainerAwareInterf
      * @param ServerRequestInterface $request
      * @return ResponseInterface
      * @throws HttpException
-     * @throws \ReflectionException
+     * @throws ReflectionException
      */
     protected function onHandle(ServerRequestInterface $request) : ResponseInterface
     {
@@ -87,11 +90,11 @@ abstract class Controller extends RequestHandler implements ContainerAwareInterf
         $route = $request->getAttribute(RouteInfo::class);
         if(!$route) {
             $path = $request->getUri()->getPath();
-            $route = new \ArrayObject([
+            $route = new ArrayObject([
                 'method' => $request->getMethod(),
                 'path' => $path,
                 'params' => array_values(array_filter(explode('/', $path)))
-            ], \ArrayObject::ARRAY_AS_PROPS);
+            ], ArrayObject::ARRAY_AS_PROPS);
         }
 
         $action = $this->resolveActionName($route);
@@ -114,11 +117,10 @@ abstract class Controller extends RequestHandler implements ContainerAwareInterf
     /**
      * Implementing the abstract action resolve method
      *
-     * @param RouteInfo $route
+     * @param ArrayObject $route
      * @return string
-     * @throws HttpException
      */
-    protected function resolveActionName(\ArrayObject $route) : string
+    protected function resolveActionName(ArrayObject $route) : string
     {
         // map http method
         $httpMethod = strtolower($route->method);
@@ -195,14 +197,14 @@ abstract class Controller extends RequestHandler implements ContainerAwareInterf
      * @param int $status
      * @param array $headers
      * @return ResponseInterface
-     * @throws \Exception
+     * @throws Exception
      */
     protected function view(View $view, int $status = 200, array $headers = []): ResponseInterface
     {
         /** @var ViewRenderer $renderer */
         $renderer = $this->getContainer()->get(ViewRendererInterface::class);
         if (!$renderer) {
-            throw new \Exception("ViewRenderer not found in the container.");
+            throw new Exception("ViewRenderer not found in the container.");
         }
 
         return $this->html($renderer->render($view, $this->request), $status, $headers);
@@ -214,7 +216,7 @@ abstract class Controller extends RequestHandler implements ContainerAwareInterf
      * @param int $status
      * @param array $headers
      * @return ResponseInterface
-     * @throws \Exception
+     * @throws Exception
      */
     protected function render(string $script, array $data = null, int $status = 200, array $headers = []) : ResponseInterface
     {

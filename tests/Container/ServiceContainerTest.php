@@ -76,6 +76,9 @@ final class ServiceContainerTest extends TestCase
         $this->container = new ServiceContainer();
     }
 
+    /**
+     * Disable setting any scalar value as service.  This is rather odd resctriction
+     */
     public function testCannotSetScalar() : void
     {
         $this->expectException(\LogicException::class);
@@ -83,9 +86,25 @@ final class ServiceContainerTest extends TestCase
         $this->container->set('abc', 12);
     }
 
+    /**
+     *
+     */
     public function testCanSetCallable() : void
     {
         $this->assertNull($this->container->set('abc', [InvokableClass::class, 'create']));
+    }
+
+    public function testCanResolveCallableDependencies() : void
+    {
+        $this->assertNull($this->container->set('callback', function(Service2 $service2) {
+            return [
+
+            ];
+        }));
+
+        $this->container->get('callback');
+
+
     }
 
     public function testCanSetClass() : void

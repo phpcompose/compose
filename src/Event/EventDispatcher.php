@@ -9,6 +9,8 @@
 namespace Compose\Event;
 
 
+use Exception;
+
 /**
  * Class EventNotifier
  * @package Compose\Event
@@ -71,7 +73,7 @@ class EventDispatcher implements EventDispatcherInterface
     }
 
     /**
-     * @param callable $callable
+     * @param SubscriberInterface $subscriber
      */
     public function subscribe(SubscriberInterface $subscriber)
     {
@@ -106,8 +108,8 @@ class EventDispatcher implements EventDispatcherInterface
 
     /**
      * @inheritdoc
-     * @param MessageInterface $message
-     * @throws \Exception
+     * @param EventInterface $message
+     * @throws Exception
      */
     public function dispatch(EventInterface $message) : void
     {
@@ -117,7 +119,7 @@ class EventDispatcher implements EventDispatcherInterface
             foreach($listeners as $listener) {
                 $listener($message);
             }
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             throw $e;
         }
     }

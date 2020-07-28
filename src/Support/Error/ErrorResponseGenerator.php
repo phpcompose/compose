@@ -3,13 +3,11 @@ namespace Compose\Support\Error;
 
 
 use Compose\Container\ResolvableInterface;
-use Compose\Container\ServiceAwareInterface;
-use Compose\Container\ServiceInterface;
-use Compose\Http\Exception\HttpException;
 use Compose\Mvc\View;
 use Compose\Mvc\ViewRenderer;
 use Compose\Mvc\ViewRendererInterface;
 use Compose\Support\Configuration;
+use Exception;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 
@@ -48,7 +46,7 @@ class ErrorResponseGenerator implements ResolvableInterface
 
     /**
      * ErrorResponseGenerator constructor.
-     * @param ViewRenderer $renderer
+     * @param ViewRendererInterface $renderer
      * @param Configuration $configuration
      */
     public function __construct(ViewRendererInterface $renderer, Configuration $configuration)
@@ -62,7 +60,7 @@ class ErrorResponseGenerator implements ResolvableInterface
      * @param ServerRequestInterface $request
      * @param ResponseInterface $response
      * @return ResponseInterface
-     * @throws \Exception
+     * @throws Exception
      */
     public function __invoke($exception, ServerRequestInterface $request, ResponseInterface $response) : ResponseInterface
     {

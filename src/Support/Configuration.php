@@ -2,7 +2,8 @@
 namespace Compose\Support;
 
 
-use Zend\Stdlib\ArrayUtils;
+use Exception;
+use Laminas\Stdlib\ArrayUtils;
 
 /**
  * Class Configuration
@@ -17,8 +18,7 @@ class Configuration extends \ArrayObject
 
     /**
      * Configuration constructor.
-     * @param string $dir
-     * @param string $env
+     * @param array|null $config
      */
     public function __construct(array $config = null)
     {
@@ -28,26 +28,26 @@ class Configuration extends \ArrayObject
 
     /**
      * @param string $file
-     * @throws \Exception
+     * @throws Exception
      */
     public function mergeFromFile(string $file) : void
     {
         if(!is_file($file)) {
-            throw new  \Exception('File not found: ' . $file);
+            throw new  Exception('File not found: ' . $file);
         }
 
         $config = include $file;
         if(!is_array($config)) {
-            throw new \Exception('Config file does not return array.');
+            throw new Exception('Config file does not return array.');
         }
 
         $this->merge($config);
     }
 
     /**
-     * @param string $path
+     * @param string $keyPath
      * @param null $default
-     * @param string|null $separator
+     * @param string $keyPathSeparator
      * @return Configuration|mixed|null
      */
     public function getNestedValue(string $keyPath, $default = null, string $keyPathSeparator = '.')

@@ -13,11 +13,13 @@ use Compose\Container\ContainerAwareInterface;
 use Compose\Container\ContainerAwareTrait;
 use Compose\Support\Configuration;
 use Compose\Support\Invocation;
+use Psr\Container\ContainerExceptionInterface;
+use Psr\Container\NotFoundExceptionInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
-use Zend\Diactoros\Response\HtmlResponse;
+use Laminas\Diactoros\Response\HtmlResponse;
 
 /**
  * Class PagesHandler
@@ -47,7 +49,6 @@ class PagesHandler implements MiddlewareInterface, ContainerAwareInterface
 
     /**
      * PagesHandler constructor.
-     * @param Configuration $configuration
      * @param ViewRendererInterface $renderer
      */
     public function __construct(ViewRendererInterface $renderer)
@@ -66,7 +67,7 @@ class PagesHandler implements MiddlewareInterface, ContainerAwareInterface
 
     /**
      * Map specific url path to a folder
-     * @param string $page
+     * @param string $path
      * @param string $dir
      */
     public function addFolder(string $path, string $dir)
@@ -88,8 +89,8 @@ class PagesHandler implements MiddlewareInterface, ContainerAwareInterface
      * @param ServerRequestInterface $request
      * @param RequestHandlerInterface $handler
      * @return ResponseInterface
-     * @throws \Psr\Container\ContainerExceptionInterface
-     * @throws \Psr\Container\NotFoundExceptionInterface
+     * @throws ContainerExceptionInterface
+     * @throws NotFoundExceptionInterface
      * @throws \ReflectionException
      */
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface

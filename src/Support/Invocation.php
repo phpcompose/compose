@@ -10,6 +10,11 @@ namespace Compose\Support;
 
 
 
+use InvalidArgumentException;
+use ReflectionException;
+use ReflectionFunction;
+use ReflectionFunctionAbstract;
+
 /**
  * Class Invocation
  * @package Compose\System
@@ -18,7 +23,7 @@ class Invocation
 {
     protected
         /**
-         * @var null|\ReflectionFunctionAbstract
+         * @var null|ReflectionFunctionAbstract
          */
         $reflection = null,
 
@@ -34,9 +39,8 @@ class Invocation
 
     /**
      * Invocation constructor.
-     * @param string $name
+     * @param callable $callable
      * @param array|null $parameters
-     * @param null $target
      */
     public function __construct(callable $callable, array $parameters = null)
     {
@@ -45,7 +49,9 @@ class Invocation
     }
 
     /**
-     * 
+     * @param $callable
+     * @param array|null $params
+     * @return Invocation|null
      */
     static public function fromCallable($callable, array $params = null) : ?self
     {
@@ -90,8 +96,8 @@ class Invocation
      *
      * If params is passed, it will be used, else will attempt to use from getParameters()
      * @param $params
-     * @throws \ReflectionException
-     * @throws \InvalidArgumentException
+     * @throws ReflectionException
+     * @throws InvalidArgumentException
      * @return mixed
      */
     public function __invoke(...$params)
@@ -109,10 +115,10 @@ class Invocation
      * Attempt to get reflection for given callable
      *
      * @param callable $callable
-     * @return \ReflectionFunction
-     * @throws \ReflectionException
+     * @return ReflectionFunction
+     * @throws ReflectionException
      */
-    static public function reflectCallable(callable $callable) : \ReflectionFunction
+    static public function reflectCallable(callable $callable) : ReflectionFunction
     {
         if(!$callable instanceof \Closure) {
             $closure = \Closure::fromCallable($callable);
@@ -120,14 +126,14 @@ class Invocation
             $closure = $callable;
         }
 
-        return new \ReflectionFunction($closure);
+        return new ReflectionFunction($closure);
     }
 
     /**
-     * @return \ReflectionFunction
-     * @throws \ReflectionException
+     * @return ReflectionFunction
+     * @throws ReflectionException
      */
-    public function getReflection() : \ReflectionFunction
+    public function getReflection() : ReflectionFunction
     {
         if(!$this->reflection) {
             $this->reflection = self::reflectCallable($this->callable);
@@ -137,10 +143,10 @@ class Invocation
     }
 
     /**
-     * @param \ReflectionFunctionAbstract $method
+     * @param ReflectionFunctionAbstract $method
      * @param array $args
      */
-    protected function verify(\ReflectionFunctionAbstract $method, array $args = [])
+    protected function verify(ReflectionFunctionAbstract $method, array $args = [])
     {
         // now we will validate the function with given $args
         $argsCount = ($args === null) ? 0 : count($args);
@@ -167,17 +173,18 @@ class Invocation
         }
 
         if ($argsCount < $requiredParamsCount) {
-            throw new \InvalidArgumentException("{$method->getName()}: Invalid Param count. (Params ({$argsCount}) are less then method anticipates ({$requiredParamsCount}))");
+            throw new InvalidArgumentException("{$method->getName()}: Invalid Param count. (Params ({$argsCount}) are less then method anticipates ({$requiredParamsCount}))");
         }
 
         if ($argsCount > $paramsCount) {
-            throw new \InvalidArgumentException("{$method->getName()}: Invalid Param count. (Params ({$argsCount}) are more than method anticipates ({$requiredParamsCount}))");
+            throw new InvalidArgumentException("{$method->getName()}: Invalid Param count. (Params ({$argsCount}) are more than method anticipates ({$requiredParamsCount}))");
         }
     }
 
     /**
      * @param int $index
      * @return null|string
+     * @throws ReflectionException
      */
     public function getArgumentTypeAtIndex(int $index) : ?string
     {

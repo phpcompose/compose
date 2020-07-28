@@ -14,6 +14,7 @@ use Compose\Container\ServiceResolver;
 use Compose\Mvc\Helper\HelperRegistry;
 use Compose\Support\Configuration;
 use Psr\Container\ContainerInterface;
+use ReflectionException;
 
 class HelperRegistryFactory implements ServiceFactoryInterface
 {
@@ -21,7 +22,7 @@ class HelperRegistryFactory implements ServiceFactoryInterface
      * @param ContainerInterface $container
      * @param string $class
      * @return HelperRegistry
-     * @throws \ReflectionException
+     * @throws ReflectionException
      */
     static public function create(ContainerInterface $container, string $class)
     {

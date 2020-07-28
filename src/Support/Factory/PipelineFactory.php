@@ -12,11 +12,18 @@ namespace Compose\Support\Factory;
 use Compose\Container\ServiceFactoryInterface;
 use Compose\Http\Pipeline;
 use Compose\Support\Configuration;
+use Exception;
 use Psr\Container\ContainerInterface;
 
 class PipelineFactory implements ServiceFactoryInterface
 {
-    static public function create(ContainerInterface $container)
+    /**
+     * @param ContainerInterface $container
+     * @param string $name
+     * @return mixed|void
+     * @throws Exception
+     */
+    static public function create(ContainerInterface $container, string $name)
     {
         $config = $container->get(Configuration::class);
         $stack = $config['pipeline'] ?? [];

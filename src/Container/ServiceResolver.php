@@ -11,7 +11,12 @@ namespace Compose\Container;
 
 
 use Compose\Support\Invocation;
+use Exception;
+use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\ContainerInterface;
+use Psr\Container\NotFoundExceptionInterface;
+use ReflectionException;
+use ReflectionFunctionAbstract;
 
 class ServiceResolver
 {
@@ -40,10 +45,10 @@ class ServiceResolver
      * @param $resolvable
      * @param array|null $args
      * @return mixed|null|object
-     * @throws \Exception
-     * @throws \Psr\Container\ContainerExceptionInterface
-     * @throws \Psr\Container\NotFoundExceptionInterface
-     * @throws \ReflectionException
+     * @throws Exception
+     * @throws ContainerExceptionInterface
+     * @throws NotFoundExceptionInterface
+     * @throws ReflectionException
      */
     public function resolve($resolvable, array $args = null)
     {
@@ -52,7 +57,7 @@ class ServiceResolver
         } else if(is_string($resolvable)) {
             return $this->instantiate($resolvable, $args);
         } else {
-            throw new \Exception("Unable to resolve.");
+            throw new Exception("Unable to resolve.");
         }
     }
 
@@ -62,9 +67,9 @@ class ServiceResolver
      * @param callable $callable
      * @param array|null $args
      * @return mixed
-     * @throws \Psr\Container\ContainerExceptionInterface
-     * @throws \Psr\Container\NotFoundExceptionInterface
-     * @throws \ReflectionException
+     * @throws ContainerExceptionInterface
+     * @throws NotFoundExceptionInterface
+     * @throws ReflectionException
      */
     public function invoke(callable $callable, array $args = null)
     {
@@ -79,7 +84,7 @@ class ServiceResolver
      * @param $className
      * @param array|null $args
      * @return null|object
-     * @throws \ReflectionException
+     * @throws ReflectionException
      */
     public function instantiate($className, array $args = null)
     {
@@ -115,12 +120,12 @@ class ServiceResolver
     /**
      * Attempts to resolve any function parameters using provided container
      *
-     * @param \ReflectionFunctionAbstract $function
+     * @param ReflectionFunctionAbstract $function
      * @param array $args
      * @return array
-     * @throws \Exception
+     * @throws Exception
      */
-    public function resolveFunctionDependencies(\ReflectionFunctionAbstract $function,  array $args = null ) : array
+    public function resolveFunctionDependencies(ReflectionFunctionAbstract $function, array $args = null ) : array
     {
         $container = $this->getContainer();
         $params = $function->getParameters();
