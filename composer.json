@@ -8,7 +8,7 @@
         }
     },
     "require": {
-        "php": "~7.1",
+        "php": "~7.3",
         "psr/container": "^1.0",
         "laminas/laminas-diactoros": "^2.3.1",
         "laminas/laminas-stratigility": "^3.1",
