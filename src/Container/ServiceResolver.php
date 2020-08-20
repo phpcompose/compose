@@ -140,7 +140,7 @@ class ServiceResolver
             } else if ($parameter->isOptional()) { // check if it is optional
                 $dependencies[] = $parameter->getDefaultValue();
             } else { // unable to resolve required params,
-                throw new \InvalidArgumentException("Unable to resolve param: {$paramName} of type: {$parameter->getType()}");
+                throw new \InvalidArgumentException("Unable to resolve param: {$paramName} of type: {$parameter->getType()->getName()}");
             }
         }
 
