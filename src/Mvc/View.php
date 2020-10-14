@@ -78,7 +78,7 @@ class View extends \ArrayObject
      * @param array|null $args
      * @return string
      */
-    public function e(string $str, array $args = null) : string
+    public function e(string $str = null, array $args = null) : string
     {
         return self::escape($str, $args);
     }
@@ -88,8 +88,10 @@ class View extends \ArrayObject
      * @param string $str
      * @return string
      */
-    public static function escape(string $str, array $args = null) : string
+    public static function escape(string $str = null, array $args = null) : string
     {
+        if(!$str) return '';
+
         if($args) {
             return htmlentities(sprintf($str, ...$args));
         }

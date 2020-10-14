@@ -17,7 +17,7 @@ class RequestHelper
     /**
      * @return ServerRequestInterface
      */
-    public function request(string $key, $default = null) : ServerRequestInterface
+    public function request() : ServerRequestInterface
     {
         return $this->registry->currentRequest;
     }
@@ -29,7 +29,7 @@ class RequestHelper
      */
     public function query(string $key, $default = null)
     {
-        return $this->request()->getQueryParams()[$key] ?? $default;
+        return $this->registry->currentRequest->getQueryParams()[$key] ?? $default;
     }
 
     /**
@@ -39,6 +39,6 @@ class RequestHelper
      */
     public function post(string $key, $default = null)
     {
-        return $this->request()->getParsedBody()[$key] ?? $default;
+        return $this->registry->currentRequest->getParsedBody()[$key] ?? $default;
     }
 }
