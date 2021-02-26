@@ -191,7 +191,10 @@ class Invocation
         $reflection = $this->getReflection();
         $param = isset($reflection->getParameters()[$index]) ? $reflection->getParameters()[$index] : null;
         if(!$param) return null;
+        if($param->getType()) {
+            return $param->getType()->getName();
+        }
 
-        return (string) $param->getType()->getName();
+        return null;
     }
 }

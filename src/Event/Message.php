@@ -11,13 +11,15 @@ namespace Compose\Event;
 
 class Message extends \ArrayObject implements EventInterface
 {
-    protected
-        $target,
-        /**
-         * @var string
-         */
-        $name;
+    protected ?object $target;
+    protected string $name;
 
+    /**
+     * Message constructor.
+     * @param string $name
+     * @param array $args
+     * @param null $target
+     */
     public function __construct(string $name, array $args = [], $target = null)
     {
         parent::__construct($args);
@@ -36,7 +38,7 @@ class Message extends \ArrayObject implements EventInterface
     /**
      * @return object
      */
-    public function getTarget()
+    public function getTarget() : ?object
     {
         return $this->target;
     }

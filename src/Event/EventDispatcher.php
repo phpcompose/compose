@@ -17,11 +17,7 @@ use Exception;
  */
 class EventDispatcher implements EventDispatcherInterface
 {
-    protected
-        /**
-         * @var array
-         */
-        $listeners = [];
+    protected array $listeners = [];
 
     /**
      * @inheritdoc

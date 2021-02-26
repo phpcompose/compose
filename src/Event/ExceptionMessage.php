@@ -8,14 +8,14 @@
 
 namespace Compose\Event;
 
-
 class ExceptionMessage extends Message
 {
-    /**
-     * @var \Exception
-     */
-    protected $e;
+    protected \Exception $e;
 
+    /**
+     * ExceptionMessage constructor.
+     * @param \Exception $e
+     */
     public function __construct(\Exception $e)
     {
         parent::__construct(get_class($e), ['exception' => $e]);

@@ -12,18 +12,9 @@ use Psr\Container\NotFoundExceptionInterface;
  */
 class ServiceContainer implements ContainerInterface
 {
-    protected
-        $aliases = [],
-
-        /**
-         * @var array
-         */
-        $instances = [],
-
-        /**
-         * @var array
-         */
-        $services = [];
+    protected array $aliases = [];
+    protected array $instances = [];
+    protected array $services = [];
 
     /**
      * ServiceContainer constructor.

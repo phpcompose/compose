@@ -7,15 +7,6 @@ use Psr\Http\Message\ServerRequestInterface;
 
 class HttpException extends \Exception
 {
-    public
-        /**
-         * @var ServerRequestInterface
-         */
-        $request,
-
-        /**
-         * @var ResponseInterface
-         */
-        $response;
-
+    public ServerRequestInterface $request;
+    public ResponseInterface $response;
 }

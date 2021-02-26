@@ -4,7 +4,4 @@
 namespace Compose\Event;
 
 
-interface EventInterface
-{
-
-}
+interface EventInterface {}

@@ -23,8 +23,7 @@ use Psr\Http\Server\RequestHandlerInterface;
  */
 class BodyParsingMiddleware implements MiddlewareInterface
 {
-    protected
-        $methods = ['PUT', 'PATCH'];
+    protected array $methods = ['PUT', 'PATCH'];
 
     /**
      * @param ServerRequestInterface $request
