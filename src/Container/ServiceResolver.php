@@ -131,8 +131,11 @@ class ServiceResolver
         $params = $function->getParameters();
         $dependencies = [];
         foreach ($params as $parameter) {
-            $pname = $parameter->getName();
-            $paramName = ($parameter->getClass()) ? $parameter->getClass()->getName() : $pname;
+//            $name = $parameter->getType() && !$parameter->getType()->isBuiltin()
+//                ? new \ReflectionClass($parameter->getType()->getName()) : null;
+
+            $pname = $parameter->getType()->getName();
+//            $paramName = ($parameter->getClass()) ? $parameter->getClass()->getName() : $pname;
             if (isset($args[$pname])) { // first check if passed $args has the param name,
                 $dependencies[] = $args[$pname];
             } else if ($container->has($paramName)) { // if now check if container has it
