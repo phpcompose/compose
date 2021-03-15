@@ -138,12 +138,12 @@ class ServiceResolver
 //            $paramName = ($parameter->getClass()) ? $parameter->getClass()->getName() : $pname;
             if (isset($args[$pname])) { // first check if passed $args has the param name,
                 $dependencies[] = $args[$pname];
-            } else if ($container->has($paramName)) { // if now check if container has it
-                $dependencies[] = $container->get($paramName);
+            } else if ($container->has($pname)) { // if now check if container has it
+                $dependencies[] = $container->get($pname);
             } else if ($parameter->isOptional()) { // check if it is optional
                 $dependencies[] = $parameter->getDefaultValue();
             } else { // unable to resolve required params,
-                throw new \InvalidArgumentException("Unable to resolve param: {$paramName} of type: {$parameter->getType()->getName()}");
+                throw new \InvalidArgumentException("Unable to resolve param: {$pname} of type: {$parameter->getType()->getName()}");
             }
         }
 
