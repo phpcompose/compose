@@ -15,5 +15,5 @@ interface ServiceFactoryInterface extends ResolvableInterface
      * @param string $name
      * @return mixed
      */
-    static public function create(ContainerInterface $container, string $name);
+    static public function create(ContainerInterface $container, string $name) : mixed;
 }

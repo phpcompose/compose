@@ -19,9 +19,9 @@ interface ContainerAwareInterface extends ResolvableInterface
      * Class should also extract any required dependencies in this method and store them locally.
      * This will make dependencies of the class clear
      *
-     * Sub classes should ALWAYS call parent::setContainer if overriding this method
+     * Subclasses should ALWAYS call parent::setContainer if overriding this method
      * @param ContainerInterface $container
-     * @return mixed
+     * @return void
      */
-    public function setContainer(ContainerInterface $container);
+    public function setContainer(ContainerInterface $container) : void;
 }

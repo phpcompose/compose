@@ -12,9 +12,11 @@ namespace Compose\Container;
 
 use Compose\Support\Invocation;
 use Exception;
+use InvalidArgumentException;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\ContainerInterface;
 use Psr\Container\NotFoundExceptionInterface;
+use ReflectionClass;
 use ReflectionException;
 use ReflectionFunctionAbstract;
 
@@ -44,13 +46,13 @@ class ServiceResolver
     /**
      * @param $resolvable
      * @param array|null $args
-     * @return mixed|null|object
+     * @return mixed
      * @throws Exception
      * @throws ContainerExceptionInterface
      * @throws NotFoundExceptionInterface
      * @throws ReflectionException
      */
-    public function resolve($resolvable, array $args = null)
+    public function resolve($resolvable, array $args = null): mixed
     {
         if(is_callable($resolvable)) {
             return $this->invoke($resolvable, $args);
@@ -70,8 +72,9 @@ class ServiceResolver
      * @throws ContainerExceptionInterface
      * @throws NotFoundExceptionInterface
      * @throws ReflectionException
+     * @throws Exception
      */
-    public function invoke(callable $callable, array $args = null)
+    public function invoke(callable $callable, array $args = null): mixed
     {
         $reflection = Invocation::reflectCallable($callable);
 
@@ -83,10 +86,11 @@ class ServiceResolver
     /**
      * @param $className
      * @param array|null $args
-     * @return null|object
+     * @return mixed
      * @throws ReflectionException
+     * @throws Exception
      */
-    public function instantiate($className, array $args = null)
+    public function instantiate($className, array $args = null) : mixed
     {
         $container = $this->getContainer();
         $instance = null;
@@ -97,7 +101,7 @@ class ServiceResolver
         }
 
         // use reflection to resolve and instantiate
-        $reflection = new \ReflectionClass($className);
+        $reflection = new ReflectionClass($className);
         $constructor = $reflection->getConstructor();
         if ($constructor === null) {
             // if construction is not used, simply create new object without constructor
@@ -121,9 +125,9 @@ class ServiceResolver
      * Attempts to resolve any function parameters using provided container
      *
      * @param ReflectionFunctionAbstract $function
-     * @param array $args
+     * @param array|null $args
      * @return array
-     * @throws Exception
+     * @throws ReflectionException
      */
     public function resolveFunctionDependencies(ReflectionFunctionAbstract $function, array $args = null ) : array
     {
@@ -138,12 +142,12 @@ class ServiceResolver
 //            $paramName = ($parameter->getClass()) ? $parameter->getClass()->getName() : $pname;
             if (isset($args[$pname])) { // first check if passed $args has the param name,
                 $dependencies[] = $args[$pname];
-            } else if ($container->has($pname)) { // if now check if container has it
+            } else if ($container->has($pname)) { // now check if container has it
                 $dependencies[] = $container->get($pname);
             } else if ($parameter->isOptional()) { // check if it is optional
                 $dependencies[] = $parameter->getDefaultValue();
             } else { // unable to resolve required params,
-                throw new \InvalidArgumentException("Unable to resolve param: {$pname} of type: {$parameter->getType()->getName()}");
+                throw new InvalidArgumentException("Unable to resolve param: $pname of type: {$parameter->getType()->getName()}");
             }
         }
 

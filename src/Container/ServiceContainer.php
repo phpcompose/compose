@@ -3,9 +3,11 @@ namespace Compose\Container;
 
 
 use Exception;
+use LogicException;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\ContainerInterface;
 use Psr\Container\NotFoundExceptionInterface;
+use ReflectionException;
 
 /**
  * Class ServiceContainer
@@ -39,11 +41,11 @@ class ServiceContainer implements ContainerInterface
      * @return bool
      * @throws Exception
      */
-    public function has($id) : bool
+    public function has(string $id) : bool
     {
         return isset($this->instances[$id]) ||      // instance available
             isset($this->services[$id]) ||          // service available
-            $this->getResolver()->isService($id);   // able to autowire
+            $this->getResolver()->isService($id);   // able to auto-wire
     }
 
     /**
@@ -51,12 +53,12 @@ class ServiceContainer implements ContainerInterface
      * Service will be cached for next use
      * @todo Better logic organization
      * @param string $id
-     * @return mixed|object
+     * @return mixed
      * @throws ContainerExceptionInterface
      * @throws NotFoundExceptionInterface
      * @throws Exception
      */
-    public function get($id)
+    public function get(string $id): mixed
     {
         if(isset($this->instances[$id])) { // service instance, if available
             return $this->instances[$id];
@@ -75,7 +77,7 @@ class ServiceContainer implements ContainerInterface
             // or manually registered itself as service
             $service = $id;
             if(!$this->getResolver()->isService($service)) {
-                throw new NotFoundException("Service class: {$service} must implement ResolvableInterface or be registered as service.");
+                throw new NotFoundException("Service class: $service must implement ResolvableInterface or be registered as service.");
             }
             $instance = $this->resolve($service);
         }
@@ -89,14 +91,15 @@ class ServiceContainer implements ContainerInterface
      * resolve service
      *
      * Will check service interface implementation validation only when random arbitrary class is being requested to be resolved.
-     * However this validation will not happen if any class is explicitly assigned by set method
+     * However, this validation will not happen if any class is explicitly assigned by set method
      *
      * @param $service
      * @param array|null $args
-     * @return mixed|null|object
-     * @throws \ReflectionException
+     * @return mixed
+     * @throws ReflectionException
+     * @throws Exception
      */
-    public function resolve($service, array $args = null)
+    public function resolve($service, array $args = null): mixed
     {
         $resolver = $this->getResolver();
 
@@ -106,8 +109,8 @@ class ServiceContainer implements ContainerInterface
             $instance = $resolver->instantiate($service, $args);
         } else if(is_object($service)) { // impossible, will be set to instance by set method
             $instance = $service;
-        } else { // this is impossible since it will be cought be set method
-            throw new \LogicException("Unable to resolve");
+        } else { // this is impossible since it will be caught be set method
+            throw new LogicException("Unable to resolve");
         }
 
         return $instance;
@@ -116,26 +119,26 @@ class ServiceContainer implements ContainerInterface
     /**
      * Add service to the container
      *
-     * A $service can be object, or fully qualified class name.
+     * A $service can be an object, or fully qualified class name.
      *
      * Supported services type will be validated and thrown error
-     * @param $id
+     * @param string $id
      * @param mixed $service
      */
-    public function set(string $id, $service = null)
+    public function set(string $id, mixed $service = null)
     {
         if(isset($this->instances[$id]) || isset($this->services[$id])) {
-            throw new \LogicException("Service Instance already available for: {$id}");
+            throw new LogicException("Service Instance already available for: $id");
         }
 
         if(is_null($service) || $service === $id) {
             $this->services[$id] = $id;
         } else if(is_callable($service) || is_string($service)) {
             $this->services[$id] = $service;
-        } else if(is_object($service)) { // any object other then closure is instance
+        } else if(is_object($service)) { // any object other than closure is instanced
             $this->instances[$id] = $service;
         } else {
-            throw new \LogicException("Cannot add service: {$id}.  Not supported type.");
+            throw new LogicException("Cannot add service: $id.  Not supported type.");
         }
     }
 
