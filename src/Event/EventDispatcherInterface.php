@@ -14,7 +14,7 @@ namespace Compose\Event;
  *
  * @note
  *  - removing a listener only with callback is expensive task.  And rare.
- *      therefore detach function takes both $event name and the callback.  This is how NodeJS and Symfony anothers do
+ *      therefore, detach function takes both $event name and the callback.  This is how NodeJS and Symfony another do
  *
  * @package Compose\Event
  */
@@ -36,26 +36,20 @@ interface EventDispatcherInterface
 
     /**
      * @param SubscriberInterface $subscriber
-     * @return mixed
+     * @return void
      */
-    public function subscribe(SubscriberInterface $subscriber);
+    public function subscribe(SubscriberInterface $subscriber) : void;
 
     /**
      * @param SubscriberInterface $subscriber
-     * @return mixed
+     * @return void
      */
-    public function unsubscribe(SubscriberInterface $subscriber);
+    public function unsubscribe(SubscriberInterface $subscriber) : void;
 
     /**
-     * @param EventInterface $event
-     * @return mixed
+     * @param string $event
+     * @param MessageInterface $message
+     * @return void
      */
-    public function dispatch(EventInterface $event);
-
-
-    /**
-     * @param EventInterface $event
-     * @return iterable
-     */
-    public function getListenersForEvent(EventInterface $event) : iterable;
+    public function dispatch(string $event, MessageInterface $message) : void;
 }

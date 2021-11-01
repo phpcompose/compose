@@ -8,24 +8,26 @@
 
 namespace Compose\Event;
 
+use Exception;
+
 class ExceptionMessage extends Message
 {
-    protected \Exception $e;
+    protected Exception $e;
 
     /**
      * ExceptionMessage constructor.
-     * @param \Exception $e
+     * @param Exception $e
      */
-    public function __construct(\Exception $e)
+    public function __construct(Exception $e)
     {
         parent::__construct(get_class($e), ['exception' => $e]);
         $this->e = $e;
     }
 
     /**
-     * @return \Exception
+     * @return Exception
      */
-    public function getException() : \Exception
+    public function getException() : Exception
     {
         return $this->e;
     }

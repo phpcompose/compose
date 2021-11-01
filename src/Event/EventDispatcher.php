@@ -20,20 +20,12 @@ class EventDispatcher implements EventDispatcherInterface
     protected array $listeners = [];
 
     /**
-     * @inheritdoc
-     * @param EventInterface $event
+     * @param string $event
      * @return iterable
      */
-    public function getListenersForEvent(EventInterface $event): iterable
+    public function getListenersForEvent(string $event): iterable
     {
-        $name = null;
-        if($event instanceof Message) {
-            $name = $event->getName();
-        } else {
-            $name = get_class($event);
-        }
-
-        return $this->listeners[$name] ?? [];
+        return $this->listeners[$event] ?? [];
     }
 
     /**
@@ -43,13 +35,13 @@ class EventDispatcher implements EventDispatcherInterface
      * @param int $priority
      * @return bool
      */
-    public function attach(string $event, callable $listener): void
+    public function attach(string $event, callable $callback): void
     {
         if(!isset($this->listeners[$event])) {
             $this->listeners[$event] = [];
         }
 
-        $this->listeners[$event][] = $listener;
+        $this->listeners[$event][] = $callback;
     }
 
     /**
@@ -57,13 +49,13 @@ class EventDispatcher implements EventDispatcherInterface
      * @param $event
      * @param callable $callback
      */
-    public function detach(string $event, callable $listener) : void
+    public function detach(string $event, callable $callback) : void
     {
         $listeners = $this->listeners[$event] ?? null;
         if(!$listeners) return;
 
         foreach($listeners as $index => $aListener) {
-            if($aListener !== $listener) continue;
+            if($aListener !== $callback) continue;
             unset($this->listeners[$event][$index]);
         }
     }
@@ -71,7 +63,7 @@ class EventDispatcher implements EventDispatcherInterface
     /**
      * @param SubscriberInterface $subscriber
      */
-    public function subscribe(SubscriberInterface $subscriber)
+    public function subscribe(SubscriberInterface $subscriber) : void
     {
         $events = $subscriber->subscribedEvents();
         foreach($events as $event => $methods) {
@@ -88,7 +80,7 @@ class EventDispatcher implements EventDispatcherInterface
     /**
      * @param SubscriberInterface $subscriber
      */
-    public function unsubscribe(SubscriberInterface $subscriber)
+    public function unsubscribe(SubscriberInterface $subscriber) : void
     {
         $events = $subscriber->subscribedEvents();
         foreach($events as $event => $methods) {
@@ -104,19 +96,16 @@ class EventDispatcher implements EventDispatcherInterface
 
     /**
      * @inheritdoc
-     * @param EventInterface $message
+     * @param string $event
+     * @param MessageInterface $message
      * @throws Exception
      */
-    public function dispatch(EventInterface $message) : void
+    public function dispatch(string $event, MessageInterface $message) : void
     {
-        $listeners = $this->getListenersForEvent($message);
+        $listeners = $this->getListenersForEvent($event);
 
-        try {
-            foreach($listeners as $listener) {
-                $listener($message);
-            }
-        } catch (Exception $e) {
-            throw $e;
+        foreach($listeners as $listener) {
+            $listener($event, $message);
         }
     }
 }
