@@ -24,7 +24,7 @@ class ViewRendererFactory implements ServiceFactoryInterface
      * @param string $name
      * @return ViewRenderer
      */
-    static public function create(ContainerInterface $container, string $name)
+    static public function create(ContainerInterface $container, string $name) : mixed
     {
         $configuration = $container->get(Configuration::class);
         $renderer = new ViewRenderer($configuration['templates'] ?? [], $container->get(HelperRegistry::class));

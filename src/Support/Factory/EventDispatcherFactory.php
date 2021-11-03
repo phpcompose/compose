@@ -16,17 +16,17 @@ use Psr\Container\ContainerInterface;
 
 class EventDispatcherFactory implements ServiceFactoryInterface
 {
-    static public function create(ContainerInterface $container, string $id)
+    static public function create(ContainerInterface $container, string $id) : mixed
     {
         // TODO: Implement create() method.
         $config = $container->get(Configuration::class);
         $notifier = new EventDispatcher();
-        $subscribers = $config['subscribers'];
-        if($subscribers) {
-            foreach($subscribers as $subscriber) {
-                $notifier->subscribe($container->get($subscriber));
-            }
-        }
+//        $subscribers = $config['subscribers'];
+//        if($subscribers) {
+//            foreach($subscribers as $subscriber) {
+//                $notifier->subscribe($container->get($subscriber));
+//            }
+//        }
 
         return $notifier;
     }

@@ -19,7 +19,7 @@ use Laminas\Stratigility\Middleware\ErrorHandler;
 
 class ErrorHandlerFactory implements ServiceFactoryInterface
 {
-    static public function create(ContainerInterface $container, string $id)
+    static public function create(ContainerInterface $container, string $id) : mixed
     {
         $config = $container->get(Configuration::class);
         $generator = new ErrorResponseGenerator($container->get(ViewRendererInterface::class), $container->get(Configuration::class));

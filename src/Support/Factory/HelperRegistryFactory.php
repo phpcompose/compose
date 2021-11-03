@@ -24,7 +24,7 @@ class HelperRegistryFactory implements ServiceFactoryInterface
      * @return HelperRegistry
      * @throws ReflectionException
      */
-    static public function create(ContainerInterface $container, string $class)
+    static public function create(ContainerInterface $container, string $class) : mixed
     {
         $configuration = $container->get(Configuration::class);
         $helpers  = $configuration['helpers'] ?? [];
