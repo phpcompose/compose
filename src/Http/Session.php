@@ -10,6 +10,8 @@ namespace Compose\Http;
 
 
 
+use SessionHandlerInterface;
+
 /**
  * Class Session
  * @package Compose\Http
@@ -17,21 +19,15 @@ namespace Compose\Http;
 class Session
 {
     protected
-        /**
-         * @var array
-         */
-        $options = [
+        array $options = [
             'cookie_path' => '/',
             'cookie_timeout' => 21600,
             'garbage_timeout' => 216600,
             'cookie_secure' => false,
             'cookie_domain' => null
-        ],
+        ];
 
-        /**
-         * @var string
-         */
-        $id;
+    protected string $id;
 
     /**
      * Session constructor.
@@ -45,9 +41,9 @@ class Session
     }
 
     /**
-     * @param \SessionHandlerInterface|null $handler
+     * @param SessionHandlerInterface|null $handler
      */
-    public function start(\SessionHandlerInterface $handler = null)
+    public function start(SessionHandlerInterface $handler = null) : void
     {
         if(session_status() == PHP_SESSION_NONE) {
             if(headers_sent()) {}
@@ -102,7 +98,7 @@ class Session
     /**
      * @param string $id
      */
-    public function setId(string $id)
+    public function setId(string $id) : void
     {
         session_id($id);
     }
@@ -119,9 +115,9 @@ class Session
     /**
      * @param string $name
      * @param null $default
-     * @return null
+     * @return null|string
      */
-    public function get(string $name, $default = null)
+    public function get(string $name, $default = null) : ?string
     {
         return $_SESSION[$name] ?? $default;
     }
@@ -130,7 +126,7 @@ class Session
      * @param string $name
      * @param $value
      */
-    public function set(string $name, $value)
+    public function set(string $name, $value) : void
     {
         $_SESSION[$name] = $value;
     }
@@ -138,16 +134,16 @@ class Session
     /**
      * @param string $name
      */
-    public function unset(string $name)
+    public function unset(string $name) : void
     {
         $_SESSION[$name] = null;
         unset($_SESSION[$name]);
     }
 
     /**
-     * @return Session
+     * @return void
      */
-    public function regenerate() : self
+    public function regenerate() : void
     {
         session_regenerate_id();
 //        $session_id = session_create_id();

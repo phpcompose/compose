@@ -18,16 +18,13 @@ use Throwable;
 abstract class RequestHandler implements MiddlewareInterface, RequestHandlerInterface
 {
     use ResponseHelperTrait;
-    protected
-        /**
-         * @var ServerRequestInterface
-         */
-        $request;
+    protected ServerRequestInterface $request;
 
     /**
-     * Implementing command interface
+     * Implementing Middleware interface
      *
      * @param ServerRequestInterface $request
+     * @param RequestHandlerInterface $handler
      * @return ResponseInterface
      * @throws Throwable
      */
@@ -85,7 +82,10 @@ abstract class RequestHandler implements MiddlewareInterface, RequestHandlerInte
      */
     protected function onException(ServerRequestInterface $request, Throwable $e) : ?ResponseInterface
     {
-        $e->request = $request;
+        if($e instanceof HttpException) {
+            $e->request = $request;
+        }
+
         throw $e;
     }
 

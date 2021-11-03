@@ -8,10 +8,10 @@
 
 namespace Compose\Http;
 
-
+use Exception;
 use Compose\Container\ContainerAwareInterface;
 use Compose\Container\ContainerAwareTrait;
-use Exception;
+use Compose\Support\Error\ErrorResponseGenerator;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\ContainerInterface;
 use Psr\Container\NotFoundExceptionInterface;
@@ -22,7 +22,6 @@ use Laminas\Stratigility\Middleware\CallableMiddlewareDecorator;
 use Laminas\Stratigility\MiddlewarePipe;
 use Laminas\HttpHandlerRunner\RequestHandlerRunner;
 use Laminas\HttpHandlerRunner\Emitter\SapiEmitter;
-use Compose\Support\Error\ErrorResponseGenerator;
 use Laminas\Diactoros\ServerRequestFactory;
 
 /**
@@ -38,7 +37,7 @@ function middleware($mixed, ContainerInterface $container) : MiddlewareInterface
         return new ResolvableMiddleware($mixed, $container);
     } else if(is_callable($mixed)) {
         return new CallableMiddlewareDecorator($mixed);
-    } else if(is_object($mixed) && $mixed instanceof MiddlewareInterface) {
+    } else if($mixed instanceof MiddlewareInterface) {
         return $mixed;
     } else if(is_array($mixed)) {
         $pipe = new MiddlewarePipe();
@@ -60,11 +59,7 @@ class Pipeline  implements ContainerAwareInterface
 {
     use ContainerAwareTrait;
 
-    protected
-        /**
-         * @var MiddlewarePipe
-         */
-        $pipe;
+    protected MiddlewarePipe $pipe;
 
     /**
      * Pipeline constructor.
@@ -78,42 +73,38 @@ class Pipeline  implements ContainerAwareInterface
      * @param ServerRequestInterface $request
      * @return ResponseInterface
      */
-    public function __invoke(ServerRequestInterface $request)
+    public function __invoke(ServerRequestInterface $request): ResponseInterface
     {
        return $this->pipe->handle($request);
     }
 
     /**
      * @param $middleware
-     * @return Pipeline
+     * @return void
      * @throws Exception
      * @throws ContainerExceptionInterface
      * @throws NotFoundExceptionInterface
      */
-    public function pipe($middleware) : self
+    public function pipe($middleware) : void
     {
         $instance = middleware($middleware, $this->getContainer());
         $this->pipe->pipe($instance);
-
-        return $this;
     }
 
     /**
      * @param array|null $arr
-     * @return Pipeline
+     * @return void
      * @throws Exception
      * @throws ContainerExceptionInterface
      * @throws NotFoundExceptionInterface
      */
-    public function pipeMany(array $arr = null): self
+    public function pipeMany(array $arr = null): void
     {
         if($arr) {
-            foreach($arr as $key => $middleware) {
+            foreach($arr as $middleware) {
                 $this->pipe($middleware);
             }
         }
-
-        return $this;
     }
 
     /**

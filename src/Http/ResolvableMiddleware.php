@@ -22,10 +22,8 @@ use Psr\Http\Message\ResponseInterface;
  */
 class ResolvableMiddleware implements MiddlewareInterface
 {
-    protected
-        $className,
-        /** @var ContainerInterface */
-        $container;
+    protected string $className;
+    protected ContainerInterface $container;
 
     /**
      * ResolvableMiddleware constructor.
