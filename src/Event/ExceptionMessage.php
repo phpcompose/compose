@@ -20,7 +20,7 @@ class ExceptionMessage extends Message
      */
     public function __construct(Exception $e)
     {
-        parent::__construct(get_class($e), ['exception' => $e]);
+        parent::__construct(['exception' => $e]);
         $this->e = $e;
     }
 

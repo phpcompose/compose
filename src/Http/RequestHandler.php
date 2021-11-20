@@ -72,15 +72,15 @@ abstract class RequestHandler implements MiddlewareInterface, RequestHandlerInte
      * @param ServerRequestInterface $request
      * @param ResponseInterface $response
      */
-    protected function onExit(ServerRequestInterface $request, ResponseInterface $response) {}
+    protected function onExit(ServerRequestInterface $request, ResponseInterface &$response) {}
 
     /**
      * @param ServerRequestInterface $request
      * @param Throwable $e
-     * @return null|ResponseInterface
+     * @return ResponseInterface
      * @throws Throwable
      */
-    protected function onException(ServerRequestInterface $request, Throwable $e) : ?ResponseInterface
+    protected function onException(ServerRequestInterface $request, Throwable $e) : ResponseInterface
     {
         if($e instanceof HttpException) {
             $e->request = $request;
@@ -88,5 +88,4 @@ abstract class RequestHandler implements MiddlewareInterface, RequestHandlerInte
 
         throw $e;
     }
-
 }

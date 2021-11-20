@@ -10,19 +10,19 @@ namespace Compose\Http;
 
 use Psr\Http\Message\ResponseInterface;
 use Laminas\Diactoros\Response;
+use Psr\Http\Message\UriInterface;
 
 
 /**
- * Class ResponseHelperTrait
- * @package Compose\Mvc
+ *
  */
 trait ResponseHelperTrait
 {
     /**
-     * @param $data
+     * @param mixed $data
      * @return array
      */
-    protected function encodeJson($data) : array
+    protected function encodeJson(mixed $data) : array
     {
         $encoded = [];
         foreach ($data as $key => $val) {
@@ -73,12 +73,12 @@ trait ResponseHelperTrait
     }
 
     /**
-     * @param $uri
+     * @param string|UriInterface $uri
      * @param int $status
      * @param array $headers
      * @return ResponseInterface
      */
-    public function redirect($uri, int $status = 302, array $headers = []) : ResponseInterface
+    public function redirect(string|UriInterface $uri, int $status = 302, array $headers = []) : ResponseInterface
     {
         return new Response\RedirectResponse($uri, $status, $headers);
     }

@@ -43,6 +43,18 @@ class Starter
         ksort($middleware);
         $pipeline->pipeMany($middleware);
 
+        // add the handlers
+        $handlers = $configuration['handlers'] ?? null;
+        if($handlers) {
+            // first sort so that the biggest path is registered first
+            // this way specific route will be handled before general ones
+            $handlerPaths = array_keys($handlers);
+            rsort($handlerPaths);
+            foreach($handlerPaths as $path) {
+                $pipeline->pipe($handlers[$path], $path);
+            }
+        }
+
         $pipeline->pipe(MvcMiddleware::class);
     }
 
@@ -58,7 +70,7 @@ class Starter
     {
         // application http pipeline setup
         $container = $this->createContainer($configuration);
-        $pipeline = $this->createPipeline($container);
+        $pipeline = $container->get(Pipeline::class);
 
         // register the main error handler
         $pipeline->pipe($container->get(ErrorHandler::class)); 
@@ -87,21 +99,6 @@ class Starter
         $container->set(Configuration::class, $configuration);
 
         return $container;
-    }
-
-    /**
-     * @param ContainerInterface $container
-     * @return Pipeline
-     * @throws Exception
-     * @throws ContainerExceptionInterface
-     * @throws NotFoundExceptionInterface
-     */
-    protected function createPipeline(ContainerInterface $container) : Pipeline
-    {
-        $pipeline = new Pipeline();
-        $pipeline->setContainer($container);
-
-        return $pipeline;
     }
 
     /**

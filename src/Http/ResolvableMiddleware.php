@@ -50,7 +50,7 @@ class ResolvableMiddleware implements MiddlewareInterface
         } else if($instance instanceof RequestHandlerInterface) {
             return $instance->handle($request);
         } else {
-            throw new Exception("{$this->className} is NOT Middleware or RequestHandler");
+            throw new Exception("$this->className is NOT Middleware or RequestHandler");
         }
     }
 }

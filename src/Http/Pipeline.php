@@ -23,6 +23,7 @@ use Laminas\Stratigility\MiddlewarePipe;
 use Laminas\HttpHandlerRunner\RequestHandlerRunner;
 use Laminas\HttpHandlerRunner\Emitter\SapiEmitter;
 use Laminas\Diactoros\ServerRequestFactory;
+use function Laminas\Stratigility\path;
 
 /**
  * Lazy Middleware factory
@@ -79,16 +80,19 @@ class Pipeline  implements ContainerAwareInterface
     }
 
     /**
-     * @param $middleware
+     * @param mixed $middleware
+     * @param string|null $path
      * @return void
      * @throws Exception
-     * @throws ContainerExceptionInterface
-     * @throws NotFoundExceptionInterface
      */
-    public function pipe($middleware) : void
+    public function pipe(mixed $middleware, string $path = null) : void
     {
         $instance = middleware($middleware, $this->getContainer());
-        $this->pipe->pipe($instance);
+        if($path) {
+            $this->pipe->pipe(path($path, $instance));
+        } else {
+            $this->pipe->pipe($instance);
+        }
     }
 
     /**
@@ -101,8 +105,13 @@ class Pipeline  implements ContainerAwareInterface
     public function pipeMany(array $arr = null): void
     {
         if($arr) {
-            foreach($arr as $middleware) {
-                $this->pipe($middleware);
+            foreach($arr as $path => $middleware) {
+                if(is_int($path)) {
+                    $this->pipe($middleware);
+                } else {
+                    $this->pipe($middleware, $path);
+                }
+
             }
         }
     }
