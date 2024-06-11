@@ -144,7 +144,7 @@ class PagesHandler implements MiddlewareInterface, ContainerAwareInterface
      */
     protected function resolveTemplate(string $page) : ?array
     {
-        $dir = $this->dir;
+        $dir = $this->dir ?? '';
         $folders = $this->folders;
 
         $params = [];
