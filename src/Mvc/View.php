@@ -123,6 +123,24 @@ class View extends \ArrayObject
         return $this->getArrayCopy();
     }
 
+    public function __get($name)
+    {
+        return $this->_data[$name] ?? null;
+    }
+
+    public function __set($name, $value)
+    {
+        $this->_data[$name] = $value;
+    }
+
+    public function __unset($name)
+    {
+        if(isset($this->_data[$name])) {
+            $this->_data[$name] = null;
+            unset($this->_data[$name]);
+        }
+    }
+
     /**
      * Delegates method calls to helpers
      *
