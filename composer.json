@@ -13,7 +13,8 @@
         "laminas/laminas-diactoros": "^2.3.1",
         "laminas/laminas-stratigility": "^3.1",
         "laminas/laminas-config-aggregator": "^1.1",
-        "laminas/laminas-httphandlerrunner": "^2.10"
+        "laminas/laminas-httphandlerrunner": "^2.10",
+        "league/plates": "^3.6"
     },
 
     "require-dev": {

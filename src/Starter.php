@@ -16,6 +16,7 @@ use Psr\Container\ContainerInterface;
 use Laminas\Stratigility\Middleware\ErrorHandler;
 use Laminas\Stratigility\Middleware\OriginalMessages;
 use Psr\Container\NotFoundExceptionInterface;
+use Compose\App\PagesMiddleware;
 
 /**
  * Class Starter
@@ -43,7 +44,7 @@ class Starter
         ksort($middleware);
         $pipeline->pipeMany($middleware);
 
-        $pipeline->pipe(MvcMiddleware::class);
+        $pipeline->pipe($container->get(PagesMiddleware::class));
     }
 
 
@@ -54,7 +55,7 @@ class Starter
      * @throws ContainerExceptionInterface
      * @throws NotFoundExceptionInterface
      */
-    public function __invoke(Configuration $configuration) : Pipeline
+    public function start(Configuration $configuration) : Pipeline
     {
         // application http pipeline setup
         $container = $this->createContainer($configuration);
@@ -83,9 +84,11 @@ class Starter
     protected function createContainer(Configuration $configuration) : ContainerInterface
     {
         $container = new ServiceContainer();
-        $container->setMany($configuration['services'] ?? []);
-        $container->set(Configuration::class, $configuration);
+        ServiceContainer::setSharedInstance($container);
 
+        $container->set(Configuration::class, $configuration);
+        $container->setMany($configuration['services'] ?? []);
+        
         return $container;
     }
 
@@ -110,11 +113,11 @@ class Starter
      * @throws ContainerExceptionInterface
      * @throws NotFoundExceptionInterface
      */
-    static public function start(array $config)
+    static public function run(array $config)
     {
         $configuration = new Configuration($config);
         $starter = new static();
-        $pipeline = $starter($configuration);
+        $pipeline = $starter->start($configuration);
         $pipeline->listen();
     }
 }

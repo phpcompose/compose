@@ -42,7 +42,7 @@ function middleware($mixed, ContainerInterface $container) : MiddlewareInterface
         return $mixed;
     } else if(is_array($mixed)) {
         $pipe = new MiddlewarePipe();
-        foreach($pipe as $middleware) {
+        foreach($mixed as $middleware) {
             $pipe->pipe(middleware($middleware, $container));
         }
         return $pipe;

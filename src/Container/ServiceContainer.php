@@ -1,7 +1,7 @@
 <?php
 namespace Compose\Container;
 
-
+use Compose\Support\Pattern\SharedInstanceTrait;
 use Exception;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\ContainerInterface;
@@ -12,6 +12,8 @@ use Psr\Container\NotFoundExceptionInterface;
  */
 class ServiceContainer implements ContainerInterface
 {
+    use SharedInstanceTrait;
+    
     protected
         $aliases = [],
 
