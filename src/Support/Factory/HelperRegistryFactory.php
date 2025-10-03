@@ -8,38 +8,62 @@
 
 namespace Compose\Support\Factory;
 
-
 use Compose\Container\ServiceFactoryInterface;
 use Compose\Container\ServiceResolver;
 use Compose\Mvc\Helper\HelperRegistry;
 use Compose\Support\Configuration;
+use InvalidArgumentException;
 use Psr\Container\ContainerInterface;
-use ReflectionException;
 
 class HelperRegistryFactory implements ServiceFactoryInterface
 {
-    /**
-     * @param ContainerInterface $container
-     * @param string $class
-     * @return HelperRegistry
-     * @throws ReflectionException
-     */
-    static public function create(ContainerInterface $container, string $class)
+    public static function create(ContainerInterface $container, string $class)
     {
         $configuration = $container->get(Configuration::class);
-        $helpers  = $configuration['helpers'] ?? [];
+        $definitions  = $configuration['helpers'] ?? [];
 
         $registry = new HelperRegistry($container->get(ServiceResolver::class));
-        foreach($helpers as $key => $val) {
-            if(is_int($key)) {
-                $registry->extend($val);
-                continue;
+
+        foreach ($definitions as $name => $definition) {
+            if (is_int($name)) {
+                if (!is_string($definition)) {
+                    throw new InvalidArgumentException('Helper definitions without explicit names must be class strings.');
+                }
+
+                $name = self::deriveAlias($definition);
             }
 
-            $registry->register($key, $val);
-            $registry->extend($val);
+            $registry->register($name, $definition);
+
+            if (is_string($definition)) {
+                self::registerHelperMethods($registry, $name, $definition);
+            }
         }
 
         return $registry;
+    }
+
+    private static function deriveAlias(string $class): string
+    {
+        $segments = explode('\\', $class);
+        $short = end($segments);
+        $short = preg_replace('/Helper$/', '', $short) ?: $short;
+
+        return strtolower($short);
+    }
+
+    private static function registerHelperMethods(HelperRegistry $registry, string $alias, string $class): void
+    {
+        $reflection = new \ReflectionClass($class);
+
+        foreach ($reflection->getMethods(\ReflectionMethod::IS_PUBLIC) as $method) {
+            $name = $method->getName();
+
+            if ($name === '__construct' || $name === '__invoke' || str_starts_with($name, '__')) {
+                continue;
+            }
+
+            $registry->registerMethodAlias($name, $alias, $name);
+        }
     }
 }

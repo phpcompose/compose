@@ -118,15 +118,15 @@ class Config
 
             /**
              * helpers
-             * 
-             * Two ways to register helpers:
-             *  - If pass in as simple (index based) entry then
+             *
+             * Map helper aliases to invokable classes or callables. Each helper will
+             * receive the HelperRegistry as the first argument when invoked.
              */
             'helpers' => [
-                Compose\Mvc\Helper\LayoutHelper::class,
-                Compose\Mvc\Helper\TagHelper::class,
-                Compose\Mvc\Helper\FormatterHelper::class,
-                Compose\Mvc\Helper\RequestHelper::class
+                'layout' => Compose\Mvc\Helper\LayoutHelper::class,
+                'tag' => Compose\Mvc\Helper\TagHelper::class,
+                'format' => Compose\Mvc\Helper\FormatterHelper::class,
+                'request' => Compose\Mvc\Helper\RequestHelper::class,
             ],
         ];
     }

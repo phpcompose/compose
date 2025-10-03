@@ -8,13 +8,20 @@
 
 namespace Compose\Mvc\Helper;
 
-
-class LayoutHelper
+class LayoutHelper implements HelperInterface
 {
     protected
         $content,
         $sections,
         $data = [];
+
+    private ?HelperRegistry $helpers = null;
+
+    public function __invoke(HelperRegistry $helpers, ...$args)
+    {
+        $this->helpers = $helpers;
+        return $this;
+    }
 
     /**
      * @param string $key

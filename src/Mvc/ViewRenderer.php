@@ -118,27 +118,24 @@ class ViewRenderer implements ViewRendererInterface
     public function render(View $view, ServerRequestInterface $request = null) : string
     {
         $registry = $this->getHelperRegistry();
-        $registry->currentRequest = $request;
-        $registry->currentView = $view;
+        $registry->setContext($view, $request);
 
         $view->setHelperRegistry($registry);
 
-        // initially set default layout
-        // view will have option to reset or set different view
-        $view->layout = $this->_defaultLayout;
+        try {
+            $view->layout = $this->_defaultLayout;
 
-        // render the content view
-        $content = $this->renderScript($view->getScript(), $view->getArrayCopy(), $view);
+            $content = $this->renderScript($view->getScript(), $view->getArrayCopy(), $view);
 
-        // render the layout if available
-        if($view->layout) {
-            $view->content($content); // store the content
-            $content = $this->renderScript($view->layout, [], $view);
+            if($view->layout) {
+                $view->content($content);
+                $content = $this->renderScript($view->layout, [], $view);
+            }
+
+            return $content;
+        } finally {
+            $registry->setContext(null, null);
         }
-
-        $registry->currentView = null;
-        $registry->currentRequest = null;
-        return $content;
     }
 
     /**

@@ -8,7 +8,6 @@
 
 namespace Compose\Mvc\Helper;
 
-
 use Compose\Container\ContainerAwareInterface;
 use Compose\Container\ContainerAwareTrait;
 use Compose\Container\ServiceResolver;
@@ -23,26 +22,25 @@ class HelperRegistry implements ContainerAwareInterface
 {
     use ContainerAwareTrait;
 
-    public
-        /**
-         * @var View
-         */
-        $currentView,
-
-        /**
-         * @var ServerRequestInterface
-         */
-        $currentRequest;
-
-    protected
-        $resolver,
-        $helpers = [],
-        $instances = [];
+    /**
+     * @deprecated Use getCurrentView()/getCurrentRequest()
+     * @var View|null
+     */
+    public $currentView;
 
     /**
-     * HelperRegistry constructor.
-     * @param ServiceResolver $resolver
+     * @deprecated Use getCurrentView()/getCurrentRequest()
+     * @var ServerRequestInterface|null
      */
+    public $currentRequest;
+
+    private ServiceResolver $resolver;
+    private array $definitions = [];
+    private array $instances = [];
+
+    private ?View $view = null;
+    private ?ServerRequestInterface $request = null;
+
     public function __construct(ServiceResolver $resolver)
     {
         $this->resolver = $resolver;
@@ -53,120 +51,129 @@ class HelperRegistry implements ContainerAwareInterface
         return $this;
     }
 
-    /**
-     * @param string $name
-     * @param $helper
-     * @throws \Exception
-     */
-    public function register(string $name, $helper)
+    public function register(string $name, $definition): void
     {
-        if(method_exists($this, $name)) {
-            throw new \Exception("Cannot register helper with this name: " . $name);
+        if (isset($this->definitions[$name])) {
+            throw new \InvalidArgumentException("Helper is already registered with that name: {$name}");
         }
 
-        if(isset($this->helpers[$name])) {
-            throw new \Exception("Helper is already registered with that name: " . $name);
+        if (!is_string($definition) && !is_callable($definition) && !is_object($definition)) {
+            throw new \InvalidArgumentException('Helper definition must be a class name, callable, or object.');
         }
 
-        $this->helpers[$name] = $helper;
+        $this->definitions[$name] = $definition;
     }
 
-    /**
-     * Apply methods of give class (static) or object to the helper registry
-     * @param $objectOrClass
-     * @param array|null $helpers
-     * @throws \ReflectionException
-     */
-    public function extend($objectOrClass, array $methods = null)
+    public function has(string $name): bool
     {
-        $reflector = new \ReflectionClass($objectOrClass);
-
-        if(!$methods) {
-            $methods = $reflector->getMethods(\ReflectionMethod::IS_PUBLIC);
-            foreach ($methods as $method) {
-                $name = $method->getName();
-                if(strpos($name, '__') === 0) continue; // ignore magic methods
-
-                $this->register($name, $objectOrClass);
-            }
-        } else {
-            foreach($methods as $name) {
-                $this->register($name, $objectOrClass);
-            }
-        }
+        return array_key_exists($name, $this->definitions);
     }
 
-    /**
-     * @param string $name
-     * @return mixed|null|object
-     * @throws \ReflectionException
-     */
+    public function setContext(?View $view, ?ServerRequestInterface $request): void
+    {
+        $this->view = $view;
+        $this->request = $request;
+        $this->currentView = $view;
+        $this->currentRequest = $request;
+    }
+
+    public function getCurrentView(): ?View
+    {
+        return $this->view;
+    }
+
+    public function getCurrentRequest(): ?ServerRequestInterface
+    {
+        return $this->request;
+    }
+
     public function get(string $name)
     {
-        $helper = $this->helpers[$name] ?? null;
-        if(!$helper) {
-            throw new \Exception("Helper is not registered: " . $name);
+        return $this->invokeHelper($name, []);
+    }
+
+    public function getMany(array $names): array
+    {
+        $result = [];
+        foreach ($names as $name) {
+            $result[$name] = $this->get($name);
         }
 
-        if(is_string($helper)) {
-            $instance = $this->instances[$helper] ?? null;
-            if(!$instance) {
-                $instance = $this->resolver->resolve($helper);
-                if(property_exists($instance, 'registry')) {
-                    $instance->registry = $this;
-                }
+        return $result;
+    }
 
-                $this->instances[$helper] = $instance;
+    public function call(string $name, ...$arguments)
+    {
+        return $this->invokeHelper($name, $arguments);
+    }
+
+    public function registerMethodAlias(string $alias, string $helperName, string $method): void
+    {
+        if ($this->has($alias)) {
+            return;
+        }
+
+        $this->register($alias, function(HelperRegistry $helpers, ...$arguments) use ($helperName, $method) {
+            $helper = $helpers->get($helperName);
+
+            if (!is_object($helper) || !method_exists($helper, $method)) {
+                throw new \LogicException(sprintf('Helper "%s" does not provide method "%s".', $helperName, $method));
             }
 
-            $helper = $instance;
-        }
-
-        return $helper;
+            return $helper->$method(...$arguments);
+        });
     }
 
-    /**
-     * @param array $names
-     * @return array
-     * @throws \ReflectionException
-     */
-    public function getMany(array $names)
-    {
-        $helpers = [];
-        foreach($names as $name) {
-            $helpers[$name] = $this->get($name);
-        }
-
-        return $helpers;
-    }
-
-
-    /**
-     * @param $name
-     * @param $arguments
-     * @return mixed
-     * @throws \Exception
-     */
     public function __call($name, $arguments)
     {
-        $helper = $this->get($name);
-
-        if(is_callable($helper)) {
-            return call_user_func_array($helper, $arguments);
-        } else if(is_object($helper)) {
-            return call_user_func_array([$helper, $name], $arguments);
-        } else {
-            throw new \Exception('Unable to execute helper: ' . $name);
-        }
+        return $this->call($name, ...$arguments);
     }
 
-    /**
-     * @param $name
-     * @return mixed|null|object
-     * @throws \ReflectionException
-     */
     public function __get($name)
     {
         return $this->get($name);
+    }
+
+    private function invokeHelper(string $name, array $arguments)
+    {
+        if (!$this->has($name)) {
+            throw new \Exception('Helper is not registered: ' . $name);
+        }
+
+        $callable = $this->resolveDefinition($name);
+
+        if (is_object($callable) && property_exists($callable, 'registry')) {
+            $callable->registry = $this;
+        }
+
+        if (!is_callable($callable)) {
+            throw new \LogicException('Helper is not callable: ' . $name);
+        }
+
+        return $callable($this, ...$arguments);
+    }
+
+    private function resolveDefinition(string $name)
+    {
+        $definition = $this->definitions[$name];
+
+        if (is_string($definition)) {
+            if (!isset($this->instances[$name])) {
+                $instance = $this->resolver->resolve($definition);
+                $this->instances[$name] = $instance;
+            }
+
+            return $this->instances[$name];
+        }
+
+        if (is_object($definition) && !($definition instanceof \Closure)) {
+            if (!isset($this->instances[$name])) {
+                $this->instances[$name] = $definition;
+            }
+
+            return $this->instances[$name];
+        }
+
+        return $definition;
     }
 }

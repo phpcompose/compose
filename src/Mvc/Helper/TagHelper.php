@@ -8,15 +8,19 @@
 
 namespace Compose\Mvc\Helper;
 
-
 use Compose\Mvc\View;
 
 /**
  * Class HtmlHelper
  * @package Compose\Mvc\Helper
  */
-class TagHelper
+class TagHelper implements HelperInterface
 {
+    public function __invoke(HelperRegistry $helpers, ...$args)
+    {
+        return $this;
+    }
+
     /**
      * Render open tag
      *

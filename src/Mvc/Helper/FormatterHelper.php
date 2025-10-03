@@ -8,8 +8,14 @@
 
 namespace Compose\Mvc\Helper;
 
+use Compose\Mvc\View;
 
-class FormatterHelper {
+class FormatterHelper implements HelperInterface {
+
+    public function __invoke(HelperRegistry $helpers, ...$args)
+    {
+        return $this;
+    }
 
     /**
      * Format currency.
