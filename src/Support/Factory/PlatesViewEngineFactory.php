@@ -10,13 +10,18 @@ use InvalidArgumentException;
 use League\Plates\Engine;
 use Psr\Container\ContainerInterface;
 
-class ViewEngineFactory implements ServiceFactoryInterface
+class PlatesViewEngineFactory implements ServiceFactoryInterface
 {
     public static function create(ContainerInterface $container, string $id): ViewEngineInterface
     {
         $configuration = $container->get(Configuration::class);
         $templates = $configuration['templates'] ?? [];
 
+        return self::createPlatesEngine($container, $templates, $configuration);
+    }
+
+    private static function createPlatesEngine(ContainerInterface $container, array $templates, Configuration|array $configuration): ViewEngineInterface
+    {
         $directory = $templates['dir'] ?? COMPOSE_DIR_TEMPLATE;
         $folders = $templates['folders'] ?? [];
         $extension = $templates['extension'] ?? 'phtml';
@@ -32,16 +37,15 @@ class ViewEngineFactory implements ServiceFactoryInterface
 
         $viewEngine = new PlatesViewEngine($engine, $defaultLayout);
 
-        foreach ($helpers as $alias => $definition) {
-            $callable = self::resolveHelper($definition, $container);
-            $name = is_int($alias) ? self::deriveAlias($definition) : $alias;
-            $viewEngine->registerHelper($name, $callable);
+        foreach (self::normalizeHelpers($helpers) as $alias => $definition) {
+            $callable = self::resolveHelperCallable($definition, $container);
+            $viewEngine->registerHelper($alias, $callable);
         }
 
         return $viewEngine;
     }
 
-    private static function resolveHelper($definition, ContainerInterface $container): callable
+    private static function resolveHelperCallable($definition, ContainerInterface $container): callable
     {
         if (is_string($definition) && class_exists($definition)) {
             $instance = $container->get($definition);
@@ -56,6 +60,27 @@ class ViewEngineFactory implements ServiceFactoryInterface
         }
 
         throw new InvalidArgumentException('Helper definition must be a callable or invokable class name.');
+    }
+
+    /**
+     * @param array<int|string, mixed> $helpers
+     * @return array<string, mixed>
+     */
+    private static function normalizeHelpers(array $helpers): array
+    {
+        $normalized = [];
+
+        foreach ($helpers as $alias => $definition) {
+            $name = is_int($alias) ? self::deriveAlias($definition) : (string) $alias;
+
+            if ($name === '') {
+                throw new InvalidArgumentException('Helper alias must be a non-empty string.');
+            }
+
+            $normalized[$name] = $definition;
+        }
+
+        return $normalized;
     }
 
     private static function deriveAlias($definition): string

@@ -31,7 +31,8 @@ $rootDir = dirname($_SERVER['DOCUMENT_ROOT']) . '/';
     <nav class="navbar sticky-top  navbar-light bg-danger">
         <span class="navbar-text text-white font-weight-bold">
             <i class="fa fa-warning" aria-hidden="true"></i>
-            Error <?= $this->escape("%d : %s @ %s", [$exception->getCode(), $exception->getMessage(), $exception->getFile()]) ?></u>,  Line # <?= $exception->getLine() ?>
+            <?php $errorHeadline = sprintf('%d : %s @ %s', $exception->getCode(), $exception->getMessage(), $exception->getFile()); ?>
+            Error <?= $this->escape($errorHeadline) ?></u>,  Line # <?= $exception->getLine() ?>
         </span>
     </nav>
 
