@@ -8,15 +8,16 @@
 
 namespace Compose\Container;
 
-
-
 use Compose\Support\Invocation;
 use Exception;
+use ReflectionClass;
+use ReflectionMethod;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\ContainerInterface;
 use Psr\Container\NotFoundExceptionInterface;
 use ReflectionException;
 use ReflectionFunctionAbstract;
+use Throwable;
 
 class ServiceResolver
 {
@@ -52,12 +53,20 @@ class ServiceResolver
      */
     public function resolve($resolvable, ?array $args = null)
     {
-        if(is_callable($resolvable)) {
-            return $this->invoke($resolvable, $args);
-        } else if(is_string($resolvable)) {
-            return $this->instantiate($resolvable, $args);
-        } else {
-            throw new Exception("Unable to resolve.");
+        try {
+            if (is_callable($resolvable)) {
+                return $this->invoke($resolvable, $args);
+            }
+
+            if (is_string($resolvable)) {
+                return $this->instantiate($resolvable, $args);
+            }
+
+            throw new ContainerException(sprintf('Unable to resolve value of type "%s".', gettype($resolvable)));
+        } catch (ContainerException $exception) {
+            throw $exception;
+        } catch (Throwable $exception) {
+            throw ContainerException::fromResolution($this->describeResolvable($resolvable), $exception);
         }
     }
 
@@ -73,11 +82,16 @@ class ServiceResolver
      */
     public function invoke(callable $callable, ?array $args = null)
     {
-        $reflection = Invocation::reflectCallable($callable);
+        try {
+            $reflection = Invocation::reflectCallable($callable);
 
-        // attempt to resolve dependencies
-        $dependencies = $this->resolveFunctionDependencies($reflection, $args);
-        return $reflection->invokeArgs($dependencies);
+            $dependencies = $this->resolveFunctionDependencies($reflection, $args, $callable);
+            return $reflection->invokeArgs($dependencies);
+        } catch (ContainerException $exception) {
+            throw $exception;
+        } catch (Throwable $exception) {
+            throw ContainerException::fromResolution($this->describeResolvable($callable), $exception);
+        }
     }
 
     /**
@@ -88,33 +102,33 @@ class ServiceResolver
      */
     public function instantiate($className, ?array $args = null)
     {
-        $container = $this->getContainer();
-        $instance = null;
+        try {
+            $container = $this->getContainer();
+            $instance = null;
 
-        // if factory is provided use that
-        if(isset(class_implements($className)[ServiceFactoryInterface::class])) {
-            return $className::create($container, $className);
+            if (isset(class_implements($className)[ServiceFactoryInterface::class])) {
+                return $className::create($container, $className);
+            }
+
+            $reflection = new ReflectionClass($className);
+            $constructor = $reflection->getConstructor();
+            if ($constructor === null) {
+                $instance = $reflection->newInstanceWithoutConstructor();
+            } else {
+                $dependencies = $this->resolveFunctionDependencies($constructor, $args, $className);
+                $instance = $reflection->newInstanceArgs($dependencies);
+            }
+
+            if ($instance instanceof ContainerAwareInterface) {
+                $instance->setContainer($container);
+            }
+
+            return $instance;
+        } catch (ContainerException $exception) {
+            throw $exception;
+        } catch (Throwable $exception) {
+            throw ContainerException::fromResolution($className, $exception);
         }
-
-        // use reflection to resolve and instantiate
-        $reflection = new \ReflectionClass($className);
-        $constructor = $reflection->getConstructor();
-        if ($constructor === null) {
-            // if construction is not used, simply create new object without constructor
-            $instance = $reflection->newInstanceWithoutConstructor();
-        } else {
-            // attempt to inject dependencies for the constructor and then instantiate
-            $dependencies = $this->resolveFunctionDependencies($constructor, $args);
-            $instance = $reflection->newInstanceArgs($dependencies);
-        }
-
-        // if the instance also implements ContainerAwareInterface interface,
-        // then we will inject the container to the instance as well.
-        if ($instance instanceof ContainerAwareInterface) {
-            $instance->setContainer($container);
-        }
-
-        return $instance;
     }
 
     /**
@@ -125,28 +139,80 @@ class ServiceResolver
      * @return array
      * @throws Exception
      */
-    public function resolveFunctionDependencies(ReflectionFunctionAbstract $function, ?array $args = null ) : array
+    public function resolveFunctionDependencies(ReflectionFunctionAbstract $function, ?array $args = [], $context = null ) : array
     {
+        $args = $args ?? [];
         $container = $this->getContainer();
         $params = $function->getParameters();
         $dependencies = [];
         foreach ($params as $parameter) {
             $pname = $parameter->getName();
             $pclass = $parameter->getType() && !$parameter->getType()->isBuiltin()
-                ? new \ReflectionClass($parameter->getType()->getName())
+                ? new ReflectionClass($parameter->getType()->getName())
                 : null;
             $paramName = ($pclass) ? $pclass->getName() : $pname;
-            if (isset($args[$pname])) { // first check if passed $args has the param name,
+            if (array_key_exists($pname, $args)) { // first check if passed $args has the param name,
                 $dependencies[] = $args[$pname];
             } else if ($container->has($paramName)) { // if now check if container has it
-                $dependencies[] = $container->get($paramName);
+                try {
+                    $dependencies[] = $container->get($paramName);
+                } catch (Throwable $exception) {
+                    throw ContainerException::fromParameter(
+                        $this->describeFunction($function, $context),
+                        $paramName,
+                        $exception
+                    );
+                }
             } else if ($parameter->isOptional()) { // check if it is optional
                 $dependencies[] = $parameter->getDefaultValue();
             } else { // unable to resolve required params,
-                throw new \InvalidArgumentException("Unable to resolve param: {$paramName} of type: {$parameter->getType()->getName()}");
+                $typeName = $parameter->getType() ? $parameter->getType()->getName() : 'mixed';
+                throw ContainerException::fromParameter(
+                    $this->describeFunction($function, $context),
+                    sprintf('%s (%s)', $paramName, $typeName)
+                );
             }
         }
 
         return $dependencies;
+    }
+
+    private function describeResolvable($resolvable): string
+    {
+        if (is_string($resolvable)) {
+            return $resolvable;
+        }
+
+        if (is_array($resolvable)) {
+            [$classOrObject, $method] = $resolvable + [null, null];
+            if (is_object($classOrObject)) {
+                $classOrObject = get_class($classOrObject);
+            }
+
+            return sprintf('%s::%s', $classOrObject, $method);
+        }
+
+        if ($resolvable instanceof \Closure) {
+            return '{closure}';
+        }
+
+        if (is_object($resolvable)) {
+            return get_class($resolvable);
+        }
+
+        return (string) $resolvable;
+    }
+
+    private function describeFunction(ReflectionFunctionAbstract $function, $context = null): string
+    {
+        if ($function instanceof ReflectionMethod) {
+            return $function->getDeclaringClass()->getName() . '::' . $function->getName();
+        }
+
+        if (is_string($context)) {
+            return $context . '::' . $function->getName();
+        }
+
+        return $function->getName();
     }
 }

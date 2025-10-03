@@ -65,6 +65,13 @@ class Service4 {
     }
 }
 
+class ServiceRequiringService1 implements ResolvableInterface
+{
+    public function __construct(Service1 $missing)
+    {
+    }
+}
+
 /**
  * Class ServiceContainerTest
  * @package Compose\Container
@@ -84,7 +91,7 @@ final class ServiceContainerTest extends TestCase
      */
     public function testCannotSetScalar() : void
     {
-        $this->expectException(\LogicException::class);
+        $this->expectException(ContainerException::class);
 
         $this->container->set('abc', 12);
     }
@@ -166,6 +173,14 @@ final class ServiceContainerTest extends TestCase
         $this->assertSame($service5, $service6);
         $this->assertSame($service7, $service5);
         $this->assertSame($service7, $service6);
+    }
+
+    public function testThrowsContainerExceptionWithContextWhenDependencyMissing(): void
+    {
+        $this->expectException(ContainerException::class);
+        $this->expectExceptionMessage('ServiceRequiringService1');
+
+        $this->container->get(ServiceRequiringService1::class);
     }
 
     /**

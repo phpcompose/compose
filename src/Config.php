@@ -50,7 +50,11 @@ class Config
             /**
              * services
              *
-             * Services for dependency service container
+             * Map of service identifiers to their definitions. Acceptable definitions are:
+             *  - a string class name (instantiated lazily and shared)
+             *  - a callable factory (receives the container and the service id)
+             *  - an existing object instance (stored as-is)
+             *  - null (alias to the service id itself)
              */
             'services' => [
                 ErrorHandler::class => Compose\Support\Factory\ErrorHandlerFactory::class,

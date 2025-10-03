@@ -85,11 +85,10 @@ class Starter
     protected function createContainer(Configuration $configuration) : ContainerInterface
     {
         $container = new ServiceContainer();
-        ServiceContainer::setSharedInstance($container);
 
         $container->set(Configuration::class, $configuration);
         $container->setMany($configuration['services'] ?? []);
-        
+
         return $container;
     }
 

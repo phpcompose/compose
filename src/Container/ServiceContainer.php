@@ -1,7 +1,6 @@
 <?php
 namespace Compose\Container;
 
-use Compose\Support\Pattern\SharedInstanceTrait;
 use Exception;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\ContainerInterface;
@@ -12,8 +11,6 @@ use Psr\Container\NotFoundExceptionInterface;
  */
 class ServiceContainer implements ContainerInterface
 {
-    use SharedInstanceTrait;
-    
     protected
         $aliases = [],
 
@@ -135,6 +132,8 @@ class ServiceContainer implements ContainerInterface
      */
     public function set(string $id, $service = null)
     {
+        $this->assertValidDefinition($id, $service);
+
         if(isset($this->instances[$id]) || isset($this->services[$id])) {
             throw new \LogicException("Service Instance already available for: {$id}");
         }
@@ -161,5 +160,21 @@ class ServiceContainer implements ContainerInterface
             }
             $this->set($id, $service);
         }
+    }
+
+    /**
+     * Ensures a definition follows the supported schema (string, callable, object or null).
+     */
+    private function assertValidDefinition(string $id, $service): void
+    {
+        if($service === null || $service === $id) {
+            return;
+        }
+
+        if(is_string($service) || is_callable($service) || is_object($service)) {
+            return;
+        }
+
+        throw ContainerException::dueToInvalidDefinition($id, $service);
     }
 }

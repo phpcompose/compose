@@ -14,6 +14,9 @@ use InvalidArgumentException;
 use ReflectionException;
 use ReflectionFunction;
 use ReflectionFunctionAbstract;
+use ReflectionIntersectionType;
+use ReflectionNamedType;
+use ReflectionUnionType;
 
 /**
  * Class Invocation
@@ -42,7 +45,7 @@ class Invocation
      * @param callable $callable
      * @param array|null $parameters
      */
-    public function __construct(callable $callable, array $parameters = null)
+    public function __construct(callable $callable, ?array $parameters = null)
     {
         $this->callable = $callable;
         if($parameters) $this->parameters = $parameters;
@@ -53,7 +56,7 @@ class Invocation
      * @param array|null $params
      * @return Invocation|null
      */
-    static public function fromCallable($callable, array $params = null) : ?self
+    static public function fromCallable($callable, ?array $params = null) : ?self
     {
         if(!\is_callable($callable)) {
             return null;
@@ -190,8 +193,30 @@ class Invocation
     {
         $reflection = $this->getReflection();
         $param = isset($reflection->getParameters()[$index]) ? $reflection->getParameters()[$index] : null;
-        if(!$param) return null;
+        if(!$param) {
+            return null;
+        }
 
-        return (string) $param->getType()->getName();
+        $type = $param->getType();
+
+        if(!$type) {
+            return null;
+        }
+
+        if($type instanceof ReflectionNamedType) {
+            return $type->getName();
+        }
+
+        if($type instanceof ReflectionUnionType || $type instanceof ReflectionIntersectionType) {
+            $names = array_map(static function($inner) {
+                return $inner->getName();
+            }, $type->getTypes());
+
+            $separator = $type instanceof ReflectionUnionType ? '|' : '&';
+
+            return implode($separator, $names);
+        }
+
+        return null;
     }
 }
