@@ -60,13 +60,12 @@ class Config
                 ErrorHandler::class => Compose\Support\Factory\ErrorHandlerFactory::class,
                 Compose\Event\EventDispatcherInterface::class => Compose\Support\Factory\EventDispatcherFactory::class,
                 Compose\Http\Session\Session::class => Compose\Support\Factory\SessionFactory::class,
-                Compose\Mvc\ViewRendererInterface::class => Compose\Support\Factory\ViewRendererFactory::class,
+                Compose\Mvc\ViewEngineInterface::class => Compose\Support\Factory\ViewEngineFactory::class,
                 Compose\Mvc\MvcMiddleware::class => Compose\Support\Factory\MvcMiddlewareFactory::class,
                 Compose\Http\OutputBufferMiddleware::class => Compose\Http\OutputBufferMiddleware::class,
                 Compose\Mvc\PagesMiddleware::class => Compose\Mvc\PagesMiddleware::class,
                 Compose\Routing\RoutingMiddleware::class => Compose\Routing\RoutingMiddleware::class,
                 Compose\Routing\DispatchMiddleware::class => Compose\Routing\DispatchMiddleware::class,
-                Compose\Mvc\Helper\HelperRegistry::class => Compose\Support\Factory\HelperRegistryFactory::class,
             ],
 
             /**
@@ -119,15 +118,9 @@ class Config
             /**
              * helpers
              *
-             * Map helper aliases to invokable classes or callables. Each helper will
-             * receive the HelperRegistry as the first argument when invoked.
+             * Map helper aliases to callables registered with the view engine.
              */
-            'helpers' => [
-                'layout' => Compose\Mvc\Helper\LayoutHelper::class,
-                'tag' => Compose\Mvc\Helper\TagHelper::class,
-                'format' => Compose\Mvc\Helper\FormatterHelper::class,
-                'request' => Compose\Mvc\Helper\RequestHelper::class,
-            ],
+            'helpers' => [],
         ];
     }
 }

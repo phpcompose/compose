@@ -10,7 +10,7 @@ namespace Compose\Support\Factory;
 
 
 use Compose\Container\ServiceFactoryInterface;
-use Compose\Mvc\ViewRendererInterface;
+use Compose\Mvc\ViewEngineInterface;
 use Compose\Support\Configuration;
 use Compose\Support\Error\ErrorResponseGenerator;
 use Psr\Container\ContainerInterface;
@@ -23,7 +23,7 @@ class ErrorHandlerFactory implements ServiceFactoryInterface
     {
         $config = $container->get(Configuration::class);
         $generator = new ErrorResponseGenerator(
-            $container->get(ViewRendererInterface::class),
+            $container->get(ViewEngineInterface::class),
             $config
         );
 

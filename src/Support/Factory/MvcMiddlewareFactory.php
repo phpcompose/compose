@@ -31,12 +31,12 @@ class MvcMiddlewareFactory implements ServiceFactoryInterface
         $pageHandler->setContainer($container);
         $pages = $config['pages'] ?? [];
         $pageDir = $pages['dir'] ?? null;
-        if($pageDir) {
-            $pageHandler->setDirectory($pageDir);
+        if ($pageDir) {
+            $pageHandler->setDirectory($pageDir, $pages['namespace'] ?? null);
         }
 
         $folders = $pages['folders'] ?? null;
-        if($folders) {
+        if ($folders) {
             $pageHandler->setFolders($folders);
         }
         $mvc->pipe($pageHandler);

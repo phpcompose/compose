@@ -1,191 +1,158 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: alaminahmed
- * Date: 2017-11-30
- * Time: 8:58 AM
- */
 
 namespace Compose\Mvc;
 
-
 use Compose\Container\ContainerAwareInterface;
 use Compose\Container\ContainerAwareTrait;
-use Compose\Support\Configuration;
+use Compose\Container\ResolvableInterface;
 use Compose\Support\Invocation;
-use Psr\Container\ContainerExceptionInterface;
-use Psr\Container\NotFoundExceptionInterface;
-use Psr\Http\Server\MiddlewareInterface;
-use Psr\Http\Server\RequestHandlerInterface;
+use Laminas\Diactoros\Response\HtmlResponse;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
-use Laminas\Diactoros\Response\HtmlResponse;
+use Psr\Http\Server\MiddlewareInterface;
+use Psr\Http\Server\RequestHandlerInterface;
 
-/**
- * Class PagesHandler
- * @package Compose\Page
- */
-class PagesMiddleware implements MiddlewareInterface, ContainerAwareInterface
+class PagesMiddleware implements MiddlewareInterface, ContainerAwareInterface, ResolvableInterface
 {
     use ContainerAwareTrait;
 
-    protected
-        /**
-         * @var string default page directory
-         */
-        $dir,
+    private ViewEngineInterface $viewEngine;
+    private ?string $baseAlias = null;
+    private array $folders = [];
+    private string $defaultPage = 'index';
 
-        $folders = [],
-
-        /**
-         * @var ViewRendererInterface
-         */
-        $renderer,
-
-        /**
-         * @var string
-         */
-        $defaultPage = 'index';
-
-    /**
-     * PagesHandler constructor.
-     * @param ViewRendererInterface $renderer
-     */
-    public function __construct(ViewRendererInterface $renderer)
+    public function __construct(ViewEngineInterface $engine)
     {
-        $this->renderer = $renderer;
-        $this->renderer = $renderer;
+        $this->viewEngine = $engine;
     }
 
-    /**
-     * @param string $dir
-     */
-    public function setDirectory(string $dir)
+    public function setDirectory(string $dir, ?string $namespace = null): void
     {
-        $this->dir = $dir;
+        $this->baseAlias = $namespace ?: 'pages';
+        $this->viewEngine->addPath($this->baseAlias, $dir);
     }
 
-    /**
-     * Map specific url path to a folder
-     * @param string $path
-     * @param string $dir
-     */
-    public function addFolder(string $path, string $dir)
+    public function addFolder(string $name, string $dir): void
     {
-        $this->folders[$path] = $dir;
+        $this->folders[$name] = $dir;
+        $this->viewEngine->addPath($name, $dir);
     }
 
-    /**
-     * Set path mapping folder.  Existing maps will be replaced
-     * 
-     * @param array $folders
-     */
-    public function setFolders(array $folders) 
+    public function setFolders(array $folders): void
     {
         $this->folders = $folders;
+        foreach ($folders as $name => $dir) {
+            $this->viewEngine->addPath($name, $dir);
+        }
     }
 
-    /**
-     * @param ServerRequestInterface $request
-     * @param RequestHandlerInterface $handler
-     * @return ResponseInterface
-     * @throws ContainerExceptionInterface
-     * @throws NotFoundExceptionInterface
-     * @throws \ReflectionException
-     */
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
-        // parse the request
-        $data = null;
-        $path = $request->getUri()->getPath();
-
-        $templateInfo = $this->resolveTemplate($path);
-        if(!$templateInfo) {
+        $match = $this->matchTemplate($request->getUri()->getPath());
+        if (!$match) {
             return $handler->handle($request);
         }
 
-        [$templateScript, $templateParams] = $templateInfo;
+        [$template, $params] = $match;
+        $data = $this->executeCodeBehind($template, $params, $request);
 
-        // execute the code-behind script
-        $codeScript = "{$templateScript}.php";
-        if(file_exists($codeScript)) {
-            $return = include $codeScript;
-
-            // call if callable is returned
-            if(is_callable($return)) {
-                if(is_object($return) && $return instanceof ContainerAwareInterface) {
-                    $return->setContainer($this->getContainer());
-                }
-
-                $invocation = new Invocation($return);
-                if($invocation->getArgumentTypeAtIndex(0) == ServerRequestInterface::class) {
-                    array_unshift($templateParams, $request); // add the request as the first param
-                }
-                $data = $invocation(...$templateParams);
-            }  else {
-                $data = $return;
-            }
-        }
-
-        if($data instanceof ResponseInterface) {
+        if ($data instanceof ResponseInterface) {
             return $data;
         }
 
-        return new HtmlResponse(
-            $this->renderer->render(new View($templateScript, $data), $request)
-        );
+        return new HtmlResponse($this->viewEngine->render($template, $data ?? [], $request));
     }
 
-    /**
-     * Attempt to resolve the page from the page directory
-     *
-     * @param string $page
-     * @return null|array
-     */
-    protected function resolveTemplate(string $page) : ?array
+    private function matchTemplate(string $path): ?array
     {
-        $dir = $this->dir ?? '';
-        $folders = $this->folders;
-
+        $path = trim($path, '/');
+        $segments = $path === '' ? [] : explode('/', $path);
         $params = [];
-        $template = null;
 
-        // normalizing
-        $dir = rtrim($dir, '/');
-        $page = trim($page, '/');
-
-        $parts = explode('/', $page);
-      
-        // check if path to folder mapping available
-        if(isset($folders[$parts[0]])) {
-            $foldername = \array_shift($parts);
-            $dirname = $folders[$foldername];
-        } else {
-            $dirname = $dir;
-        }
-
-        while(count($parts)) {
-            $path = $dirname . '/' . implode('/', $parts);
-            if(is_dir($path)) { // first check if
-                $template = "{$path}/{$this->defaultPage}.phtml";
-            } else {
-                $template = "{$path}.phtml";
+        while (true) {
+            foreach ($this->candidateTemplateNames($segments) as $name) {
+                if ($this->viewEngine->hasTemplate($name)) {
+                    return [$name, $params];
+                }
             }
 
-            if(file_exists($template)) {
+            if (empty($segments)) {
                 break;
-            } else {
-                $template = null; // reset
             }
 
-            // build the params
-            array_unshift( $params, array_pop($parts));
+            array_unshift($params, array_pop($segments));
         }
 
-        if(!$template) {
+        return null;
+    }
+
+    private function executeCodeBehind(string $template, array $params, ServerRequestInterface $request)
+    {
+        $path = $this->viewEngine->resolvePath($template);
+        if (!$path) {
             return null;
         }
 
-        return [$template, $params];
+        $script = $path . '.php';
+        if (!file_exists($script)) {
+            return null;
+        }
+
+        $result = include $script;
+
+        if (is_callable($result)) {
+            if (is_object($result) && $result instanceof ContainerAwareInterface) {
+                $result->setContainer($this->getContainer());
+            }
+
+            $invocation = new Invocation($result);
+            array_unshift($params, $request);
+            return $invocation(...$params);
+        }
+
+        if (is_array($result)) {
+            return $result;
+        }
+
+        throw new \RuntimeException('Invalid page script return type for ' . $script);
+    }
+
+    /**
+     * @param array<int,string> $segments
+     * @return string[]
+     */
+    private function candidateTemplateNames(array $segments): array
+    {
+        $names = [];
+
+        $base = implode('/', $segments);
+
+        if ($base !== '') {
+            $names[] = $base;
+            $names[] = $base . '/' . $this->defaultPage;
+            if ($this->baseAlias) {
+                $names[] = $this->baseAlias . '::' . $base;
+                $names[] = $this->baseAlias . '::' . $base . '/' . $this->defaultPage;
+            }
+        } else {
+            $names[] = $this->defaultPage;
+            if ($this->baseAlias) {
+                $names[] = $this->baseAlias . '::' . $this->defaultPage;
+            }
+        }
+
+        if ($segments) {
+            $first = $segments[0];
+            if (isset($this->folders[$first])) {
+                $remainder = array_slice($segments, 1);
+                $portion = implode('/', $remainder);
+                $names[] = $first . '::' . ($portion ?: $this->defaultPage);
+                if ($portion) {
+                    $names[] = $first . '::' . $portion . '/' . $this->defaultPage;
+                }
+            }
+        }
+
+        return array_values(array_unique($names));
     }
 }

@@ -3,10 +3,8 @@ namespace Compose\Support\Error;
 
 
 use Compose\Container\ResolvableInterface;
-use Compose\Mvc\View;
 use Compose\Http\Exception\HttpException;
-use Compose\Mvc\ViewRenderer;
-use Compose\Mvc\ViewRendererInterface;
+use Compose\Mvc\ViewEngineInterface;
 use Compose\Support\Configuration;
 use Exception;
 use Psr\Http\Message\ResponseInterface;
@@ -18,41 +16,25 @@ use Psr\Http\Message\ServerRequestInterface;
  */
 class ErrorResponseGenerator implements ResolvableInterface
 {
-    protected
-        /**
-         * @var ViewRenderer
-         */
-        $renderer,
+    protected ViewEngineInterface $engine;
 
-        /**
-         * @var bool
-         */
-        $debug,
+    protected bool $debug;
 
-        /**
-         * @var string template to debug view
-         */
-        $template_debug = 'compose::error/debug',
+    protected string $template_debug = 'compose::error/debug';
 
-        /**
-         * @var string template to 404 page, for production
-         */
-        $template_404 = 'compose::error/404',
+    protected string $template_404 = 'compose::error/404';
 
-        /**
-         * @var null
-         */
-        $template_error = 'compose::error/error';
+    protected string $template_error = 'compose::error/error';
 
 
     /**
      * ErrorResponseGenerator constructor.
-     * @param ViewRendererInterface $renderer
+     * @param ViewEngineInterface $engine
      * @param Configuration $configuration
      */
-    public function __construct(ViewRendererInterface $renderer, Configuration $configuration)
+    public function __construct(ViewEngineInterface $engine, Configuration $configuration)
     {
-        $this->renderer = $renderer;
+        $this->engine = $engine;
         $this->debug = $configuration['debug'] ?? false;
     }
 
@@ -77,9 +59,7 @@ class ErrorResponseGenerator implements ResolvableInterface
         }
 
         $response = $response->withStatus($httpStatus);
-        $response->getBody()->write($this->renderer->render(
-            new View($template, compact('exception', 'request')), $request)
-        );
+        $response->getBody()->write($this->engine->render($template, compact('exception', 'request'), $request));
 
         return $response;
     }

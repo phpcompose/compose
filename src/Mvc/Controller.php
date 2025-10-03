@@ -11,6 +11,7 @@ use ArrayObject;
 use Compose\Http\Exception\HttpException;
 use Compose\Routing\Route;
 use Compose\Http\RequestHandler;
+use Compose\Mvc\ViewEngineInterface;
 use Exception;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -200,27 +201,16 @@ abstract class Controller extends RequestHandler implements ContainerAwareInterf
      * @return ResponseInterface
      * @throws Exception
      */
-    protected function view(View $view, int $status = 200, array $headers = []): ResponseInterface
+    protected function render(string $template, array $data = null, int $status = 200, array $headers = []): ResponseInterface
     {
-        /** @var ViewRenderer $renderer */
-        $renderer = $this->getContainer()->get(ViewRendererInterface::class);
-        if (!$renderer) {
-            throw new Exception("ViewRenderer not found in the container.");
+        /** @var ViewEngineInterface $engine */
+        $engine = $this->getContainer()->get(ViewEngineInterface::class);
+        if (!$engine) {
+            throw new Exception('ViewEngine not found in the container.');
         }
 
-        return $this->html($renderer->render($view, $this->request), $status, $headers);
-    }
+        $html = $engine->render($template, $data ?? [], $this->request);
 
-    /**
-     * @param string $script
-     * @param array|null $data
-     * @param int $status
-     * @param array $headers
-     * @return ResponseInterface
-     * @throws Exception
-     */
-    protected function render(string $script, array $data = null, int $status = 200, array $headers = []) : ResponseInterface
-    {
-        return $this->view(new View($script, $data), $status, $headers);
+        return $this->html($html, $status, $headers);
     }
 }
