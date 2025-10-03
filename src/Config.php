@@ -58,6 +58,10 @@ class Config
                 Compose\Http\Session\Session::class => Compose\Support\Factory\SessionFactory::class,
                 Compose\Mvc\ViewRendererInterface::class => Compose\Support\Factory\ViewRendererFactory::class,
                 Compose\Mvc\MvcMiddleware::class => Compose\Support\Factory\MvcMiddlewareFactory::class,
+                Compose\Http\OutputBufferMiddleware::class => Compose\Http\OutputBufferMiddleware::class,
+                Compose\Mvc\PagesMiddleware::class => Compose\Mvc\PagesMiddleware::class,
+                Compose\Routing\RoutingMiddleware::class => Compose\Routing\RoutingMiddleware::class,
+                Compose\Routing\DispatchMiddleware::class => Compose\Routing\DispatchMiddleware::class,
                 Compose\Mvc\Helper\HelperRegistry::class => Compose\Support\Factory\HelperRegistryFactory::class,
             ],
 
@@ -115,9 +119,9 @@ class Config
              *  - If pass in as simple (index based) entry then
              */
             'helpers' => [
+                Compose\Mvc\Helper\LayoutHelper::class,
                 Compose\Mvc\Helper\TagHelper::class,
                 Compose\Mvc\Helper\FormatterHelper::class,
-                Compose\Mvc\Helper\LayoutHelper::class,
                 Compose\Mvc\Helper\RequestHelper::class
             ],
         ];

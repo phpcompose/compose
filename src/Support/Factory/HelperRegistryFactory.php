@@ -33,9 +33,11 @@ class HelperRegistryFactory implements ServiceFactoryInterface
         foreach($helpers as $key => $val) {
             if(is_int($key)) {
                 $registry->extend($val);
-            } else {
-                $registry->register($key, $val);
+                continue;
             }
+
+            $registry->register($key, $val);
+            $registry->extend($val);
         }
 
         return $registry;

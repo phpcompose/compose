@@ -14,7 +14,7 @@ use Compose\Mvc\ViewRendererInterface;
 use Compose\Support\Configuration;
 use Compose\Support\Error\ErrorResponseGenerator;
 use Psr\Container\ContainerInterface;
-use Laminas\Diactoros\Response;
+use Laminas\Diactoros\ResponseFactory;
 use Laminas\Stratigility\Middleware\ErrorHandler;
 
 class ErrorHandlerFactory implements ServiceFactoryInterface
@@ -22,13 +22,13 @@ class ErrorHandlerFactory implements ServiceFactoryInterface
     static public function create(ContainerInterface $container, string $id)
     {
         $config = $container->get(Configuration::class);
-        $generator = new ErrorResponseGenerator($container->get(ViewRendererInterface::class), $container->get(Configuration::class));
+        $generator = new ErrorResponseGenerator(
+            $container->get(ViewRendererInterface::class),
+            $config
+        );
 
         // error handler
-        $errorHandler = new ErrorHandler(
-            function() { return new Response(); },
-            $generator
-        );
+        $errorHandler = new ErrorHandler(new ResponseFactory(), $generator);
 
         $errorListeners = $config['error_listeners'] ?? [];
         foreach($errorListeners as $errorListener) {

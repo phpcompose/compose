@@ -7,6 +7,7 @@ use Compose\Event\EventDispatcherInterface;
 use Compose\Event\Message;
 use Compose\Http\BodyParsingMiddleware;
 use Compose\Mvc\MvcMiddleware;
+use Compose\Http\OutputBufferMiddleware;
 use Compose\Http\Pipeline;
 use Compose\Support\Configuration;
 use Compose\Support\Error\NotFoundMiddleware;
@@ -16,7 +17,6 @@ use Psr\Container\ContainerInterface;
 use Laminas\Stratigility\Middleware\ErrorHandler;
 use Laminas\Stratigility\Middleware\OriginalMessages;
 use Psr\Container\NotFoundExceptionInterface;
-use Compose\App\PagesMiddleware;
 
 /**
  * Class Starter
@@ -36,6 +36,7 @@ class Starter
     protected function onInit(ContainerInterface $container, Pipeline $pipeline)
     {
         $configuration = $container->get(Configuration::class);
+        $pipeline->pipe($container->get(OutputBufferMiddleware::class));
         $pipeline->pipe(new OriginalMessages());
         $pipeline->pipe(new BodyParsingMiddleware());
 
@@ -44,7 +45,7 @@ class Starter
         ksort($middleware);
         $pipeline->pipeMany($middleware);
 
-        $pipeline->pipe($container->get(PagesMiddleware::class));
+        $pipeline->pipe($container->get(MvcMiddleware::class));
     }
 
 
