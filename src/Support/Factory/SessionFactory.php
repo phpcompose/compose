@@ -10,7 +10,7 @@ namespace Compose\Support\Factory;
 
 
 use Compose\Container\ServiceFactoryInterface;
-use Compose\Http\Session;
+use Compose\Http\Session\Session;
 use Compose\Support\Configuration;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\ContainerInterface;
@@ -40,7 +40,7 @@ class SessionFactory implements ServiceFactoryInterface
         }
 
         $config = $configuration['session'] ?? null;
-        $session = new Session($config);
+    $session = new Session($config);
         $session->start($handler);
 
         return $session;

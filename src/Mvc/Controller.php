@@ -8,7 +8,7 @@
 
 namespace Compose\Mvc;
 use ArrayObject;
-use Compose\Http\HttpException;
+use Compose\Http\Exception\HttpException;
 use Compose\Http\RequestHandler;
 use Exception;
 use Psr\Http\Message\ResponseInterface;
@@ -166,10 +166,10 @@ abstract class Controller extends RequestHandler implements ContainerAwareInterf
      * Validate action name
      *
      * @note regex from php doc for function name: http://php.net/manual/en/functions.user-defined.php
-     * @param string $action
-     * @return bool
+    * @param string|null $action
+    * @return string|null
      */
-    protected function filterActionName(string $action = null)
+    protected function filterActionName(string $action = null) : ?string
     {
         if(!$action) return null;
         $allowedChars = ['-'];

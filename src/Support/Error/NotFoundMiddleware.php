@@ -3,7 +3,7 @@ namespace Compose\Support\Error;
 
 
 use Compose\Container\ResolvableInterface;
-use Compose\Http\HttpException;
+use Compose\Http\Exception\HttpException;
 use Exception;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;

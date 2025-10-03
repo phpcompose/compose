@@ -1,5 +1,5 @@
 <?php
-namespace Compose\Http;
+namespace Compose\Http\Exception;
 
 
 use Psr\Http\Message\ResponseInterface;

@@ -6,13 +6,13 @@
  * Time: 12:35 PM
  */
 
-namespace Compose\Http;
+namespace Compose\Http\Session;
 
 
 
 /**
  * Class Session
- * @package Compose\Http
+ * @package Compose\Http\Session
  */
 class Session
 {
@@ -69,26 +69,6 @@ class Session
             // start the session
             session_start();
         }
-
-//        if (isset($_SESSION['__destroyed__'])) {
-//            if ($_SESSION['__destroyed__'] < time()-300) {
-//                // Should not happen usually. This could be attack or due to unstable network.
-//                // Remove all authentication status of this users session.
-//                remove_all_authentication_flag_from_active_sessions($_SESSION['userid']);
-//                throw(new DestroyedSessionAccessException);
-//            }
-//            if (isset($_SESSION['__session_id__'])) {
-//                // Not fully expired yet. Could be lost cookie by unstable network.
-//                // Try again to set proper session ID cookie.
-//                // NOTE: Do not try to set session ID again if you would like to remove
-//                // authentication flag.
-//                session_commit();
-//                session_id($_SESSION['__session_id__']);
-//                // New session ID should exist
-//                session_start();
-//                return;
-//            }
-//        }
     }
 
     /**
@@ -118,8 +98,8 @@ class Session
 
     /**
      * @param string $name
-     * @param null $default
-     * @return null
+     * @param mixed|null $default
+     * @return mixed|null
      */
     public function get(string $name, $default = null)
     {
@@ -145,25 +125,14 @@ class Session
     }
 
     /**
-     * @return Session
+     * Regenerate session id and return this instance
+     *
+     * @return $this
      */
     public function regenerate() : self
     {
         session_regenerate_id();
-//        $session_id = session_create_id();
-//        $_SESSION['__session_id__'] = $session_id;
-//        $_SESSION['__destroyed__'] = time();
-//        session_commit();
-//
-//        // Start session with new session ID
-//        session_id($session_id);
-//        ini_set('session.use_strict_mode', 0);
-//        session_start();
-//        ini_set('session.use_strict_mode', 1);
-//
-//        // New session does not need them
-//        unset($_SESSION['__destroyed__']);
-//        unset($_SESSION['__session_id__']);
+        return $this;
     }
 
     /**

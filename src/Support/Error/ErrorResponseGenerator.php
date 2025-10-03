@@ -4,6 +4,7 @@ namespace Compose\Support\Error;
 
 use Compose\Container\ResolvableInterface;
 use Compose\Mvc\View;
+use Compose\Http\Exception\HttpException;
 use Compose\Mvc\ViewRenderer;
 use Compose\Mvc\ViewRendererInterface;
 use Compose\Support\Configuration;
