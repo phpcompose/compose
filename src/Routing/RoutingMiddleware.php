@@ -1,5 +1,5 @@
 <?php
-namespace Compose\Mvc;
+namespace Compose\Routing;
 
 
 use Compose\Container\ContainerAwareInterface;
@@ -14,12 +14,6 @@ use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 
-/**
- * Class FrontController
- *
- * Front Controller for Compose MVC application
- * @package Compose\Mvc
- */
 class RoutingMiddleware implements MiddlewareInterface, ContainerAwareInterface
 {
     use ContainerAwareTrait;
@@ -34,31 +28,18 @@ class RoutingMiddleware implements MiddlewareInterface, ContainerAwareInterface
          */
         $routes = [];
 
-
-    /**
-     * Add a routing map
-     *
-     * @param RouteInfo $route
-     * @throws Exception
-     */
-    public function route(RouteInfo $route) : void
+    public function route(Route $route) : void
     {
         $path = $route->path;
         if(isset($this->routes[$path])) {
             throw new Exception("Route already mapped for path: {$path}");
         }
 
-
         $path = trim($path, '/');
         $this->routes[$path] = $route;
     }
 
-    /**
-     * Attempt to route the request to appropriate route map
-     * @param ServerRequestInterface $request
-     * @return RouteInfo|null
-     */
-    public function match(ServerRequestInterface $request) : ?RouteInfo
+    public function match(ServerRequestInterface $request) : ?Route
     {
         $uri = $request->getUri();
         $normalize = function($path) {
@@ -73,7 +54,6 @@ class RoutingMiddleware implements MiddlewareInterface, ContainerAwareInterface
         foreach($routePaths as $routePath) {
             $normalizedRoutePath = $normalize($routePath);
 
-            /** @var RouteInfo $route */
             $route = $routes[$routePath];
 
             if(strpos($requestedPath, $normalizedRoutePath, 0) === 0) {
@@ -84,7 +64,7 @@ class RoutingMiddleware implements MiddlewareInterface, ContainerAwareInterface
                     $params = [];
                 }
 
-                return RouteInfo::fromArray([
+                return Route::fromArray([
                     'method' =>  $request->getMethod(),
                     'path' => $routePath,
                     'params' => $params,
@@ -96,24 +76,15 @@ class RoutingMiddleware implements MiddlewareInterface, ContainerAwareInterface
         return null;
     }
 
-    /**
-     * @param ServerRequestInterface $request
-     * @param RequestHandlerInterface $handler
-     * @return ResponseInterface
-     * @throws Exception
-     * @throws ContainerExceptionInterface
-     * @throws NotFoundExceptionInterface
-     */
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler) : ResponseInterface
     {
-        /** @var EventDispatcherInterface $notifier */
         $notifier = $this->getContainer()->get(EventDispatcherInterface::class);
 
         $notifier->dispatch(new Message(self::EVENT_ROUTE, ['request' => $request], $this));
         $route = $this->match($request);
 
         if($route) {
-            $request = $request->withAttribute(RouteInfo::class, $route);
+            $request = $request->withAttribute(Route::class, $route);
         }
 
         return $handler->handle($request);

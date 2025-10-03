@@ -25,7 +25,7 @@ use Laminas\Diactoros\Response\HtmlResponse;
  * Class PagesHandler
  * @package Compose\Page
  */
-class PagesHandler implements MiddlewareInterface, ContainerAwareInterface
+class PagesMiddleware implements MiddlewareInterface, ContainerAwareInterface
 {
     use ContainerAwareTrait;
 

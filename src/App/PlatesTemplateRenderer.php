@@ -6,7 +6,7 @@ use Compose\Support\Configuration;
 use League\Plates\Engine;
 use Psr\Container\ContainerInterface;
 
-class TemplateRenderer implements ServiceFactoryInterface
+class PlatesTemplateRenderer implements ServiceFactoryInterface
 {
     protected Engine $engine;
 

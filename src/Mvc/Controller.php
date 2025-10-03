@@ -9,6 +9,7 @@
 namespace Compose\Mvc;
 use ArrayObject;
 use Compose\Http\Exception\HttpException;
+use Compose\Routing\Route;
 use Compose\Http\RequestHandler;
 use Exception;
 use Psr\Http\Message\ResponseInterface;
@@ -86,8 +87,8 @@ abstract class Controller extends RequestHandler implements ContainerAwareInterf
      */
     protected function resolveActionHandler(ServerRequestInterface $request) : Invocation
     {
-        /** @var RouteInfo $route */
-        $route = $request->getAttribute(RouteInfo::class);
+    /** @var Route $route */
+    $route = $request->getAttribute(Route::class);
         if(!$route) {
             $path = $request->getUri()->getPath();
             $route = new ArrayObject([

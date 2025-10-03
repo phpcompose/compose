@@ -22,7 +22,7 @@ class PagesMiddleware implements MiddlewareInterface, ContainerAwareInterface, R
 
     protected Engine $engine;
 
-    public function __construct(TemplateRenderer $renderer)
+    public function __construct(PlatesTemplateRenderer $renderer)
     {
         $this->engine = $renderer->getEngine();   
     }

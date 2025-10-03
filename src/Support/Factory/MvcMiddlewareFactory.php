@@ -10,11 +10,11 @@ namespace Compose\Support\Factory;
 
 
 use Compose\Container\ServiceFactoryInterface;
-use Compose\Mvc\DispatchingMiddleware;
+use Compose\Routing\DispatchMiddleware;
 use Compose\Mvc\MvcMiddleware;
-use Compose\Mvc\PagesHandler;
-use Compose\Mvc\RouteInfo;
-use Compose\Mvc\RoutingMiddleware;
+use Compose\Mvc\PagesMiddleware;
+use Compose\Routing\Route;
+use Compose\Routing\RoutingMiddleware;
 use Compose\Support\Configuration;
 use Psr\Container\ContainerInterface;
 
@@ -26,8 +26,8 @@ class MvcMiddlewareFactory implements ServiceFactoryInterface
         $mvc = new MvcMiddleware();
         $mvc->setContainer($container);
 
-        /** @var PagesHandler $pageHandler */
-        $pageHandler = $container->get(PagesHandler::class);
+        /** @var PagesMiddleware $pageHandler */
+        $pageHandler = $container->get(PagesMiddleware::class);
         $pageHandler->setContainer($container);
         $pages = $config['pages'] ?? [];
         $pageDir = $pages['dir'] ?? null;
@@ -41,13 +41,13 @@ class MvcMiddlewareFactory implements ServiceFactoryInterface
         }
         $mvc->pipe($pageHandler);
 
-        /** @var RoutingMiddleware $routing */
-        $routing = $container->get(RoutingMiddleware::class);
+    /** @var RoutingMiddleware $routing */
+    $routing = $container->get(RoutingMiddleware::class);
         $routing->setContainer($container);
         $routes = $config['routes'] ?? [];
         if($routes) {
             foreach($routes as $path => $command) {
-                $routing->route(RouteInfo::fromArray([
+                $routing->route(Route::fromArray([
                     'path' => $path,
                     'handler' => $command
                 ]));
@@ -56,10 +56,10 @@ class MvcMiddlewareFactory implements ServiceFactoryInterface
 
         $mvc->pipe($routing);
 
-        /** @var DispatchingMiddleware $dispatcher */
-        $dispatcher = $container->get(DispatchingMiddleware::class);
-        $dispatcher->setContainer($container);
-        $mvc->pipe($dispatcher);
+    /** @var DispatchMiddleware $dispatcher */
+    $dispatcher = $container->get(DispatchMiddleware::class);
+    $dispatcher->setContainer($container);
+    $mvc->pipe($dispatcher);
 
         return $mvc;
     }
