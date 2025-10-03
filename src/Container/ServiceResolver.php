@@ -50,7 +50,7 @@ class ServiceResolver
      * @throws NotFoundExceptionInterface
      * @throws ReflectionException
      */
-    public function resolve($resolvable, array $args = null)
+    public function resolve($resolvable, ?array $args = null)
     {
         if(is_callable($resolvable)) {
             return $this->invoke($resolvable, $args);
@@ -71,7 +71,7 @@ class ServiceResolver
      * @throws NotFoundExceptionInterface
      * @throws ReflectionException
      */
-    public function invoke(callable $callable, array $args = null)
+    public function invoke(callable $callable, ?array $args = null)
     {
         $reflection = Invocation::reflectCallable($callable);
 
@@ -86,7 +86,7 @@ class ServiceResolver
      * @return null|object
      * @throws ReflectionException
      */
-    public function instantiate($className, array $args = null)
+    public function instantiate($className, ?array $args = null)
     {
         $container = $this->getContainer();
         $instance = null;
@@ -125,7 +125,7 @@ class ServiceResolver
      * @return array
      * @throws Exception
      */
-    public function resolveFunctionDependencies(ReflectionFunctionAbstract $function, array $args = null ) : array
+    public function resolveFunctionDependencies(ReflectionFunctionAbstract $function, ?array $args = null ) : array
     {
         $container = $this->getContainer();
         $params = $function->getParameters();

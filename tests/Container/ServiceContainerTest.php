@@ -55,6 +55,9 @@ class Service2Factory implements ServiceFactoryInterface
 }
 
 class Service4 {
+
+    public $service2;
+    public $service3;
     public function __construct(Service2 $service2, Service3 $service3)
     {
         $this->service2 = $service2;
@@ -71,7 +74,7 @@ final class ServiceContainerTest extends TestCase
     /** @var ServiceContainer */
     protected $container;
 
-    public function setUp()
+    protected function setUp(): void
     {
         $this->container = new ServiceContainer();
     }
@@ -96,15 +99,12 @@ final class ServiceContainerTest extends TestCase
 
     public function testCanResolveCallableDependencies() : void
     {
-        $this->assertNull($this->container->set('callback', function(Service2 $service2) {
-            return [
-
-            ];
+        $this->assertNull($this->container->set('callback', function(ServiceContainer $container) {
+            return $container->get(Service2::class);
         }));
 
-        $this->container->get('callback');
-
-
+        $result = $this->container->get('callback');
+        $this->assertInstanceOf(Service2::class, $result);
     }
 
     public function testCanSetClass() : void

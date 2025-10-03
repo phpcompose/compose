@@ -50,7 +50,7 @@ class ServiceContainer implements ContainerInterface
      * @return bool
      * @throws Exception
      */
-    public function has($id) : bool
+    public function has(string $id) : bool
     {
         return isset($this->instances[$id]) ||      // instance available
             isset($this->services[$id]) ||          // service available
@@ -67,7 +67,7 @@ class ServiceContainer implements ContainerInterface
      * @throws NotFoundExceptionInterface
      * @throws Exception
      */
-    public function get($id)
+    public function get(string $id)
     {
         if(isset($this->instances[$id])) { // service instance, if available
             return $this->instances[$id];
@@ -107,7 +107,7 @@ class ServiceContainer implements ContainerInterface
      * @return mixed|null|object
      * @throws \ReflectionException
      */
-    public function resolve($service, array $args = null)
+    public function resolve($service, ?array $args = null)
     {
         $resolver = $this->getResolver();
 

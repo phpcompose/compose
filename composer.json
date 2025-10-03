@@ -9,21 +9,25 @@
     },
     "require": {
         "php": "~8.3",
-        "psr/container": "^1.0",
-        "laminas/laminas-diactoros": "^2.3.1",
-        "laminas/laminas-stratigility": "^3.1",
+        "psr/container": "^2.0",
+        "laminas/laminas-diactoros": "^3.6",
+        "laminas/laminas-stratigility": "^4.2",
         "laminas/laminas-config-aggregator": "^1.1",
         "laminas/laminas-httphandlerrunner": "^2.10",
         "league/plates": "^3.6"
     },
-
     "require-dev": {
-        "phpunit/phpunit": "^10.5"
+        "phpunit/phpunit": "^11.0"
     },
-
     "scripts": {
-        "test-all": "phpunit --colors=always --testdox --verbose --bootstrap vendor/autoload.php tests",
-        "test": "phpunit --colors=always --testdox --verbose --bootstrap vendor/autoload.php",
+        "test-all": "phpunit --colors=always --testdox --bootstrap vendor/autoload.php tests",
+        "test": "phpunit --colors=always --testdox --bootstrap vendor/autoload.php tests",
         "serve": "php -S 0.0.0.0:8080 -t public/"
+    },
+    "config": {
+        "platform": {
+            "php": "8.3.0"
+        },
+        "sort-packages": true
     }
 }
