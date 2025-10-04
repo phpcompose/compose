@@ -32,15 +32,8 @@ class ComposeViewEngineFactory implements ServiceFactoryInterface
         $resolver = $container->get(ServiceResolver::class);
         $registry = new HelperRegistry($resolver);
 
-        $defaults = [
-            'layout' => LayoutHelper::class,
-            'tag' => TagHelper::class,
-            'format' => FormatterHelper::class,
-            'request' => RequestHelper::class,
-        ];
 
         $helpers = $templates['helpers'] ?? ($configuration['helpers'] ?? []);
-        $helpers = array_replace($defaults, $helpers);
 
         foreach (self::normalizeHelpers($helpers) as $alias => $definition) {
             $registry->register($alias, $definition);
