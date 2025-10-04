@@ -7,7 +7,6 @@ use Compose\Container\ServiceResolver;
 use Compose\Mvc\ComposeViewEngine;
 use Compose\Mvc\Helper\FormatterHelper;
 use Compose\Mvc\Helper\HelperRegistry;
-use Compose\Mvc\Helper\LayoutHelper;
 use Compose\Mvc\Helper\RequestHelper;
 use Compose\Mvc\Helper\TagHelper;
 use Compose\Mvc\ViewEngineInterface;

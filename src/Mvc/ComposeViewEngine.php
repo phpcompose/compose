@@ -10,7 +10,6 @@ use Psr\Http\Message\ServerRequestInterface;
 class ComposeViewEngine implements ViewEngineInterface
 {
     private HelperRegistry $helpers;
-    private ?string $defaultLayout;
     private array $folders = [];
     private array $maps = [];
     private ?string $baseDirectory;
@@ -19,7 +18,6 @@ class ComposeViewEngine implements ViewEngineInterface
     public function __construct(array $templates, HelperRegistry $helpers)
     {
         $this->helpers = $helpers;
-        $this->defaultLayout = $templates['layout'] ?? null;
         $this->folders = $templates['folders'] ?? [];
         $this->maps = $templates['maps'] ?? [];
         $this->baseDirectory = $templates['dir'] ?? null;
@@ -29,8 +27,7 @@ class ComposeViewEngine implements ViewEngineInterface
     public function render(string $template, array $data = [], ?ServerRequestInterface $request = null, ?string $layout = null): string
     {
         $view = new View($template, $data);
-        $view->layout = $layout ?? $this->defaultLayout;
-
+        $view->layout = $layout;
         $this->helpers->setContext($view, $request);
         $view->setHelperRegistry($this->helpers);
 
@@ -38,9 +35,8 @@ class ComposeViewEngine implements ViewEngineInterface
             $content = $this->renderScript($view->getScript(), $view->getArrayCopy(), $view);
 
             if ($view->layout) {
-                $view->content($content);
-                $layoutData = $view->getArrayCopy();
-                $layoutData['content'] = $content;
+                $view->set(View::CONTENT, $content);
+                $layoutData = $view->toArray();
                 $content = $this->renderScript($view->layout, $layoutData, $view);
             }
 

@@ -8,7 +8,6 @@ use Compose\Container\ServiceContainer;
 use Compose\Container\ServiceResolver;
 use Compose\Mvc\ComposeViewEngine;
 use Compose\Mvc\Helper\HelperRegistry;
-use Compose\Mvc\Helper\LayoutHelper;
 use Compose\Mvc\ViewEngineInterface;
 use Laminas\Diactoros\ServerRequest;
 use PHPUnit\Framework\TestCase;
@@ -18,8 +17,8 @@ final class ComposeViewEngineTest extends TestCase
     public function testRenderWithLayout(): void
     {
         $dir = $this->createTemplates([
-            'home/index.phtml' => 'Hello <?= $name ?>',
-            'layout.phtml' => '<html><body><main><?= $this->section(\'content\') ?></main></body></html>',
+            'home/index.phtml' => "<?php \$this->layout = 'layout'; ?>Hello <?= \$name ?>",
+            'layout.phtml' => "<html><body><main><?= \$this->get('content') ?></main></body></html>",
         ]);
 
         $engine = $this->createEngine(['dir' => $dir, 'layout' => 'layout']);
@@ -27,6 +26,33 @@ final class ComposeViewEngineTest extends TestCase
         $html = $engine->render('home/index', ['name' => 'Compose'], new ServerRequest());
 
         $this->assertStringContainsString('<main>Hello Compose</main>', $html);
+    }
+
+    public function testSectionsAndSharedDataAreAvailableInLayout(): void
+    {
+        $dir = $this->createTemplates([
+            'home/index.phtml' => <<<'PHP'
+<?php $this->layout = 'layout'; ?>
+<?php $this->set('menu', ['Dashboard']); ?>
+<?php $this->start('sidebar'); ?>Sidebar<?php $this->end(); ?>
+<p>Main Area</p>
+PHP,
+            'layout.phtml' => <<<'PHP'
+<html><body>
+<nav><?= implode(',', (array) $this->get('menu', [])) ?></nav>
+<aside><?= trim($this->get('sidebar', '')) ?></aside>
+<main><?= $this->get('content') ?></main>
+</body></html>
+PHP,
+        ]);
+
+        $engine = $this->createEngine(['dir' => $dir]);
+
+        $html = $engine->render('home/index', [], new ServerRequest());
+
+        $this->assertStringContainsString('<nav>Dashboard</nav>', $html);
+        $this->assertStringContainsString('<aside>Sidebar</aside>', $html);
+        $this->assertStringContainsString('<main><p>Main Area</p></main>', $html);
     }
 
     public function testTemplateLookup(): void
@@ -47,9 +73,6 @@ final class ComposeViewEngineTest extends TestCase
         $container = new ServiceContainer();
         $resolver = new ServiceResolver($container);
         $registry = new HelperRegistry($resolver);
-        $registry->register('layout', LayoutHelper::class);
-        $registry->registerMethodAlias('content', 'layout', 'content');
-        $registry->registerMethodAlias('section', 'layout', 'section');
 
         return new ComposeViewEngine(array_merge([
             'dir' => $templates['dir'] ?? null,
