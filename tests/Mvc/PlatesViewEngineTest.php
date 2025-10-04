@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Mvc;
 
-use Compose\Mvc\PlatesViewEngine;
+use Compose\Bridge\Plates\PlatesViewEngine;
 use Compose\Mvc\ViewEngineInterface;
 use League\Plates\Engine;
 use Laminas\Diactoros\ServerRequest;

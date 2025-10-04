@@ -6,11 +6,11 @@ use Compose\Mvc\Helper\HelperRegistry;
 
 class View extends \ArrayObject
 {
-    public $layout = null;
-    public $title = null;
+    public ?string $layout;
+    public ?string $title;
 
     protected HelperRegistry $helpers;
-    protected ?string $script = null;
+    protected ?string $script;
 
     public function __construct(string $script, array $data = null)
     {
@@ -63,24 +63,6 @@ class View extends \ArrayObject
     public function toArray(): array
     {
         return $this->getArrayCopy();
-    }
-
-    public function __get($name)
-    {
-        return $this->_data[$name] ?? null;
-    }
-
-    public function __set($name, $value): void
-    {
-        $this->_data[$name] = $value;
-    }
-
-    public function __unset($name): void
-    {
-        if (isset($this->_data[$name])) {
-            $this->_data[$name] = null;
-            unset($this->_data[$name]);
-        }
     }
 
     public function __call($name, $arguments)

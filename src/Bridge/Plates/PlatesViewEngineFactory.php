@@ -1,9 +1,8 @@
 <?php
 
-namespace Compose\Support\Factory;
+namespace Compose\Bridge\Plates;
 
 use Compose\Container\ServiceFactoryInterface;
-use Compose\Mvc\PlatesViewEngine;
 use Compose\Mvc\ViewEngineInterface;
 use Compose\Support\Configuration;
 use InvalidArgumentException;
