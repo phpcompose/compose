@@ -100,6 +100,14 @@ class PagesMiddleware implements MiddlewareInterface, ContainerAwareInterface, R
 
         $result = include $script;
 
+        if ($result === false) {
+            throw new \RuntimeException('Unable to include page script: ' . $script);
+        }
+
+        if ($result === 1 || $result === null) {
+            return null;
+        }
+
         if (is_callable($result)) {
             if (is_object($result) && $result instanceof ContainerAwareInterface) {
                 $result->setContainer($this->getContainer());

@@ -26,6 +26,26 @@ class MvcMiddlewareFactory implements ServiceFactoryInterface
         $mvc = new MvcMiddleware();
         $mvc->setContainer($container);
 
+        /** @var RoutingMiddleware $routing */
+        $routing = $container->get(RoutingMiddleware::class);
+        $routing->setContainer($container);
+        $routes = $config['routes'] ?? [];
+        if ($routes) {
+            foreach ($routes as $path => $command) {
+                $routing->route(Route::fromArray([
+                    'path' => $path,
+                    'handler' => $command
+                ]));
+            }
+        }
+
+        $mvc->pipe($routing);
+
+        /** @var DispatchMiddleware $dispatcher */
+        $dispatcher = $container->get(DispatchMiddleware::class);
+        $dispatcher->setContainer($container);
+        $mvc->pipe($dispatcher);
+
         /** @var PagesMiddleware $pageHandler */
         $pageHandler = $container->get(PagesMiddleware::class);
         $pageHandler->setContainer($container);
@@ -39,27 +59,7 @@ class MvcMiddlewareFactory implements ServiceFactoryInterface
         if ($folders) {
             $pageHandler->setFolders($folders);
         }
-        $mvc->pipe($pageHandler);
-
-    /** @var RoutingMiddleware $routing */
-    $routing = $container->get(RoutingMiddleware::class);
-        $routing->setContainer($container);
-        $routes = $config['routes'] ?? [];
-        if($routes) {
-            foreach($routes as $path => $command) {
-                $routing->route(Route::fromArray([
-                    'path' => $path,
-                    'handler' => $command
-                ]));
-            }
-        }
-
-        $mvc->pipe($routing);
-
-    /** @var DispatchMiddleware $dispatcher */
-    $dispatcher = $container->get(DispatchMiddleware::class);
-    $dispatcher->setContainer($container);
-    $mvc->pipe($dispatcher);
+        $mvc->pipe(middleware: $pageHandler);
 
         return $mvc;
     }
