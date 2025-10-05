@@ -6,14 +6,14 @@ namespace Tests\Mvc;
 
 use Compose\Container\ServiceContainer;
 use Compose\Container\ServiceResolver;
-use Compose\Mvc\ComposeViewEngine;
+use Compose\Mvc\ViewEngine;
 use Compose\Mvc\Helper\HelperRegistry;
 use Compose\Mvc\Helper\TagHelper;
 use Compose\Mvc\ViewEngineInterface;
 use Laminas\Diactoros\ServerRequest;
 use PHPUnit\Framework\TestCase;
 
-final class ComposeViewEngineTest extends TestCase
+final class ViewEngineTest extends TestCase
 {
     public function testRenderWithLayout(): void
     {
@@ -110,7 +110,7 @@ PHP,
             }
         }
 
-        return new ComposeViewEngine(array_merge([
+        return new ViewEngine(array_merge([
             'dir' => $templates['dir'] ?? null,
             'folders' => $templates['folders'] ?? [],
             'maps' => $templates['maps'] ?? [],

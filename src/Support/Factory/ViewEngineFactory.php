@@ -4,13 +4,13 @@ namespace Compose\Support\Factory;
 
 use Compose\Container\ServiceFactoryInterface;
 use Compose\Container\ServiceResolver;
-use Compose\Mvc\ComposeViewEngine;
+use Compose\Mvc\ViewEngine;
 use Compose\Mvc\Helper\HelperRegistry;
 use Compose\Mvc\ViewEngineInterface;
 use Compose\Support\Configuration;
 use Psr\Container\ContainerInterface;
 
-class ComposeViewEngineFactory implements ServiceFactoryInterface
+class ViewEngineFactory implements ServiceFactoryInterface
 {
     public static function create(ContainerInterface $container, string $id): ViewEngineInterface
     {
@@ -44,6 +44,6 @@ class ComposeViewEngineFactory implements ServiceFactoryInterface
             'extension' => $templates['extension'] ?? 'phtml',
         ];
 
-        return new ComposeViewEngine(array_merge($config, $templates), $registry);
+        return new ViewEngine(array_merge($config, $templates), $registry);
     }
 }

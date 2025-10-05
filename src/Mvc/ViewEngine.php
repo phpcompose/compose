@@ -7,7 +7,7 @@ use Compose\Mvc\HelperRegistryInterface;
 use Exception;
 use Psr\Http\Message\ServerRequestInterface;
 
-class ComposeViewEngine implements ViewEngineInterface
+class ViewEngine implements ViewEngineInterface
 {
     private HelperRegistry $helpers;
     private array $folders = [];

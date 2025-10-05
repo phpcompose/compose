@@ -60,7 +60,7 @@ class Config
                 ErrorHandler::class => Compose\Support\Factory\ErrorHandlerFactory::class,
                 Compose\Event\EventDispatcherInterface::class => Compose\Support\Factory\EventDispatcherFactory::class,
                 Compose\Http\Session\Session::class => Compose\Support\Factory\SessionFactory::class,
-                Compose\Mvc\ViewEngineInterface::class => Compose\Support\Factory\ComposeViewEngineFactory::class,
+                Compose\Mvc\ViewEngineInterface::class => Compose\Support\Factory\ViewEngineFactory::class,
                 Compose\Mvc\MvcMiddleware::class => Compose\Support\Factory\MvcMiddlewareFactory::class,
                 Compose\Http\OutputBufferMiddleware::class => Compose\Http\OutputBufferMiddleware::class,
                 Compose\Mvc\PagesMiddleware::class => Compose\Mvc\PagesMiddleware::class,
