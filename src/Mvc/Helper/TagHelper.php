@@ -2,12 +2,11 @@
 
 namespace Compose\Mvc\Helper;
 
-use Compose\Mvc\HelperRegistryInterface;
 use Compose\Mvc\View;
 
-class TagHelper implements HelperInterface
+class TagHelper
 {
-    public function __invoke(HelperRegistryInterface $helpers, ...$args)
+    public function __invoke(...$args)
     {
         return $this;
     }

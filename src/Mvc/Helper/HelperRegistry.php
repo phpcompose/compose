@@ -53,6 +53,26 @@ class HelperRegistry implements ContainerAwareInterface, HelperRegistryInterface
         $this->definitions[$name] = $definition;
     }
 
+    /**
+     * Registers all public methods of the given class or object as helper aliases.
+     */
+    public function extend($helper): void
+    {
+        $reflection = new \ReflectionClass($helper);
+        foreach ($reflection->getMethods(\ReflectionMethod::IS_PUBLIC) as $method) {
+            $name = $method->getName();
+            if ($name === '__construct' || str_starts_with($name, '__')) {
+                continue;
+            }
+
+            if ($this->has($name)) {
+                continue;
+            }
+
+            $this->register($name, $helper);
+        }
+    }
+
     public function has(string $name): bool
     {
         return array_key_exists($name, $this->definitions);
@@ -102,8 +122,8 @@ class HelperRegistry implements ContainerAwareInterface, HelperRegistryInterface
             return;
         }
 
-        $this->register($alias, function(HelperRegistryInterface $helpers, ...$arguments) use ($helperName, $method) {
-            $helper = $helpers->get($helperName);
+        $this->register($alias, function (...$arguments) use ($helperName, $method) {
+            $helper = $this->get($helperName);
 
             if (!is_object($helper) || !method_exists($helper, $method)) {
                 throw new \LogicException(sprintf('Helper "%s" does not provide method "%s".', $helperName, $method));
@@ -131,19 +151,23 @@ class HelperRegistry implements ContainerAwareInterface, HelperRegistryInterface
 
         $definition = $this->resolveDefinition($name);
 
-        if (is_object($definition)) {
-            if (method_exists($definition, 'setRegistry')) {
-                $definition->setRegistry($this);
-            } elseif (property_exists($definition, 'registry')) {
-                $definition->registry = $this;
-            }
+        if (is_object($definition) && $definition instanceof HelperRegistryAwareInterface) {
+            $definition->setHelperRegistry($this);
         }
 
-        if (!is_callable($definition)) {
-            throw new \LogicException('Helper is not callable: ' . $name);
+        if (is_object($definition) && method_exists($definition, $name)) {
+            return $definition->$name(...$arguments);
         }
 
-        return $definition($this, ...$arguments);
+        if (is_callable($definition)) {
+            return $definition(...$arguments);
+        }
+
+        if (is_object($definition) && method_exists($definition, '__call')) {
+            return $definition->$name(...$arguments);
+        }
+
+        throw new \LogicException('Helper is not callable: ' . $name);
     }
 
     private function resolveDefinition(string $name)

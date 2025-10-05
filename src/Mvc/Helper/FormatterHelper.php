@@ -2,11 +2,9 @@
 
 namespace Compose\Mvc\Helper;
 
-use Compose\Mvc\HelperRegistryInterface;
-
-class FormatterHelper implements HelperInterface
+class FormatterHelper
 {
-    public function __invoke(HelperRegistryInterface $helpers, ...$args)
+    public function __invoke(...$args)
     {
         return $this;
     }

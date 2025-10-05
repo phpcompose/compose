@@ -5,32 +5,33 @@ namespace Compose\Mvc\Helper;
 use Compose\Mvc\HelperRegistryInterface;
 use Psr\Http\Message\ServerRequestInterface;
 
-class RequestHelper implements HelperInterface
+class RequestHelper implements HelperRegistryAwareInterface
 {
-    public $registry;
-
-    private ?HelperRegistryInterface $helpers = null;
+    private ?HelperRegistryInterface $registry = null;
     private ?ServerRequestInterface $request = null;
 
-    public function __invoke(HelperRegistryInterface $helpers, ...$args)
+    public function setHelperRegistry(HelperRegistryInterface $registry): void
     {
-        $this->helpers = $helpers;
-        $this->registry = $helpers; // backwards compatibility
-        $this->request = $helpers->getCurrentRequest();
+        $this->registry = $registry;
+    }
 
+    public function __invoke(...$args)
+    {
         return $this;
     }
 
     public function request(): ServerRequestInterface
     {
-        if ($this->request) {
+        if ($this->request instanceof ServerRequestInterface) {
             return $this->request;
         }
-        $current = $this->helpers ? $this->helpers->getCurrentRequest() : null;
-        if ($current) {
+
+        $current = $this->registry ? $this->registry->getCurrentRequest() : null;
+        if ($current instanceof ServerRequestInterface) {
             $this->request = $current;
             return $current;
         }
+
         throw new \RuntimeException('No active request available for RequestHelper.');
     }
 

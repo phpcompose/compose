@@ -6,7 +6,7 @@ use Compose\Mvc\Helper\HelperRegistry;
 
 class View extends \ArrayObject
 {
-    public const CONTENT = 'content';
+    public const string CONTENT = 'content';
 
     public ?string $layout = null;
     public ?string $title = null;

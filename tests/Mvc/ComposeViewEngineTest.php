@@ -8,6 +8,7 @@ use Compose\Container\ServiceContainer;
 use Compose\Container\ServiceResolver;
 use Compose\Mvc\ComposeViewEngine;
 use Compose\Mvc\Helper\HelperRegistry;
+use Compose\Mvc\Helper\TagHelper;
 use Compose\Mvc\ViewEngineInterface;
 use Laminas\Diactoros\ServerRequest;
 use PHPUnit\Framework\TestCase;
@@ -55,6 +56,32 @@ PHP,
         $this->assertStringContainsString('<main><p>Main Area</p></main>', $html);
     }
 
+    public function testNumericHelperRegistrationExtendsMethods(): void
+    {
+        $dir = $this->createTemplates([
+            'home/index.phtml' => <<<'PHP'
+<?php $this->layout = 'layout'; ?>
+<?php echo $this->open('section', ['class' => 'hero']); ?>
+    <h2>Hello</h2>
+<?php echo $this->close('section'); ?>
+PHP,
+            'layout.phtml' => <<<'PHP'
+<html><body><?= $this->get('content') ?></body></html>
+PHP,
+        ]);
+
+        $engine = $this->createEngine([
+            'dir' => $dir,
+            'layout' => 'layout',
+            'helpers' => [TagHelper::class],
+        ]);
+
+        $html = $engine->render('home/index', [], new ServerRequest());
+
+        $this->assertStringContainsString('<section class="hero">', $html);
+        $this->assertStringContainsString('</section>', $html);
+    }
+
     public function testTemplateLookup(): void
     {
         $dir = $this->createTemplates([
@@ -73,6 +100,15 @@ PHP,
         $container = new ServiceContainer();
         $resolver = new ServiceResolver($container);
         $registry = new HelperRegistry($resolver);
+
+        $helpers = $templates['helpers'] ?? [];
+        foreach ($helpers as $alias => $definition) {
+            if (is_int($alias)) {
+                $registry->extend($definition);
+            } else {
+                $registry->register($alias, $definition);
+            }
+        }
 
         return new ComposeViewEngine(array_merge([
             'dir' => $templates['dir'] ?? null,

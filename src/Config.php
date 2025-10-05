@@ -121,8 +121,8 @@ class Config
              * Map helper aliases to callables registered with the view engine.
              */
             'helpers' => [
-                'tag' => Compose\Mvc\Helper\TagHelper::class,
-                'format' => Compose\Mvc\Helper\FormatterHelper::class,
+                Compose\Mvc\Helper\TagHelper::class,
+                Compose\Mvc\Helper\FormatterHelper::class,
                 'request' => Compose\Mvc\Helper\RequestHelper::class,
             ],
         ];
