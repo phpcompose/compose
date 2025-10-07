@@ -3,8 +3,8 @@ namespace Compose;
 
 
 use Compose\Container\ServiceContainer;
-use Compose\Event\ApplicationInitEvent;
-use Compose\Event\ApplicationReadyEvent;
+use Compose\Starter\Event\ApplicationInitEvent;
+use Compose\Starter\Event\ApplicationReadyEvent;
 use Compose\Http\BodyParsingMiddleware;
 use Compose\Mvc\MvcMiddleware;
 use Compose\Http\OutputBufferMiddleware;
