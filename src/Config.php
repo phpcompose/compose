@@ -58,7 +58,7 @@ class Config
              */
             'services' => [
                 ErrorHandler::class => Compose\Support\Factory\ErrorHandlerFactory::class,
-                \Psr\EventDispatcher\ListenerProviderInterface::class => Compose\Event\ListenerProvider::class,
+                \Psr\EventDispatcher\ListenerProviderInterface::class => Compose\Support\Factory\ListenerProviderFactory::class,
                 \Psr\EventDispatcher\EventDispatcherInterface::class => Compose\Event\EventDispatcher::class,
                 Compose\Http\Session\Session::class => Compose\Support\Factory\SessionFactory::class,
                 Compose\Mvc\ViewEngineInterface::class => Compose\Support\Factory\ViewEngineFactory::class,

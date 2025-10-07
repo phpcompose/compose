@@ -10,35 +10,34 @@ class ListenerProvider implements ListenerProviderInterface, ResolvableInterface
     /** @var array<class-string, list<callable>> */
     private array $listeners = [];
 
-    public function addListener(string $eventClass, callable $listener): void
+    public function addListener(string $eventIdentifier, callable $listener): void
     {
-        $this->listeners[$eventClass][] = $listener;
+        $this->listeners[$eventIdentifier][] = $listener;
     }
 
     public function addSubscriber(SubscriberInterface $subscriber): void
     {
-        foreach ($subscriber->getSubscribedEvents() as $eventClass => $methods) {
-            if (is_array($methods)) {
-                foreach ($methods as $method) {
-                    $this->addListener($eventClass, [$subscriber, $method]);
-                }
-                continue;
-            }
-
-            $this->addListener($eventClass, [$subscriber, $methods]);
+        foreach ($subscriber->getSubscribedEvents() as $eventIdentifier => $callable) {
+            $this->addListener($eventIdentifier, $callable);
         }
     }
 
     public function getListenersForEvent(object $event): iterable
     {
-        foreach ($this->listeners as $eventClass => $listeners) {
-            if (!is_a($event, $eventClass)) {
-                continue;
+        $listeners = [];
+        if ($event instanceof EventInterface && isset($this->listeners[$event->identifier()])) {
+            $listeners = $this->listeners[$event->identifier()];
+        } else {
+            foreach ($this->listeners as $eventIdentifier => $eventListeners) {
+                if (is_a($event, $eventIdentifier)) {
+                    foreach ($eventListeners as $listener) {
+                        $listeners[] = $listener;
+                    }
+                }
             }
-
-            foreach ($listeners as $listener) {
-                yield $listener;
-            }
+        }
+        foreach ($listeners as $listener) {
+            yield $listener;
         }
     }
 }

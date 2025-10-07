@@ -53,7 +53,7 @@ class Starter
      * @throws ContainerExceptionInterface
      * @throws NotFoundExceptionInterface
      */
-    public function start(Configuration $configuration) : Pipeline
+    public function init(Configuration $configuration, ?callable $callback = null) : Pipeline
     {
         // application http pipeline setup
         $container = $this->createContainer($configuration);
@@ -67,6 +67,9 @@ class Starter
         $dispatcher->dispatch(new ApplicationInitEvent($container));
 
         $this->onInit($container, $pipeline);
+        if($callback) {
+            $callback($container, $pipeline);
+        }
 
         $dispatcher->dispatch(new ApplicationReadyEvent($container));
 
@@ -110,11 +113,11 @@ class Starter
      * @throws ContainerExceptionInterface
      * @throws NotFoundExceptionInterface
      */
-    static public function run(array $config)
+    static public function start(array $config, ?callable $callback = null)
     {
         $configuration = new Configuration($config);
         $starter = new static();
-        $pipeline = $starter->start($configuration);
+        $pipeline = $starter->init($configuration, $callback);
         $pipeline->listen();
     }
 }

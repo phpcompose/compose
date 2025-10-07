@@ -4,7 +4,7 @@ namespace Compose\Event;
 
 use Psr\Container\ContainerInterface;
 
-final class ApplicationInitEvent
+final class ApplicationInitEvent extends AbstractEvent
 {
     public function __construct(private ContainerInterface $container)
     {
