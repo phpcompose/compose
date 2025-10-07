@@ -1,126 +1,28 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: alaminahmed
- * Date: 2017-12-04
- * Time: 1:42 PM
- */
 
 namespace Compose\Event;
 
+use Compose\Container\ResolvableInterface;
+use Psr\EventDispatcher\EventDispatcherInterface;
+use Psr\EventDispatcher\ListenerProviderInterface;
+use Psr\EventDispatcher\StoppableEventInterface;
 
-use Exception;
-
-/**
- * Class EventNotifier
- * @package Compose\Event
- */
-class EventDispatcher implements EventDispatcherInterface
+final class EventDispatcher implements EventDispatcherInterface, ResolvableInterface
 {
-    protected
-        /**
-         * @var array
-         */
-        $listeners = [];
-
-    /**
-     * @inheritdoc
-     * @param EventInterface $event
-     * @return iterable
-     */
-    public function getListenersForEvent(EventInterface $event): iterable
+    public function __construct(private ListenerProviderInterface $provider)
     {
-        $name = null;
-        if($event instanceof Message) {
-            $name = $event->getName();
-        } else {
-            $name = get_class($event);
-        }
-
-        return $this->listeners[$name] ?? [];
     }
 
-    /**
-     * @inheritdoc
-     * @param string $event
-     * @param callable $callback
-     * @param int $priority
-     * @return bool
-     */
-    public function attach(string $event, callable $listener): void
+    public function dispatch(object $event): object
     {
-        if(!isset($this->listeners[$event])) {
-            $this->listeners[$event] = [];
-        }
+        foreach ($this->provider->getListenersForEvent($event) as $listener) {
+            $listener($event);
 
-        $this->listeners[$event][] = $listener;
-    }
-
-    /**
-     * @inheritdoc
-     * @param $event
-     * @param callable $callback
-     */
-    public function detach(string $event, callable $listener) : void
-    {
-        $listeners = $this->listeners[$event] ?? null;
-        if(!$listeners) return;
-
-        foreach($listeners as $index => $aListener) {
-            if($aListener !== $listener) continue;
-            unset($this->listeners[$event][$index]);
-        }
-    }
-
-    /**
-     * @param SubscriberInterface $subscriber
-     */
-    public function subscribe(SubscriberInterface $subscriber)
-    {
-        $events = $subscriber->subscribedEvents();
-        foreach($events as $event => $methods) {
-            if(is_array($methods)) {
-                foreach($methods as $method) {
-                    $this->attach($event, [$subscriber, $method]);
-                }
-            } else {
-                $this->attach($event, [$subscriber, $methods]);
+            if ($event instanceof StoppableEventInterface && $event->isPropagationStopped()) {
+                break;
             }
         }
-    }
 
-    /**
-     * @param SubscriberInterface $subscriber
-     */
-    public function unsubscribe(SubscriberInterface $subscriber)
-    {
-        $events = $subscriber->subscribedEvents();
-        foreach($events as $event => $methods) {
-            if(is_array($methods)) {
-                foreach($methods as $method) {
-                    $this->detach($event, [$subscriber, $method]);
-                }
-            } else {
-                $this->detach($event, [$subscriber, $methods]);
-            }
-        }
-    }
-
-    /**
-     * @inheritdoc
-     * @param EventInterface $message
-     * @throws Exception
-     */
-    public function dispatch(EventInterface $message) : void
-    {
-        $listeners = $this->getListenersForEvent($message);
-
-        try {
-            foreach($listeners as $listener) {
-                $listener($message);
-            }
-        } catch (Exception $e) {
-            throw $e;
-        }
+        return $event;
     }
 }

@@ -3,8 +3,8 @@ namespace Compose;
 
 
 use Compose\Container\ServiceContainer;
-use Compose\Event\EventDispatcherInterface;
-use Compose\Event\Message;
+use Compose\Event\ApplicationInitEvent;
+use Compose\Event\ApplicationReadyEvent;
 use Compose\Http\BodyParsingMiddleware;
 use Compose\Mvc\MvcMiddleware;
 use Compose\Http\OutputBufferMiddleware;
@@ -12,6 +12,7 @@ use Compose\Http\Pipeline;
 use Compose\Support\Configuration;
 use Compose\Support\Error\NotFoundMiddleware;
 use Exception;
+use Psr\EventDispatcher\EventDispatcherInterface;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\ContainerInterface;
 use Laminas\Stratigility\Middleware\ErrorHandler;
@@ -24,10 +25,6 @@ use Psr\Container\NotFoundExceptionInterface;
  */
 class Starter
 {
-    const
-        EVENT_INIT = 'starter.init',
-        EVENT_READY = 'starter.ready';
-
     /**
      * @param ContainerInterface $container
      * @param Pipeline $pipeline
@@ -65,13 +62,13 @@ class Starter
         // register the main error handler
         $pipeline->pipe($container->get(ErrorHandler::class)); 
 
-        /** @var EventDispatcherInterface $notifier */
-        $notifier = $container->get(EventDispatcherInterface::class);
-        $notifier->dispatch(new Message(self::EVENT_INIT, ['container' => $container], $this));
+        /** @var EventDispatcherInterface $dispatcher */
+        $dispatcher = $container->get(EventDispatcherInterface::class);
+        $dispatcher->dispatch(new ApplicationInitEvent($container));
 
         $this->onInit($container, $pipeline);
 
-        $notifier->dispatch(new Message(self::EVENT_READY, ['container' => $container], $this));
+        $dispatcher->dispatch(new ApplicationReadyEvent($container));
 
         // now final handler/not found handler
         $pipeline->pipe($container->get(NotFoundMiddleware::class));

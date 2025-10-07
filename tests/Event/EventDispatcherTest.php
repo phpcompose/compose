@@ -1,140 +1,96 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: alaminahmed
- * Date: 2018-06-26
- * Time: 4:47 PM
- */
+
+declare(strict_types=1);
 
 namespace Compose\Event;
 
+use Compose\Event\EventDispatcher;
+use Compose\Event\ListenerProvider;
+use Compose\Event\SubscriberInterface;
 use PHPUnit\Framework\TestCase;
+use Psr\EventDispatcher\EventDispatcherInterface;
 
-class MessageOne implements EventInterface
+final class EventDispatcherTest extends TestCase
 {
-
-}
-
-class EventDispatcherTest extends TestCase
-{
-    /** @var EventDispatcher */
-    protected $notifier;
-
-    /** @var \ArrayObject */
-    protected $results;
+    private EventDispatcherInterface $dispatcher;
+    private ListenerProvider $provider;
 
     protected function setUp(): void
     {
-        $this->notifier = new EventDispatcher();
-        $this->results = new \ArrayObject();
+        $this->provider = new ListenerProvider();
+        $this->dispatcher = new EventDispatcher($this->provider);
     }
 
-    /**
-     * @throws \Exception
-     */
-    public function testBasicListeningAndDispatching()
+    public function testListenerReceivesEvent(): void
     {
-        $results = new \ArrayObject();
-        $this->notifier->attach(MessageOne::class, function(MessageOne $message) use($results) {
-            $results['test1'] = 'value1';
-        });
-
-        $this->assertArrayNotHasKey('test1', $results);
-        $this->notifier->dispatch(new MessageOne());
-        $this->assertEquals('value1', $results['test1']);
-    }
-
-    /**
-     * @throws \Exception
-     */
-    public function testCustomMessageObjectListening()
-    {
-        $this->notifier->attach('message.two', function(Message $message) {
-            $message['arg1'] = 'changed';
-        });
-
-        $message = new Message('message.two', ['arg1' => 'val1']);
-        $this->notifier->dispatch($message);
-
-        $this->assertEquals('changed', $message['arg1']);
-    }
-
-    /**
-     * @throws \Exception
-     */
-    public function testAttachAndDetachListener()
-    {
-        $count = 0;
-
-        $listener = function () use (&$count) {
-            $count++;
+        $event = new class {
+            public bool $handled = false;
         };
 
-        $this->notifier->attach('event1', $listener);
-        $this->notifier->dispatch(new Message('event1'));
-        $this->notifier->dispatch(new Message('event1'));
-
-        $this->assertEquals(2, $count);
-
-        // now detach
-        $this->notifier->detach('event1', $listener);
-        $this->notifier->dispatch(new Message('event1'));
-        $this->assertEquals(2, $count);
-    }
-
-    /**
-     * @throws \Exception
-     */
-    public function _testEventArgs()
-    {
-        $args = new EventArgs('event2', ['param1' => 'value2']);
-        $this->assertEquals('event2', $args->getName());
-        $this->assertArrayHasKey('param1', $args);
-        $this->assertEquals('value2', $args['param1']);
-        $this->assertNull($args->getSender());
-
-
-
-        $this->notifier->attach('event2', function(EventArgs $args) {
-            $this->assertEquals('event2', $args->getName());
-            $this->assertEquals('value1', $args['param1']);
+        $this->provider->addListener($event::class, function ($e) {
+            $e->handled = true;
         });
 
-        $this->notifier->dispatch(new Message('event2', ['param1' => 'value1']));
+        $this->dispatcher->dispatch($event);
+
+        $this->assertTrue($event->handled);
     }
 
-    /**
-     * @throws \Exception
-     */
-    public function testSubscription()
+    public function testSubscriberRegistersListeners(): void
     {
-        $result = new \ArrayObject();
+        $event = new class {
+            public int $count = 0;
+        };
 
-        $subscriber = new class($result) implements SubscriberInterface {
-            protected $object;
+        $subscriber = new class($event) implements SubscriberInterface {
+            public function __construct(private object $event) {}
 
-            public function __construct(\ArrayObject $object) {
-                $this->object = $object;
-            }
-
-            public function subscribedEvents(): array
+            public function getSubscribedEvents(): array
             {
-                return ['event3' => 'onEvent3', 'event4' => 'onEvent4'];
+                return [get_class($this->event) => 'onEvent'];
             }
 
-            public function onEvent3(Message $message) {
-                $this->object['param1'] = $message['param1'];
-            }
-
-            public function onEvent4()
+            public function onEvent(object $event): void
             {
-
+                $event->count++;
             }
         };
 
-        $this->notifier->subscribe($subscriber);
-        $this->notifier->dispatch(new Message('event3', ['param1' => 'value1']));
+        $this->provider->addSubscriber($subscriber);
 
-        $this->assertEquals('value1', $result['param1']);
+        $this->dispatcher->dispatch($event);
+
+        $this->assertSame(1, $event->count);
+    }
+
+    public function testStoppableEventStopsPropagation(): void
+    {
+        $event = new class implements \Psr\EventDispatcher\StoppableEventInterface {
+            public int $count = 0;
+            private bool $stopped = false;
+
+            public function stop(): void
+            {
+                $this->stopped = true;
+            }
+
+            public function isPropagationStopped(): bool
+            {
+                return $this->stopped;
+            }
+        };
+
+        $this->provider->addListener($event::class, function ($e) {
+            $e->count++;
+            $e->stop();
+        });
+
+        $this->provider->addListener($event::class, function ($e) {
+            $e->count++;
+        });
+
+        $this->dispatcher->dispatch($event);
+
+        $this->assertSame(1, $event->count);
     }
 }

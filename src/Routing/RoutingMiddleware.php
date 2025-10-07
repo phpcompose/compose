@@ -4,8 +4,8 @@ namespace Compose\Routing;
 
 use Compose\Container\ContainerAwareInterface;
 use Compose\Container\ContainerAwareTrait;
-use Compose\Event\EventDispatcherInterface;
-use Compose\Event\Message;
+use Compose\Http\Event\RouteEvent;
+use Psr\EventDispatcher\EventDispatcherInterface;
 use Exception;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\NotFoundExceptionInterface;
@@ -18,10 +18,6 @@ class RoutingMiddleware implements MiddlewareInterface, ContainerAwareInterface
 {
     use ContainerAwareTrait;
 
-    const
-        EVENT_ROUTE = 'http.route',
-        EVENT_ERROR = 'http.error';
-
     protected
         /**
          * @var array
@@ -30,12 +26,16 @@ class RoutingMiddleware implements MiddlewareInterface, ContainerAwareInterface
 
     public function route(Route $route) : void
     {
-        $path = $route->path;
+        $path = trim($route->path, '/');
+
+        if ($path === '') {
+            throw new Exception('Route path cannot be empty.');
+        }
+
         if(isset($this->routes[$path])) {
             throw new Exception("Route already mapped for path: {$path}");
         }
 
-        $path = trim($path, '/');
         $this->routes[$path] = $route;
     }
 
@@ -78,9 +78,8 @@ class RoutingMiddleware implements MiddlewareInterface, ContainerAwareInterface
 
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler) : ResponseInterface
     {
-        $notifier = $this->getContainer()->get(EventDispatcherInterface::class);
-
-        $notifier->dispatch(new Message(self::EVENT_ROUTE, ['request' => $request], $this));
+        $dispatcher = $this->getContainer()->get(EventDispatcherInterface::class);
+        $dispatcher->dispatch(new RouteEvent($request));
         $route = $this->match($request);
 
         if($route) {

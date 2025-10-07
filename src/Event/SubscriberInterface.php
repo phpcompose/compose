@@ -1,22 +1,11 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: alaminahmed
- * Date: 2017-12-31
- * Time: 8:59 PM
- */
 
 namespace Compose\Event;
 
-/**
- * Interface SubscriberInterface
- * @package Compose\Event
- */
 interface SubscriberInterface
 {
     /**
-     * Subscribed events.
-     * @return array
+     * @return array<class-string, string|string[]>
      */
-    public function subscribedEvents() : array;
+    public function getSubscribedEvents(): array;
 }
