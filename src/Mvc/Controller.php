@@ -29,41 +29,41 @@ use ReflectionException;
 abstract class Controller extends RequestHandler implements ContainerAwareInterface
 {
     use ContainerAwareTrait;
-    
+
     protected
-        /**
-         * Mapping HTTP method to internal method for action routing
-         *
-         * @var array
-         */
-        $httpMethodMapper = [
-            'index' => 'index',
-            'get'   => 'get',
-            'post'  => 'post',
-            'put'   => 'put',
-            'patch' => 'patch',
-            'delete'=> 'delete'
-        ],
+    /**
+     * Mapping HTTP method to internal method for action routing
+     *
+     * @var array
+     */
+    $httpMethodMapper = [
+        'index' => 'index',
+        'get' => 'get',
+        'post' => 'post',
+        'put' => 'put',
+        'patch' => 'patch',
+        'delete' => 'delete'
+    ],
 
-        /**
-         * Action prefix
-         *
-         * @var string
-         */
-        $actionNamePrefix = 'do',
+    /**
+     * Action prefix
+     *
+     * @var string
+     */
+    $actionNamePrefix = 'do',
 
-        /**
-         * @var string
-         */
-        $actionNameSuffix = '',
+    /**
+     * @var string
+     */
+    $actionNameSuffix = '',
 
-        /**
-         * Default action name.
-         *
-         * This name is usually used for index method (GET method + no param passed)
-         * @var string
-         */
-        $defaultAction = 'index';
+    /**
+     * Default action name.
+     *
+     * This name is usually used for index method (GET method + no param passed)
+     * @var string
+     */
+    $defaultAction = 'index';
 
 
     /**
@@ -72,7 +72,7 @@ abstract class Controller extends RequestHandler implements ContainerAwareInterf
      * @throws HttpException
      * @throws ReflectionException
      */
-    protected function onHandle(ServerRequestInterface $request) : ResponseInterface
+    protected function onHandle(ServerRequestInterface $request): ResponseInterface
     {
         /** @var Invocation $invocation */
         $invocation = $this->resolveActionHandler($request);
@@ -86,11 +86,11 @@ abstract class Controller extends RequestHandler implements ContainerAwareInterf
      * @return Invocation|null
      * @throws HttpException
      */
-    protected function resolveActionHandler(ServerRequestInterface $request) : Invocation
+    protected function resolveActionHandler(ServerRequestInterface $request): Invocation
     {
-    /** @var Route $route */
-    $route = $request->getAttribute(Route::class);
-        if(!$route) {
+        /** @var Route $route */
+        $route = $request->getAttribute(Route::class);
+        if (!$route) {
             $path = $request->getUri()->getPath();
             $route = new ArrayObject([
                 'method' => $request->getMethod(),
@@ -102,13 +102,13 @@ abstract class Controller extends RequestHandler implements ContainerAwareInterf
         $action = $this->resolveActionName($route);
         $params = $route->params;
 
-        
+
 
         $invocation = Invocation::fromCallable([$this, $action]);
-        if(!$invocation) {
+        if (!$invocation) {
             throw new HttpException("Unable to find action for request: {$route->method}: {$route->path} in " . get_class($this), 404);
         }
-        if($invocation->getArgumentTypeAtIndex(0) == ServerRequestInterface::class) {
+        if ($invocation->getArgumentTypeAtIndex(0) == ServerRequestInterface::class) {
             array_unshift($params, $request); // add the request as the first param
         }
 
@@ -122,22 +122,22 @@ abstract class Controller extends RequestHandler implements ContainerAwareInterf
      * @param ArrayObject $route
      * @return string
      */
-    protected function resolveActionName(ArrayObject $route) : string
+    protected function resolveActionName(ArrayObject $route): string
     {
         // map http method
         $httpMethod = strtolower($route->method);
-        if(isset($this->httpMethodMapper[$httpMethod])) {
+        if (isset($this->httpMethodMapper[$httpMethod])) {
             $httpMethod = $this->httpMethodMapper[$httpMethod];
         }
 
         // handle default case, ie. path/ (GET request + no param passed)
-        if(!count($route->params) && $httpMethod == 'get') {
+        if (!count($route->params) && $httpMethod == 'get') {
             return $this->buildActionName($this->defaultAction);
         }
 
         // now check for standard restful methods
         $restMethod = $this->buildActionName($httpMethod);
-        if(method_exists($this, $restMethod)) {
+        if (method_exists($this, $restMethod)) {
             return $restMethod;
         }
 
@@ -155,7 +155,7 @@ abstract class Controller extends RequestHandler implements ContainerAwareInterf
      * @param $names
      * @return string
      */
-    protected function buildActionName(...$names) : string
+    protected function buildActionName(...$names): string
     {
         array_unshift($names, $this->actionNamePrefix);
         array_push($names, $this->actionNameSuffix);
@@ -168,22 +168,23 @@ abstract class Controller extends RequestHandler implements ContainerAwareInterf
      * Validate action name
      *
      * @note regex from php doc for function name: http://php.net/manual/en/functions.user-defined.php
-    * @param string|null $action
-    * @return string|null
+     * @param string|null $action
+     * @return string|null
      */
-    protected function filterActionName(string $action = null) : ?string
+    protected function filterActionName(string $action = null): ?string
     {
-        if(!$action) return null;
+        if (!$action)
+            return null;
         $allowedChars = ['-'];
 
         // if allowed chars are provided,
         // then we will need to remove them first
-        if(count($allowedChars)) {
+        if (count($allowedChars)) {
             $action = str_replace(' ', '', str_replace($allowedChars, ' ', $action));
         }
 
         $regex = "/^[a-zA-Z_\x7f-\xff][a-zA-Z0-9_\x7f-\xff]*$/"; // see comment ^
-        if(!preg_match($regex, $action)) {
+        if (!preg_match($regex, $action)) {
             return null;
         }
 

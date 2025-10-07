@@ -16,7 +16,7 @@ class View extends \ArrayObject
     private array $sectionStack = [];
     private array $sections = [];
 
-    public function __construct(string $script, array $data = null)
+    public function __construct(string $script, ?array $data = null)
     {
         parent::__construct($data ?? []);
         $this->script = $script;
@@ -32,12 +32,12 @@ class View extends \ArrayObject
         return $this->script ?? '';
     }
 
-    public function e(string $str = null, array $args = null): string
+    public function e(?string $str = null, ?array $args = null): string
     {
         return self::escape($str, $args);
     }
 
-    public static function escape(string $str = null, array $args = null): string
+    public static function escape(?string $str = null, ?array $args = null): string
     {
         if (!$str) {
             return '';

@@ -82,7 +82,7 @@ class ViewEngine implements ViewEngineInterface
         return $paths;
     }
 
-    private function renderScript(string $script, array $locals = null, $bind = null): string
+    private function renderScript(string $script, ?array $locals = null, ?object $bind = null): string
     {
         $filename = $this->resolve($script);
         if (!$filename) {
