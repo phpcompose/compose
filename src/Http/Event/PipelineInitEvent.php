@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace Compose\Starter\Event;
+namespace Compose\Http\Event;
 
 use Compose\Event\AbstractEvent;
 use Psr\Container\ContainerInterface;
 
-final class ApplicationReadyEvent extends AbstractEvent
+final class PipelineInitEvent extends AbstractEvent
 {
     public function __construct(private ContainerInterface $container)
     {

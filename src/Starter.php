@@ -3,8 +3,8 @@ namespace Compose;
 
 
 use Compose\Container\ServiceContainer;
-use Compose\Starter\Event\ApplicationInitEvent;
-use Compose\Starter\Event\ApplicationReadyEvent;
+use Compose\Http\Event\PipelineInitEvent;
+use Compose\Http\Event\PipelineReadyEvent;
 use Compose\Http\BodyParsingMiddleware;
 use Compose\Mvc\MvcMiddleware;
 use Compose\Http\OutputBufferMiddleware;
@@ -53,25 +53,25 @@ class Starter
      * @throws ContainerExceptionInterface
      * @throws NotFoundExceptionInterface
      */
-    public function init(Configuration $configuration, ?callable $callback = null) : Pipeline
+    public function init(Configuration $configuration, ?callable $callback = null): Pipeline
     {
         // application http pipeline setup
         $container = $this->createContainer($configuration);
         $pipeline = $this->createPipeline($container);
 
         // register the main error handler
-        $pipeline->pipe($container->get(ErrorHandler::class)); 
+        $pipeline->pipe($container->get(ErrorHandler::class));
 
         /** @var EventDispatcherInterface $dispatcher */
         $dispatcher = $container->get(EventDispatcherInterface::class);
-        $dispatcher->dispatch(new ApplicationInitEvent($container));
+        $dispatcher->dispatch(new PipelineInitEvent($container));
 
         $this->onInit($container, $pipeline);
-        if($callback) {
+        if ($callback) {
             $callback($container, $pipeline);
         }
 
-        $dispatcher->dispatch(new ApplicationReadyEvent($container));
+        $dispatcher->dispatch(new PipelineReadyEvent($container));
 
         // now final handler/not found handler
         $pipeline->pipe($container->get(NotFoundMiddleware::class));
@@ -82,7 +82,7 @@ class Starter
      * @param Configuration $configuration
      * @return ContainerInterface
      */
-    protected function createContainer(Configuration $configuration) : ContainerInterface
+    protected function createContainer(Configuration $configuration): ContainerInterface
     {
         $container = new ServiceContainer();
 
@@ -99,7 +99,7 @@ class Starter
      * @throws ContainerExceptionInterface
      * @throws NotFoundExceptionInterface
      */
-    protected function createPipeline(ContainerInterface $container) : Pipeline
+    protected function createPipeline(ContainerInterface $container): Pipeline
     {
         $pipeline = new Pipeline();
         $pipeline->setContainer($container);
