@@ -29,7 +29,7 @@ class SessionFactory implements ServiceFactoryInterface
      * @throws ContainerExceptionInterface
      * @throws NotFoundExceptionInterface
      */
-    static public function create(ContainerInterface $container, string $id)
+    public static function create(ContainerInterface $container, string $id): Session
     {
         $configuration = $container->get(Configuration::class);
 
@@ -40,7 +40,7 @@ class SessionFactory implements ServiceFactoryInterface
         }
 
         $config = $configuration['session'] ?? null;
-    $session = new Session($config);
+        $session = new Session($config);
         $session->start($handler);
 
         return $session;

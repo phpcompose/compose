@@ -20,7 +20,7 @@ use Psr\Container\ContainerInterface;
 
 class MvcMiddlewareFactory implements ServiceFactoryInterface
 {
-    public static function create(ContainerInterface $container, string $name)
+    public static function create(ContainerInterface $container, string $name): MvcMiddleware
     {
         $config = $container->get(Configuration::class);
         $mvc = new MvcMiddleware();

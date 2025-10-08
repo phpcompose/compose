@@ -48,7 +48,7 @@ interface Service2Interface {
 
 class Service2Factory implements ServiceFactoryInterface
 {
-    public static function create(ContainerInterface $container, string $name)
+    public static function create(ContainerInterface $container, string $name): Service2
     {
         return new Service2();
     }

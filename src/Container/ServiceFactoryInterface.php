@@ -1,19 +1,12 @@
 <?php
-namespace Compose\Container;
 
+declare(strict_types=1);
+
+namespace Compose\Container;
 
 use Psr\Container\ContainerInterface;
 
-/**
- * Interface ServiceFactoryInterface
- * @package Compose\Store
- */
 interface ServiceFactoryInterface extends ResolvableInterface
 {
-    /**
-     * @param ContainerInterface $container
-     * @param string $name
-     * @return mixed
-     */
-    static public function create(ContainerInterface $container, string $name);
+    public static function create(ContainerInterface $container, string $id): object;
 }
