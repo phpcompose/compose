@@ -137,7 +137,7 @@ Configure the Pages middleware in your `config/app.php`:
 ```php
 'pages' => [
     'dir' => __DIR__ . '/../pages',              // Base directory for pages
-    'default_page' => 'index',                    // Name of the default/index page
+    'namespace' => 'pages',                       // Optional: namespace for the base directory
     'folders' => [                                // Additional mounted directories
         'admin' => __DIR__ . '/../pages-admin',
     ],
@@ -148,9 +148,11 @@ Configure the Pages middleware in your `config/app.php`:
 
 - **`dir`** (string, required): The base directory where page templates and code-behind files are stored. This is the primary location the middleware searches for pages.
 
-- **`default_page`** (string, default: `'index'`): The name of the default page file to use when a directory is requested. For example, with `'index'`, a request to `/blog/` will look for `pages/blog/index.phtml`.
+- **`namespace`** (string, optional, default: `'pages'`): The namespace prefix for the base directory. This is used internally for template resolution. In most cases, the default is sufficient.
 
 - **`folders`** (array, optional): Named directories that can be mounted at URL prefixes. Each key is the URL segment prefix, and the value is the absolute path to the directory. This enables modular organization of pages (e.g., separating admin pages, API endpoints, or documentation).
+
+**Note**: The default page name (`index`) is currently hardcoded in the middleware and cannot be changed via configuration.
 
 **Related Template Configuration:**
 
