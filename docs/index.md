@@ -6,6 +6,7 @@ Welcome to the Compose framework documentation. Compose is a lightweight PHP fra
 
 ## Quick Navigation
 
+- **[Conceptual Overview](conceptual-overview.md)** – Understand how configuration, pipeline, pages, and events fit together
 - **[Getting Started](getting-started.md)** – Install the framework and create your first page-based application
 - **[Views & Pages](views-and-pages.md)** – Deep dive into the Pages middleware, code-behind scripts, and template rendering
 - [Configuration Reference](configuration.md) – Detailed explanation of the configuration array
