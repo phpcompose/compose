@@ -1,5 +1,7 @@
 # Compose Framework — Pages-first PHP framework
 
+📖 **Documentation:** https://phpcompose.github.io/compose/
+
 Compose is a lightweight PHP framework built around a Pages feature: a filesystem-driven URL-to-page mapping engine with optional code-behind support. Pages are the primary application surface — map request paths directly to page templates and (optionally) small server-side page handlers that provide data to the templates.
 
 Highlights

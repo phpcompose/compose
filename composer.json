@@ -1,7 +1,32 @@
 {
     "name": "phpcompose/compose",
     "type": "library",
-    "description": "A PHP framework",
+    "description": "Pages-first PHP framework: filesystem-driven routing, PSR-15 pipeline, pragmatic DI container, and simple view engine.",
+    "support": {
+        "docs": "https://phpcompose.github.io/compose/",
+        "source": "https://github.com/phpcompose/compose"
+    },
+        "homepage": "https://phpcompose.github.io/compose/",
+    "license": "MIT",
+    "keywords": [
+        "php",
+        "framework",
+        "psr-15",
+        "middleware",
+        "pages",
+        "mvc",
+        "container",
+        "dependency-injection",
+        "view",
+        "routing"
+    ],
+    "authors": [
+        {
+            "name": "Alamin Ahmed",
+            "email": "alamin@phpcompose.org",
+            "role": "lead"
+        }
+    ],
     "autoload": {
         "psr-4": {
             "Compose\\": "src/"
@@ -30,5 +55,6 @@
             "php": "8.3.0"
         },
         "sort-packages": true
-    }
+    },
+    
 }

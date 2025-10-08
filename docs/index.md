@@ -1,5 +1,7 @@
 # Compose Documentation
 
+📖 **Online Documentation:** https://phpcompose.github.io/compose/
+
 Welcome to the Compose framework documentation. Compose is a lightweight PHP framework built around **Pages** — a filesystem-driven URL-to-page mapping engine with optional code-behind support. Pages are the primary application surface, allowing you to map request paths directly to page templates with minimal configuration.
 
 ## Quick Navigation
