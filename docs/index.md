@@ -1,6 +1,6 @@
 # Compose Documentation
 
-Welcome to the Compose framework documentation. Here you will find everything you need to install the framework, understand how the middleware pipeline works, configure services, and build pages with the built-in Plates view engine.
+Welcome to the Compose framework documentation. Here you will find everything you need to install the framework, understand how the middleware pipeline works, configure services, and build applications around the Pages middleware (the primary feature).
 
 - [Getting Started](getting-started.md) – Install the package and scaffold a minimal application.
 - [Configuration Reference](configuration.md) – Detailed explanation of the configuration array.

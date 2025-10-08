@@ -120,4 +120,5 @@ class Starter
         $pipeline = $starter->init($configuration, $callback);
         $pipeline->listen();
     }
+
 }

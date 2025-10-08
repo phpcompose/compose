@@ -1,6 +1,6 @@
 # Views & Pages
 
-Compose integrates [League Plates](https://platesphp.com/) to render templates and supports a "pages" convention that maps request paths to templates with optional code-behind scripts.
+Compose includes a view engine with helpers and layouts and supports a "pages" convention that maps request paths to templates with optional code-behind scripts. A Plates bridge is available if you prefer Plates APIs.
 
 ## View Engine Basics
 
@@ -38,7 +38,7 @@ final class HomeAction implements RequestHandlerInterface
 
 ## Layouts
 
-Layouts are standard Plates layouts:
+Layouts are standard templates (compatible with the built-in engine and the Plates bridge):
 
 ```php
 <!-- templates/layouts/app.phtml -->

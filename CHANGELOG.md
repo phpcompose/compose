@@ -25,6 +25,17 @@ All notable changes to this project will be documented in this file.
 - Custom event messaging abstractions (`EventDispatcherInterface`, `Message`, `ExceptionMessage`) superseded by PSR-14 compliant components.
 - Outdated application scaffolding under `src/App/` in favor of container-driven factories and the Pages middleware.
 
+### Breaking changes
+- Root-level `helpers` removed in favor of `templates['helpers']`.
+
+### Highlights
+- Pages middleware elevated as the primary app-building workflow.
+- View configuration clarified; helpers must live under `templates['helpers']`.
+- Pipeline::pipeMany signature modernized for PHP 8.4 (`?array`).
+
+### Upgrade notes
+- Move any helper registrations under `templates['helpers']`.
+
 ### Fixed
 - Middleware resolution and invocation paths now throw descriptive exceptions when dependencies cannot be resolved, improving debugging during container configuration.
 - Error templates respect layouts and helper context, eliminating inconsistent rendering states present in earlier betas.

@@ -1,12 +1,12 @@
 # Compose Framework
 
-Compose is a lightweight PHP framework that combines a PSR-15 middleware pipeline, a pragmatic service container, and a Plates-powered view layer. The framework focuses on getting you from configuration to a running HTTP application quickly, while staying close to well-known PSR standards. Version 1.0.0-rc1 locks in the middleware orchestration, eventing model, and pages workflow iterated during the 1.0 development cycle.
+Compose is a lightweight PHP framework that combines a PSR-15 middleware pipeline, a pragmatic service container, and a first-class Pages system. The framework focuses on getting you from configuration to a running HTTP application quickly, while staying close to well-known PSR standards. Version 1.0.0-rc1 locks in the middleware orchestration, eventing model, and the Pages workflow iterated during the 1.0 development cycle.
 
 ## Highlights
 - Built on Laminas Stratigility and Diactoros for PSR-7/PSR-15 compatibility.
 - Service container with constructor injection, factories, and autowiring for classes that implement `Compose\Container\ResolvableInterface`.
 - Event-driven HTTP pipeline with hooks for initialization, dispatch, and response handling.
-- Page-driven MVC support with Plates templates, layouts, helpers, and view composition baked in.
+- Page-driven MVC with the Pages middleware (the core feature). Build apps by composing filesystem pages first; fall back to controllers and routes when needed.
 - Sensible defaults with opt-in configuration overrides.
 
 ## Requirements
@@ -27,7 +27,7 @@ composer require phpcompose/compose:^1.0@rc
 
 The quickest way to see Compose in action is to bootstrap the starter pipeline with a small configuration array. This example renders a hello world page using the built-in Plates view integration.
 
-1. Create a `public/index.php` front controller (quick demo with inline config):
+1. Create a `public/index.php` front controller (quick demo with inline config). Use `Starter::start()` to launch the app:
 
     ```php
     <?php
@@ -38,17 +38,12 @@ The quickest way to see Compose in action is to bootstrap the starter pipeline w
     require __DIR__ . '/../vendor/autoload.php';
 
     // Inline quick-demo configuration (merge over framework defaults)
-    $base = (new \Compose\Config())();
-
-    $config = array_replace_recursive($base, [
+    $config = array_replace_recursive((new \Compose\Config())(), [
         'app' => [
             'name' => 'Hello Compose',
         ],
         'templates' => [
-            'layout' => 'layouts::app',
-            'folders' => [
-                'layouts' => __DIR__ . '/../layouts',
-            ],
+            'dir' => __DIR__ . '/../templates',
         ],
         'pages' => [
             'dir' => __DIR__ . '/../pages',
@@ -59,34 +54,27 @@ The quickest way to see Compose in action is to bootstrap the starter pipeline w
     ```
 
 
-2. Create a simple layout and page (same as before):
+2. Add a page under `pages/index.phtml`. The request path `/` maps directly to `pages/index.phtml`, `/about` would map to `pages/about.phtml`, and subfolders follow the URI hierarchy (e.g. `/docs/intro` → `pages/docs/intro.phtml`).
 
-    - `layouts/app.phtml`
-        ```php
-        <!doctype html>
-        <html lang="en">
-        <head>
-            <meta charset="utf-8">
-            <title><?= $this->e($title ?? 'Compose App') ?></title>
-        </head>
-        <body>
-            <?= $this->section('content') ?>
-        </body>
-        </html>
-        ```
+    ```php
+    <!-- pages/index.phtml -->
+    <h1><?= $this->e($title ?? 'Hello Compose') ?></h1>
+    <p><?= $this->e($message ?? 'Pages are rendered straight from the filesystem.') ?></p>
+    ```
 
-    - `pages/index.phtml.php`
-        ```php
-        <?php
-        use Psr\Http\Message\ServerRequestInterface;
+    Optionally, place a `pages/index.phtml.php` file next to the template to provide a code-behind function. When present it receives the current request (and any path parameters), returning data that is passed to the template:
 
-        return static function (ServerRequestInterface $request): array {
-            return [
-                'title' => 'Welcome to Compose',
-                'message' => 'Hello from the pipeline!',
-            ];
-        };
-        ```
+    ```php
+    <?php
+    use Psr\Http\Message\ServerRequestInterface;
+
+    return static function (ServerRequestInterface $request): array {
+        return [
+            'title' => 'Welcome to Compose',
+            'message' => 'Served by the Pages middleware.',
+        ];
+    };
+    ```
 
 3. Serve the application locally:
 
@@ -94,7 +82,7 @@ The quickest way to see Compose in action is to bootstrap the starter pipeline w
     php -S 0.0.0.0:8080 -t public/
     ```
 
-Visit `http://localhost:8080` and you should see the rendered message. The starter automatically wires the HTTP pipeline, error handling middleware, page middleware, and template engine.
+Visit `http://localhost:8080` and you should see the rendered message. The Pages middleware resolves templates directly from the `pages/` directory, applies namespace folders when configured, and falls back to routing/dispatch middleware if no page matches.
 
 ## Configuration Overview
 

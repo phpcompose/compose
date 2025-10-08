@@ -19,7 +19,7 @@ composer init --name="acme/hello-compose" --require="php:~8.3" --quiet
 composer require phpcompose/compose:^1.0@rc
 ```
 
-Composer will install the framework along with Laminas PSR-7 components and League Plates.
+Composer will install the framework along with Laminas PSR-7 components.
 
 ## 2. Bootstrap the Front Controller
 
@@ -33,6 +33,7 @@ use Compose\Starter;
 
 require __DIR__ . '/../vendor/autoload.php';
 
+// load or compose your configuration array
 $config = require __DIR__ . '/../config/app.php';
 
 Starter::start($config);
@@ -72,7 +73,7 @@ Configuration is stored as an array (or `Compose\Support\Configuration` instance
 
 ## 4. Add Layouts and Pages
 
-Compose ships with a Pages middleware that can render Plates templates and optional code-behind scripts. Add the following files:
+Compose ships with a Pages middleware (the primary feature) that renders templates with optional code-behind scripts. Add the following files:
 
 `layouts/app.phtml`
 
