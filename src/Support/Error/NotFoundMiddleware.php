@@ -4,20 +4,16 @@ namespace Compose\Support\Error;
 
 use Compose\Container\ResolvableInterface;
 use Compose\Http\Exception\HttpException;
-use Exception;
+use Laminas\Diactoros\Response;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
-use Laminas\Diactoros\Response;
-use Psr\Http\Server\RequestHandlerInterface;
 use Psr\Http\Server\MiddlewareInterface;
+use Psr\Http\Server\RequestHandlerInterface;
+use Throwable;
 
 class NotFoundMiddleware implements MiddlewareInterface, ResolvableInterface
 {
-    protected
-        /**
-         * @var ErrorResponseGenerator
-         */
-        $generator;
+    protected ErrorResponseGenerator $generator;
 
     /**
      * NotFoundMiddleware constructor.
@@ -37,9 +33,8 @@ class NotFoundMiddleware implements MiddlewareInterface, ResolvableInterface
      */
     public function process(ServerRequestInterface $request, RequestHandlerInterface $delegate): ResponseInterface
     {
-        $exception = new HttpException(sprintf("%s Not found", $request->getUri()->__toString()), 404);
-        $generator = $this->generator;
+        $exception = new HttpException(sprintf('%s Not found', $request->getUri()->__toString()), 404);
 
-        return $generator($exception, $request, new Response());
+        return ($this->generator)($exception, $request, new Response());
     }
 }

@@ -1,14 +1,18 @@
 <?php
-namespace Compose\Support\Error;
 
+declare(strict_types=1);
+
+namespace Compose\Support\Error;
 
 use Compose\Container\ResolvableInterface;
 use Compose\Http\Exception\HttpException;
 use Compose\Mvc\ViewEngineInterface;
 use Compose\Support\Configuration;
-use Exception;
+use Laminas\Diactoros\Response;
+use Laminas\Diactoros\ServerRequest;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
+use Throwable;
 
 /**
  * Class DebugResponseGenerator
@@ -45,7 +49,7 @@ class ErrorResponseGenerator implements ResolvableInterface
      * @return ResponseInterface
      * @throws Exception
      */
-    public function __invoke($exception, ServerRequestInterface $request, ResponseInterface $response) : ResponseInterface
+    public function __invoke(Throwable $exception, ServerRequestInterface $request, ResponseInterface $response): ResponseInterface
     {
         if($this->debug) {
             $template = $this->template_debug;
@@ -62,5 +66,13 @@ class ErrorResponseGenerator implements ResolvableInterface
         $response->getBody()->write($this->engine->render($template, compact('exception', 'request'), $request));
 
         return $response;
+    }
+
+    public function renderWithoutRequest(Throwable $exception, ?ServerRequestInterface $request = null, ?ResponseInterface $response = null): ResponseInterface
+    {
+        $request ??= new ServerRequest();
+        $response ??= new Response();
+
+        return $this($exception, $request, $response);
     }
 }

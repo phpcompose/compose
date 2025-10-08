@@ -1,4 +1,37 @@
 
-<h1>Oops!</h1>
-<h2>This is awkward.</h2>
-<p>We encountered a Server error: <?php echo $this->escape(sprintf('%d %s', $exception->getCode(), $exception->getMessage())); ?> error.</p>
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width,initial-scale=1" />
+	<title>Server Error</title>
+	<style>
+		:root{color-scheme:light dark}
+		html,body{height:100%;margin:0}
+		body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;background:#fff;color:#0f1724;display:flex;align-items:center;justify-content:center;padding:1rem}
+		.card{max-width:920px;width:100%;padding:1rem;border-radius:10px}
+		.split{display:flex;gap:1rem;align-items:center}
+		.code{flex:0 0 140px;font-size:4rem;line-height:1;font-weight:700;letter-spacing:-0.03em;color:#7f1d1d;text-align:center}
+		.content{flex:1}
+		h1{margin:0;font-size:1.25rem}
+		h2{margin:.25rem 0;color:#334155;font-size:1rem;font-weight:600}
+		p{margin:.5rem 0;color:#475569}
+		.actions{margin-top:.6rem}
+		.btn{display:inline-block;padding:.45rem .75rem;border-radius:6px;background:#0366d6;color:#fff;text-decoration:none;font-weight:600}
+		@media (max-width:640px){.split{flex-direction:row;gap:.6rem}.code{flex:0 0 84px;font-size:2.25rem}}
+	</style>
+</head>
+<body>
+	<main class="card" role="main">
+		<div class="split">
+			<div class="code" aria-hidden="true">500</div>
+			<div class="content">
+				<h1>Server error</h1>
+				<h2>Something went wrong on our end.</h2>
+				<p>We've recorded the incident and will investigate. Please try again later.</p>
+				<p style="color:#64748b;font-size:.9rem">If the problem persists, contact the site administrator and provide the approximate time the error occurred.</p>
+			</div>
+		</div>
+	</main>
+</body>
+</html>

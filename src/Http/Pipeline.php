@@ -16,14 +16,14 @@ use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\ContainerInterface;
 use Psr\Container\NotFoundExceptionInterface;
 use Psr\Http\Message\ResponseInterface;
-use Psr\Http\Message\ServerRequestInterface;
-use Psr\Http\Server\MiddlewareInterface;
 use Laminas\Stratigility\Middleware\CallableMiddlewareDecorator;
 use Laminas\Stratigility\MiddlewarePipe;
 use Laminas\HttpHandlerRunner\RequestHandlerRunner;
 use Laminas\HttpHandlerRunner\Emitter\SapiEmitter;
 use Compose\Support\Error\ErrorResponseGenerator;
 use Laminas\Diactoros\ServerRequestFactory;
+use Psr\Http\Message\ServerRequestInterface;
+use Psr\Http\Server\MiddlewareInterface;
 
 /**
  * Lazy Middleware factory
@@ -122,11 +122,15 @@ class Pipeline  implements ContainerAwareInterface
     public function listen()
     {
         $container = $this->getContainer();
+        $generator = $container->get(ErrorResponseGenerator::class);
+
         $runner = new RequestHandlerRunner(
             $this->pipe,
             new SapiEmitter(),
             [ServerRequestFactory::class, 'fromGlobals'],
-            $container->get(ErrorResponseGenerator::class)
+            static function (\Throwable $error) use ($generator): ResponseInterface {
+                return $generator->renderWithoutRequest($error);
+            }
         );
         $runner->run();
     }

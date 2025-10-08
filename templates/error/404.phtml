@@ -1,7 +1,37 @@
-<h1>Oops!</h1>
-<h2>This is awkward.</h2>
-<p>We encountered a 404 Not Found error.</p>
-<p>
-    You are looking for something that doesn't exist or may have moved. Check out one of the links on this page
-    or head back to Home.
-</p>
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>404 Not Found</title>
+    <style>
+        /* Minimal split layout: code on left, content on right */
+        :root{color-scheme:light dark}
+        html,body{height:100%;margin:0}
+        body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;background:#fff;color:#0f1724;display:flex;align-items:center;justify-content:center;padding:1rem}
+        .card{max-width:920px;width:100%;padding:1rem;border-radius:10px}
+        .split{display:flex;gap:1rem;align-items:center}
+        .code{flex:0 0 140px;font-size:4rem;line-height:1;font-weight:700;letter-spacing:-0.03em;color:#0b2545;text-align:center}
+        .content{flex:1}
+        h1{margin:0;font-size:1.25rem}
+        h2{margin:.25rem 0;color:#334155;font-size:1rem;font-weight:600}
+        p{margin:.5rem 0;color:#475569}
+        .actions{margin-top:.6rem}
+        .btn{display:inline-block;padding:.45rem .75rem;border-radius:6px;background:#0366d6;color:#fff;text-decoration:none;font-weight:600}
+        .btn-ghost{background:transparent;border:1px solid #e6eef9;color:#0b2545;margin-left:.5rem;padding:.4rem .7rem;border-radius:6px;text-decoration:none}
+        @media (max-width:640px){.split{flex-direction:row;gap:.6rem}.code{flex:0 0 84px;font-size:2.25rem}}
+    </style>
+</head>
+<body>
+    <main class="card" role="main">
+        <div class="split">
+            <div class="code" aria-hidden="true">404</div>
+            <div class="content">
+                <h1>Page not found</h1>
+                <h2>We couldn't find that page.</h2>
+                <p>The link may be broken, or the page may have been removed. Try returning to the home page or use your browser's back button.</p>
+            </div>
+        </div>
+    </main>
+</body>
+</html>
