@@ -70,6 +70,7 @@ return array_replace_recursive($base, [
 ```
 
 Configuration is stored as an array (or `Compose\Support\Configuration` instance) and injected into the service container. You can override services, middleware, routes, subscribers, and view engine settings the same way.
+The value `layouts::app` tells the view engine to use the `app.phtml` script inside the folder that was aliased as `layouts` in the configuration above.
 
 ## 4. Add Layouts and Pages
 
@@ -90,6 +91,15 @@ Compose ships with a Pages middleware (the primary feature) that renders templat
 </html>
 ```
 
+`pages/index.phtml`
+
+```php
+<?php $this->layout('layouts::app', ['title' => $title ?? 'Compose Demo']); ?>
+
+<h1><?= $this->e($title ?? 'Hello from Compose') ?></h1>
+<p><?= $this->e($message ?? 'This response came from pages/index.phtml.') ?></p>
+```
+
 `pages/index.phtml.php`
 
 ```php
@@ -104,7 +114,7 @@ return static function (ServerRequestInterface $request): array {
 };
 ```
 
-The `.phtml.php` suffix lets you keep the view template and an optional script together. When the page file returns an array, the value is passed to the template as data. Returning a `ResponseInterface` short-circuits the rendering pipeline.
+The `.phtml.php` suffix lets you keep the view template and an optional script together. When the page file returns an array, the value is passed to the template as data. Returning a `ResponseInterface` short-circuits the rendering pipeline. If no code-behind script is present, the template runs on its own.
 
 ## 5. Serve the Application
 
