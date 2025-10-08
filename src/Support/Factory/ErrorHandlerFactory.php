@@ -14,6 +14,7 @@ use Compose\Mvc\ViewEngineInterface;
 use Compose\Support\Configuration;
 use Compose\Support\Error\ErrorResponseGenerator;
 use Psr\Container\ContainerInterface;
+use InvalidArgumentException;
 use Laminas\Diactoros\ResponseFactory;
 use Laminas\Stratigility\Middleware\ErrorHandler;
 
@@ -31,8 +32,26 @@ class ErrorHandlerFactory implements ServiceFactoryInterface
         $errorHandler = new ErrorHandler(new ResponseFactory(), $generator);
 
         $errorListeners = $config['error_listeners'] ?? [];
-        foreach($errorListeners as $errorListener) {
-            $errorHandler->attachListener($container->get($errorListener));
+        foreach ($errorListeners as $errorListener) {
+            // If a string is provided, treat it as a service id and fetch from container
+            if (is_string($errorListener)) {
+                $resolved = $container->get($errorListener);
+            } else {
+                $resolved = $errorListener;
+            }
+
+            // If it's an object with __invoke or a callable, attach directly
+            if (is_object($resolved) && is_callable($resolved)) {
+                $errorHandler->attachListener($resolved);
+                continue;
+            }
+
+            if (is_callable($resolved)) {
+                $errorHandler->attachListener($resolved);
+                continue;
+            }
+
+            throw new InvalidArgumentException('Invalid error listener registered; must be a service id or callable');
         }
 
         return $errorHandler;
