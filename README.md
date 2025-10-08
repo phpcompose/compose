@@ -1,12 +1,12 @@
 # Compose Framework
 
-Compose is a lightweight PHP framework that combines a PSR-15 middleware pipeline, a pragmatic service container, and a simple view integration. The framework focuses on getting you from configuration to a running HTTP application quickly, while staying close to well-known PSR standards.
+Compose is a lightweight PHP framework that combines a PSR-15 middleware pipeline, a pragmatic service container, and a Plates-powered view layer. The framework focuses on getting you from configuration to a running HTTP application quickly, while staying close to well-known PSR standards. Version 1.0.0-rc1 locks in the middleware orchestration, eventing model, and pages workflow iterated during the 1.0 development cycle.
 
 ## Highlights
 - Built on Laminas Stratigility and Diactoros for PSR-7/PSR-15 compatibility.
 - Service container with constructor injection, factories, and autowiring for classes that implement `Compose\Container\ResolvableInterface`.
 - Event-driven HTTP pipeline with hooks for initialization, dispatch, and response handling.
-- Page-driven MVC support with templates, layouts, helpers, and view composition (Plates is available via an optional bridge).
+- Page-driven MVC support with Plates templates, layouts, helpers, and view composition baked in.
 - Sensible defaults with opt-in configuration overrides.
 
 ## Requirements
@@ -18,10 +18,10 @@ Compose is a lightweight PHP framework that combines a PSR-15 middleware pipelin
 Install the framework as a project dependency:
 
 ```bash
-composer require phpcompose/compose
+composer require phpcompose/compose:^1.0@rc
 ```
 
-> **Note**: Beta 1.4 RC is published under the standard version constraints. If you are consuming the package before the stable release, you can require `^1.4@rc`.
+> **Versioning**: The `^1.0@rc` constraint tracks the 1.0.0 release candidate series. Once 1.0.0 ships, switch to `^1.0` to follow the stable line.
 
 ## Quick Start
 
@@ -88,7 +88,7 @@ The quickest way to see Compose in action is to bootstrap the starter pipeline w
         };
         ```
 
-4. Serve the application locally:
+3. Serve the application locally:
 
     ```bash
     php -S 0.0.0.0:8080 -t public/
@@ -120,4 +120,4 @@ This uses PHPUnit with the project-provided bootstrap.
 
 ## Documentation
 
-Extended documentation for beta 1.4 RC lives under [`docs/`](docs/index.md). The markdown files are ready for GitHub Pages or any static site generator.
+Extended documentation for 1.0.0-rc1 lives under [`docs/`](docs/index.md). The markdown files are ready for GitHub Pages or any static site generator.

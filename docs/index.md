@@ -8,6 +8,6 @@ Welcome to the Compose framework documentation. Here you will find everything yo
 - [Views & Pages](views-and-pages.md) – Rendering templates, code-behind pages, and helpers.
 - [Service Container](service-container.md) – Registering services, factories, and leveraging autowiring.
 
-## Beta 1.4 RC
+## 1.0.0 RC1
 
-Compose 1.4 introduces a refreshed configuration story, improved middleware orchestration, and a more powerful pages module. All examples in this documentation assume the beta 1.4 RC build unless noted otherwise.
+Compose 1.0.0-rc1 finalizes the refreshed configuration story, improved middleware orchestration, and enhanced pages module introduced during the 1.0 development cycle. All examples in this documentation assume the 1.0.0-rc1 build unless noted otherwise.

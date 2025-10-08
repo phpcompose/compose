@@ -16,7 +16,7 @@ Create a new project directory and require Compose:
 mkdir my-compose-app
 cd my-compose-app
 composer init --name="acme/hello-compose" --require="php:~8.3" --quiet
-composer require phpcompose/compose:^1.4@rc
+composer require phpcompose/compose:^1.0@rc
 ```
 
 Composer will install the framework along with Laminas PSR-7 components and League Plates.
