@@ -105,7 +105,7 @@ class Pipeline  implements ContainerAwareInterface
      * @throws ContainerExceptionInterface
      * @throws NotFoundExceptionInterface
      */
-    public function pipeMany(array $arr = null): self
+    public function pipeMany(?array $arr): self
     {
         if($arr) {
             foreach($arr as $key => $middleware) {

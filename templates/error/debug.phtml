@@ -110,7 +110,7 @@ $rootDir = dirname($_SERVER['DOCUMENT_ROOT'] ?? __DIR__) . '/';
                     <h2>Callback Stack</h2>
                     <table class="stack-table">
                         <thead>
-                            <tr><th>#</th><th>File</th><th>Line</th><th>Function</th></tr>
+                            <tr><th>#</th><th>File</th><th style="white-space: nowrap">Line</th><th>Function</th></tr>
                         </thead>
                         <tbody>
                         <?php $traces = $exception->getTrace(); ?>

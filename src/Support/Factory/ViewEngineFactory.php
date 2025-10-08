@@ -25,7 +25,10 @@ class ViewEngineFactory implements ServiceFactoryInterface
         $resolver = $container->get(ServiceResolver::class);
         $registry = new HelperRegistry($resolver);
 
-        $helpers = $templates['helpers'] ?? ($configuration['helpers'] ?? []);
+        // Only use helpers declared under templates['helpers']. Root-level
+        // 'helpers' support has been removed to keep view configuration
+        // colocated under the templates key.
+        $helpers = $templates['helpers'] ?? [];
 
         foreach ($helpers as $alias => $definition) {
             if (is_int($alias)) {

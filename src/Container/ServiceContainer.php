@@ -138,12 +138,12 @@ class ServiceContainer implements ContainerInterface
             throw new \LogicException("Service Instance already available for: {$id}");
         }
 
-        if(is_null($service) || $service === $id) {
+        if (is_null($service) || $service === $id) {
             $this->services[$id] = $id;
-        } else if(is_callable($service) || is_string($service)) {
-            $this->services[$id] = $service;
-        } else if(is_object($service)) { // any object other then closure is instance
+        } elseif (is_object($service) && !($service instanceof \Closure)) { // object instances (not closures) stored directly
             $this->instances[$id] = $service;
+        } elseif (is_callable($service) || is_string($service)) {
+            $this->services[$id] = $service;
         } else {
             throw new \LogicException("Cannot add service: {$id}.  Not supported type.");
         }
