@@ -83,9 +83,9 @@ The view engine is backed by Plates. Supported keys include:
 
 Configure the Pages middleware, which renders templates based on the request path:
 
-- `dir`: Directory that houses `*.phtml.php` pages.
-- `folders`: Additional named directories that can be referenced via `alias::template`.
-- `default_page`: Name of the fallback script (`index` by default).
+- `dir`: Directory that houses page templates and `*.phtml.php` code-behind files.
+- `namespace`: Optional namespace prefix for the base directory (defaults to `'pages'`).
+- `folders`: Additional named directories that can be referenced via URL prefixes.
 
 ### `routes`
 
