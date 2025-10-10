@@ -10,13 +10,13 @@ namespace Compose\Support\Factory;
 
 
 use Compose\Container\ServiceFactoryInterface;
-use Compose\Mvc\ViewEngineInterface;
 use Compose\Support\Configuration;
 use Compose\Support\Error\ErrorResponseGenerator;
-use Psr\Container\ContainerInterface;
+use Compose\Template\RendererInterface;
 use InvalidArgumentException;
 use Laminas\Diactoros\ResponseFactory;
 use Laminas\Stratigility\Middleware\ErrorHandler;
+use Psr\Container\ContainerInterface;
 
 class ErrorHandlerFactory implements ServiceFactoryInterface
 {
@@ -24,7 +24,7 @@ class ErrorHandlerFactory implements ServiceFactoryInterface
     {
         $config = $container->get(Configuration::class);
         $generator = new ErrorResponseGenerator(
-            $container->get(ViewEngineInterface::class),
+            $container->get(RendererInterface::class),
             $config
         );
 

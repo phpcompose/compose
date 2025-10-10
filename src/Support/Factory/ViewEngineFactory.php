@@ -4,31 +4,28 @@ namespace Compose\Support\Factory;
 
 use Compose\Container\ServiceFactoryInterface;
 use Compose\Container\ServiceResolver;
-use Compose\Mvc\ViewEngine;
-use Compose\Mvc\Helper\HelperRegistry;
-use Compose\Mvc\ViewEngineInterface;
 use Compose\Support\Configuration;
+use Compose\Template\Helper\HelperRegistry;
+use Compose\Template\RendererInterface;
+use Compose\Template\TemplateRenderer;
 use Psr\Container\ContainerInterface;
 
 class ViewEngineFactory implements ServiceFactoryInterface
 {
-    public static function create(ContainerInterface $container, string $id): ViewEngineInterface
+    public static function create(ContainerInterface $container, string $id): RendererInterface
     {
         $configuration = $container->get(Configuration::class);
-        $templates = $configuration['templates'] ?? [];
+        $templateConfig = $configuration['template'] ?? $configuration['templates'] ?? [];
 
-        return self::createComposeEngine($container, $templates, $configuration);
+        return self::createComposeEngine($container, $templateConfig, $configuration);
     }
 
-    private static function createComposeEngine(ContainerInterface $container, array $templates, Configuration|array $configuration): ViewEngineInterface
+    private static function createComposeEngine(ContainerInterface $container, array $templateConfig, Configuration|array $configuration): RendererInterface
     {
         $resolver = $container->get(ServiceResolver::class);
         $registry = new HelperRegistry($resolver);
 
-        // Only use helpers declared under templates['helpers']. Root-level
-        // 'helpers' support has been removed to keep view configuration
-        // colocated under the templates key.
-        $helpers = $templates['helpers'] ?? [];
+        $helpers = $templateConfig['helpers'] ?? [];
 
         foreach ($helpers as $alias => $definition) {
             if (is_int($alias)) {
@@ -40,13 +37,13 @@ class ViewEngineFactory implements ServiceFactoryInterface
         }
 
         $config = [
-            'dir' => $templates['dir'] ?? COMPOSE_DIR_TEMPLATE,
-            'folders' => $templates['folders'] ?? [],
-            'maps' => $templates['maps'] ?? [],
-            'layout' => $templates['layout'] ?? null,
-            'extension' => $templates['extension'] ?? 'phtml',
+            'dir' => $templateConfig['dir'] ?? COMPOSE_DIR_TEMPLATE,
+            'folders' => $templateConfig['folders'] ?? [],
+            'maps' => $templateConfig['maps'] ?? [],
+            'layout' => $templateConfig['layout'] ?? null,
+            'extension' => $templateConfig['extension'] ?? 'phtml',
         ];
 
-        return new ViewEngine(array_merge($config, $templates), $registry);
+        return new TemplateRenderer(array_merge($config, $templateConfig), $registry);
     }
 }

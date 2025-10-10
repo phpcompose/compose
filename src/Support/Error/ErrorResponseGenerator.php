@@ -6,7 +6,7 @@ namespace Compose\Support\Error;
 
 use Compose\Container\ResolvableInterface;
 use Compose\Http\Exception\HttpException;
-use Compose\Mvc\ViewEngineInterface;
+use Compose\Template\RendererInterface;
 use Compose\Support\Configuration;
 use Laminas\Diactoros\Response;
 use Laminas\Diactoros\ServerRequest;
@@ -20,7 +20,7 @@ use Throwable;
  */
 class ErrorResponseGenerator implements ResolvableInterface
 {
-    protected ViewEngineInterface $engine;
+    protected RendererInterface $engine;
 
     protected bool $debug;
 
@@ -33,10 +33,10 @@ class ErrorResponseGenerator implements ResolvableInterface
 
     /**
      * ErrorResponseGenerator constructor.
-     * @param ViewEngineInterface $engine
+     * @param RendererInterface $engine
      * @param Configuration $configuration
      */
-    public function __construct(ViewEngineInterface $engine, Configuration $configuration)
+    public function __construct(RendererInterface $engine, Configuration $configuration)
     {
         $this->engine = $engine;
         $this->debug = $configuration['debug'] ?? false;
