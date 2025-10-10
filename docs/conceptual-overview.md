@@ -4,11 +4,11 @@ Compose puts a PSR-15 middleware pipeline, a pragmatic service container, and fi
 
 ## Big Picture
 
-1. **Configuration** – You prepare an array (or `Compose\Support\Configuration`) that defines services, middleware, templates, routes, and pages.
+1. **Configuration** – You prepare an array (or `Compose\Support\Configuration`) that defines services, middleware, template settings, routes, and pages.
 2. **Starter** – `Starter::start($config)` creates the service container, assembles the middleware pipeline, dispatches lifecycle events, and begins listening for HTTP requests.
 3. **Pipeline** – Incoming requests flow through the pipeline: output buffering, original message preservation, body parsing, user-defined middleware, MVC middleware, and a not-found handler.
 4. **Pages First** – The MVC middleware hosts the Pages middleware, routing middleware, and dispatch middleware. Pages try to satisfy a request directly from the filesystem before handing off to controllers or other handlers.
-5. **Views & Templates** – Templates are rendered with Plates via the view engine. Helpers, layouts, and template aliases let you organize presentation code without leaving the filesystem-first approach.
+5. **Renderer & Templates** – Templates are rendered with Plates via the template renderer. Helpers, layouts, and template aliases let you organize presentation code without leaving the filesystem-first approach.
 
 Each layer can be customised—swap middleware, override services, add events—without losing the default behaviour that gets you to “Hello World” immediately.
 
@@ -36,7 +36,7 @@ Each layer can be customised—swap middleware, override services, add events—
 ```php
 $config = array_replace_recursive((new Compose\Config())(), [
     'pages' => ['dir' => __DIR__ . '/../pages'],
-    'templates' => [
+    'template' => [
         'layout' => 'layouts::app',
         'folders' => ['layouts' => __DIR__ . '/../layouts'],
     ],
@@ -66,13 +66,13 @@ Because the configuration object can be toggled read-only, it’s safe to pass a
 
 ## Template Aliases & Layouts
 
-The view engine supports namespaced template references using the `alias::template` syntax:
+The template renderer supports namespaced template references using the `alias::template` syntax:
 
-- The left side (`alias`) refers to a folder alias defined in `templates['folders']`.
+- The left side (`alias`) refers to a folder alias defined in `template['folders']`.
 - The right side (`template`) is the relative path to the script within that folder (extension is appended automatically).
 - Example: with `'folders' => ['layouts' => __DIR__ . '/../layouts']`, calling `$this->layout('layouts::app')` loads `layouts/app.phtml`.
 
-If no alias is provided (`'home'` instead of `'app::home'`), the engine looks in the base directory set by `templates['dir']`.
+If no alias is provided (`'home'` instead of `'app::home'`), the renderer looks in the base directory set by `template['dir']`.
 
 ## Events & Subscribers
 

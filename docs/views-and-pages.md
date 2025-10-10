@@ -1,20 +1,20 @@
 # Views & Pages
 
-Compose includes a view engine with helpers and layouts and supports a "pages" convention that maps request paths to templates with optional code-behind scripts. A Plates bridge is available if you prefer Plates APIs.
+Compose includes a template renderer with helpers and layouts and supports a "pages" convention that maps request paths to templates with optional code-behind scripts. A Plates bridge is available if you prefer Plates APIs.
 
-## View Engine Basics
+## Template Renderer Basics
 
-The view engine is exposed via `Compose\Mvc\ViewEngineInterface` and backed by `Compose\Mvc\ViewEngine`. The default factory registers:
+The renderer is exposed via `Compose\Template\RendererInterface` and backed by `Compose\Template\TemplateRenderer`. The default factory registers:
 
-- Base directory `templates/` (set via `templates.dir`).
-- Named folders defined in `templates.folders` and accessible with the `alias::template` syntax.
-- Layout support controlled by `templates.layout`.
-- Helper registry populated from `templates.helpers`.
+- Base directory `templates/` (set via `template.dir`).
+- Named folders defined in `template.folders` and accessible with the `alias::template` syntax.
+- Layout support controlled by `template.layout`.
+- Helper registry populated from `template.helpers`.
 
 Render a template directly from a handler:
 
 ```php
-use Compose\Mvc\ViewEngineInterface;
+use Compose\Template\RendererInterface;
 use Laminas\Diactoros\Response\HtmlResponse;
 use Psr\Http\Server\RequestHandlerInterface;
 use Psr\Http\Message\ResponseInterface;
@@ -22,7 +22,7 @@ use Psr\Http\Message\ServerRequestInterface;
 
 final class HomeAction implements RequestHandlerInterface
 {
-    public function __construct(private ViewEngineInterface $views) {}
+    public function __construct(private RendererInterface $views) {}
 
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
@@ -54,7 +54,7 @@ Layouts are standard templates (compatible with the built-in engine and the Plat
 </html>
 ```
 
-Enable a default layout by setting `templates.layout` (`layouts::app` in this example). Override per render call via the fourth argument to `render()`.
+Enable a default layout by setting `template.layout` (`layouts::app` in this example). Override per render call via the fourth argument to `render()`.
 
 ## View Helpers
 
@@ -64,7 +64,7 @@ Helpers are registered through the helper registry. Helpers can be:
 - A keyed entry mapping an alias to a callable or service id.
 
 ```php
-'templates' => [
+'template' => [
     'helpers' => [
         App\View\HelperProvider::class, // extends registry
         'asset' => static fn (string $path) => '/assets/' . ltrim($path, '/'),
@@ -92,7 +92,7 @@ The middleware automatically handles:
 
 - **Index files**: Requests to `/blog` will first check for `pages/blog.phtml`, then fall back to `pages/blog/index.phtml`.
 - **Nested paths**: Deep URL structures like `/products/category/item` map to `pages/products/category/item.phtml`.
-- **File extensions**: The default extension is `.phtml`, but you can customize this via `templates.extension`.
+- **File extensions**: The default extension is `.phtml`, but you can customize this via `template.extension`.
 
 #### File Mapping Algorithm
 
@@ -124,7 +124,7 @@ The Pages middleware uses a sophisticated matching algorithm to resolve URLs to 
 
 When processing a request, the Pages middleware resolves templates by checking in this order:
 
-1. **Explicit map overrides** (`templates.maps`) – Override specific paths
+1. **Explicit map overrides** (`template.maps`) – Override specific paths
 2. **Aliased folders** (`pages.folders`) – Check mounted directories with namespace prefixes
 3. **Base pages directory** (`pages.dir`) – The default location for pages
 
@@ -156,10 +156,10 @@ Configure the Pages middleware in your `config/app.php`:
 
 **Related Template Configuration:**
 
-The Pages middleware also uses settings from the `templates` configuration:
+The Pages middleware also uses settings from the `template` configuration:
 
 ```php
-'templates' => [
+'template' => [
     'dir' => __DIR__ . '/../templates',          // Base template directory
     'extension' => 'phtml',                       // File extension for templates
     'layout' => 'layouts::app',                   // Default layout template
@@ -172,7 +172,7 @@ The Pages middleware also uses settings from the `templates` configuration:
 ],
 ```
 
-The `templates.extension` setting determines what file extension the Pages middleware looks for (default `.phtml`).
+The `template.extension` setting determines what file extension the Pages middleware looks for (default `.phtml`).
 
 ### Code-Behind Scripts
 
@@ -512,4 +512,4 @@ return static function (ServerRequestInterface $request): array {
 
 ## Rendering Outside HTTP
 
-Because the view engine only relies on Plates, you can reuse it in CLI commands, background jobs, or any other context by retrieving `ViewEngineInterface` from the container and calling `render()` directly. Pass `null` as the request when rendering outside HTTP.
+Because the renderer only relies on Plates, you can reuse it in CLI commands, background jobs, or any other context by retrieving `RendererInterface` from the container and calling `render()` directly. Pass `null` as the request when rendering outside HTTP.

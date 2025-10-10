@@ -57,7 +57,7 @@ return array_replace_recursive($base, [
     'app' => [
         'name' => 'Hello Compose',
     ],
-    'templates' => [
+    'template' => [
         'layout' => 'layouts::app',
         'folders' => [
             'layouts' => __DIR__ . '/../layouts',
@@ -69,8 +69,8 @@ return array_replace_recursive($base, [
 ]);
 ```
 
-Configuration is stored as an array (or `Compose\Support\Configuration` instance) and injected into the service container. You can override services, middleware, routes, subscribers, and view engine settings the same way.
-The value `layouts::app` tells the view engine to use the `app.phtml` script inside the folder that was aliased as `layouts` in the configuration above.
+Configuration is stored as an array (or `Compose\Support\Configuration` instance) and injected into the service container. You can override services, middleware, routes, subscribers, and template renderer settings the same way.
+The value `layouts::app` tells the renderer to use the `app.phtml` script inside the folder that was aliased as `layouts` in the configuration above.
 
 ## 4. Add Layouts and Pages
 

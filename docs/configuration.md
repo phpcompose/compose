@@ -23,7 +23,7 @@ $config->merge(require __DIR__ . '/app.local.php');
 | `debug` | bool | Enables verbose error output when true. |
 | `services` | array | Service definitions registered in the container. |
 | `middleware` | array | Ordered pipeline middleware list (sorted with `ksort`). |
-| `templates` | array | View engine configuration (folders, layout, helpers, etc.). |
+| `template` | array | Template renderer configuration (folders, layout, helpers, etc.). |
 | `pages` | array | Settings consumed by the Pages middleware. |
 | `routes` | array | Map of path => handler for routing. |
 | `subscribers` | array | Event subscribers (see [HTTP Pipeline](http-pipeline.md)). |
@@ -68,9 +68,9 @@ Only numeric keys are necessary; they are sorted to control execution order:
 ],
 ```
 
-### `templates`
+### `template`
 
-The view engine is backed by Plates. Supported keys include:
+The template renderer exposes helper registration, layout support, and filesystem resolution. Supported keys include:
 
 - `dir`: Base directory for templates (`COMPOSE_DIR_TEMPLATE` by default).
 - `folders`: Named folders mapped to absolute paths.

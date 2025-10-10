@@ -38,7 +38,7 @@ require __DIR__ . '/../vendor/autoload.php';
 
 $config = array_replace_recursive((new \Compose\Config())(), [
     'app' => ['name' => 'Pages Demo'],
-    'templates' => ['dir' => __DIR__ . '/../templates'],
+    'template' => ['dir' => __DIR__ . '/../templates'],
     'pages' => ['dir' => __DIR__ . '/../pages'],
 ]);
 

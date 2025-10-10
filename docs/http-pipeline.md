@@ -79,6 +79,6 @@ Starter::start($config, function (ContainerInterface $container) {
 
 ## Error Handling
 
-Compose wraps the pipeline in Laminas' error handling middleware. Configure the error renderer by overriding the `templates` map for error views or by adding entries to `error_listeners`. In debug mode (`debug => true`) the framework renders a verbose error template from `templates/error/debug.phtml`.
+Compose wraps the pipeline in Laminas' error handling middleware. Configure the error renderer by overriding the `template` map for error views or by adding entries to `error_listeners`. In debug mode (`debug => true`) the framework renders a verbose error template from `templates/error/debug.phtml`.
 
 If no middleware generates a response, `NotFoundMiddleware` produces a 404 page. Customize it by providing your own middleware via configuration or by replacing the service mapping for `Compose\Support\Error\NotFoundMiddleware`.
