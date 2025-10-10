@@ -4,11 +4,9 @@ namespace Compose\Routing;
 
 use Compose\Container\ContainerAwareInterface;
 use Compose\Container\ContainerAwareTrait;
-use Compose\Http\Event\RouteEvent;
+use Compose\Routing\Event\RouteEvent;
 use Psr\EventDispatcher\EventDispatcherInterface;
 use Exception;
-use Psr\Container\ContainerExceptionInterface;
-use Psr\Container\NotFoundExceptionInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Server\MiddlewareInterface;
