@@ -6,9 +6,12 @@ use Compose\Container\ServiceContainer;
 use Compose\Http\Event\PipelineInitEvent;
 use Compose\Http\Event\PipelineReadyEvent;
 use Compose\Http\BodyParsingMiddleware;
-use Compose\Mvc\MvcMiddleware;
 use Compose\Http\OutputBufferMiddleware;
 use Compose\Http\Pipeline;
+use Compose\Pages\PagesMiddleware;
+use Compose\Routing\DispatchMiddleware;
+use Compose\Routing\Route;
+use Compose\Routing\RoutingMiddleware;
 use Compose\Support\Configuration;
 use Compose\Support\Error\NotFoundMiddleware;
 use Exception;
@@ -42,7 +45,45 @@ class Starter
         ksort($middleware);
         $pipeline->pipeMany($middleware);
 
-        $pipeline->pipe($container->get(MvcMiddleware::class));
+        // Pages middleware (filesystem-driven pages)
+        $pagesMiddleware = $container->get(PagesMiddleware::class);
+        if (method_exists($pagesMiddleware, 'setContainer')) {
+            $pagesMiddleware->setContainer($container);
+        }
+
+        $pagesConfig = $configuration['pages'] ?? [];
+        $pageDir = $pagesConfig['dir'] ?? null;
+        if ($pageDir) {
+            $pagesMiddleware->setDirectory($pageDir, $pagesConfig['namespace'] ?? null);
+        }
+
+        $pageFolders = $pagesConfig['folders'] ?? null;
+        if ($pageFolders) {
+            $pagesMiddleware->setFolders($pageFolders);
+        }
+        $pipeline->pipe($pagesMiddleware);
+
+        // Routing middleware
+        $routing = $container->get(RoutingMiddleware::class);
+        if (method_exists($routing, 'setContainer')) {
+            $routing->setContainer($container);
+        }
+
+        $routes = $configuration['routes'] ?? [];
+        foreach ($routes as $path => $handler) {
+            $routing->route(Route::fromArray([
+                'path' => $path,
+                'handler' => $handler,
+            ]));
+        }
+        $pipeline->pipe($routing);
+
+        // Dispatch middleware
+        $dispatch = $container->get(DispatchMiddleware::class);
+        if (method_exists($dispatch, 'setContainer')) {
+            $dispatch->setContainer($container);
+        }
+        $pipeline->pipe($dispatch);
     }
 
 

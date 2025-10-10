@@ -1,12 +1,12 @@
 <?php
 
-namespace Compose\Mvc;
+namespace Compose\Pages;
 
 use Compose\Container\ContainerAwareInterface;
 use Compose\Container\ContainerAwareTrait;
-use Compose\Container\ResolvableInterface;
 use Compose\Event\BroadcastEvent;
 use Compose\Support\Invocation;
+use Compose\Template\TemplateRenderer;
 use Laminas\Diactoros\Response\HtmlResponse;
 use Psr\EventDispatcher\EventDispatcherInterface;
 use Psr\Http\Message\ResponseInterface;
@@ -14,16 +14,16 @@ use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 
-class PagesMiddleware implements MiddlewareInterface, ContainerAwareInterface, ResolvableInterface
+class PagesMiddleware implements MiddlewareInterface, ContainerAwareInterface
 {
     use ContainerAwareTrait;
 
-    private ViewEngineInterface $viewEngine;
+    private TemplateRenderer $viewEngine;
     private ?string $baseAlias = null;
     private array $folders = [];
     private string $defaultPage = 'index';
 
-    public function __construct(ViewEngineInterface $engine)
+    public function __construct(TemplateRenderer $engine)
     {
         $this->viewEngine = $engine;
     }
@@ -56,11 +56,11 @@ class PagesMiddleware implements MiddlewareInterface, ContainerAwareInterface, R
         }
         [$template, $params] = $match;
 
-        /** @var \Compose\Event\EventDispatcher */
+        /** @var \Compose\Event\EventDispatcher $dispatcher */
         $dispatcher = $this->getContainer()->get(EventDispatcherInterface::class);
 
         $data = $this->executeCodeBehind($template, $params, $request);
-        $dispatcher->dispatch(event: new BroadcastEvent('pages.match'));
+        $dispatcher->dispatch(new BroadcastEvent('pages.match'));
 
         if ($data instanceof ResponseInterface) {
             return $data;

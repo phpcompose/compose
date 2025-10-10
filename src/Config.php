@@ -59,10 +59,9 @@ class Config
                 \Psr\EventDispatcher\ListenerProviderInterface::class => Compose\Support\Factory\ListenerProviderFactory::class,
                 \Psr\EventDispatcher\EventDispatcherInterface::class => Compose\Event\EventDispatcher::class,
                 Compose\Http\Session\Session::class => Compose\Support\Factory\SessionFactory::class,
-                Compose\Mvc\ViewEngineInterface::class => Compose\Support\Factory\ViewEngineFactory::class,
-                Compose\Mvc\MvcMiddleware::class => Compose\Support\Factory\MvcMiddlewareFactory::class,
+                Compose\Template\RendererInterface::class => Compose\Support\Factory\ViewEngineFactory::class,
                 Compose\Http\OutputBufferMiddleware::class => Compose\Http\OutputBufferMiddleware::class,
-                Compose\Mvc\PagesMiddleware::class => Compose\Mvc\PagesMiddleware::class,
+                Compose\Pages\PagesMiddleware::class => Compose\Pages\PagesMiddleware::class,
                 Compose\Routing\RoutingMiddleware::class => Compose\Routing\RoutingMiddleware::class,
                 Compose\Routing\DispatchMiddleware::class => Compose\Routing\DispatchMiddleware::class,
             ],
@@ -82,7 +81,6 @@ class Config
              * 'middleware' => [
              *     10 => Compose\Http\OutputBufferMiddleware::class,
              *     20 => Compose\Http\BodyParsingMiddleware::class,
-             *     90 => Compose\Mvc\MvcMiddleware::class,
              * ]
              *
              * You may also reference services registered in 'services' by id.
@@ -92,33 +90,20 @@ class Config
 
 
             /**
-             * templates
+             * template
              *
-             * Configuration for the application's view engine. The ViewEngineFactory
+             * Configuration for the application's template renderer. The ViewEngineFactory
              * consumes this array and supports the following keys (all optional):
              *
              *  - dir (string):      the base templates directory. Defaults to COMPOSE_DIR_TEMPLATE.
              *  - folders (array):   named folders mapped to absolute paths. Example: ['compose' => COMPOSE_DIR_TEMPLATE]
-             *  - maps (array):      path map overrides for resolving view scripts. Keys are logical names -> paths.
+             *  - maps (array):      path map overrides for resolving template scripts. Keys are logical names -> paths.
              *  - layout (string):   optional default layout script (relative to resolved folders).
              *  - extension (string): template file extension (default: 'phtml').
-             *  - helpers (array):   registry of view helpers. See notes below about registration.
-             *
-             * Notes about helpers:
-             *  - Helpers must be defined under `templates['helpers']` (root-level
-             *    `helpers` is no longer supported). This keeps view configuration
-             *    colocated and unambiguous.
-             *  - Helper entries may be provided in two ways:
-             *      * numeric-keyed values (0-indexed or sequential) are treated as "extensions" and the
-             *        value is passed directly to the HelperRegistry->extend(), allowing helper providers
-             *        to register multiple helpers in a single class.
-             *      * string-keyed entries map an alias to a helper definition (class name, service id or callable)
-             *        and are registered via HelperRegistry->register(alias, definition).
-             *  - Helper definitions will be resolved through the container using the ServiceResolver when
-             *    helpers are later invoked.
+             *  - helpers (array):   registry of template helpers.
              *
              * Example:
-             * 'templates' => [
+             * 'template' => [
              *     'dir' => __DIR__ . '/../templates',
              *     'folders' => [ 'app' => __DIR__ . '/../templates/app' ],
              *     'maps' => [ 'error' => __DIR__ . '/../templates/error' ],
@@ -126,13 +111,13 @@ class Config
              *     'extension' => 'phtml',
              *     'helpers' => [
              *         // extend registry with a provider class
-             *         0 => \App\View\HelperProvider::class,
+             *         0 => \App\Template\HelperProvider::class,
              *         // register alias -> definition (class or service id)
-             *         'format' => \Compose\Mvc\Helper\FormatterHelper::class,
+             *         'format' => \Compose\Template\Helper\FormatterHelper::class,
              *     ],
              * ]
              */
-            'templates' => [
+            'template' => [
                 // map view scripts to view different paths/folders
                 'maps' => [
                 ],
@@ -144,9 +129,9 @@ class Config
                 // 'layout' => path/to/default/layout.phtml
 
                 'helpers' => [
-                    Compose\Mvc\Helper\TagHelper::class,
-                    Compose\Mvc\Helper\FormatterHelper::class,
-                    'request' => Compose\Mvc\Helper\RequestHelper::class,
+                    Compose\Template\Helper\TagHelper::class,
+                    Compose\Template\Helper\FormatterHelper::class,
+                    'request' => Compose\Template\Helper\RequestHelper::class,
                 ]
             ],
 
