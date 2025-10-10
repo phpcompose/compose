@@ -3,29 +3,29 @@
 namespace Compose\Bridge\Plates;
 
 use Compose\Container\ServiceFactoryInterface;
-use Compose\Mvc\ViewEngineInterface;
 use Compose\Support\Configuration;
+use Compose\Template\RendererInterface;
 use InvalidArgumentException;
 use League\Plates\Engine;
 use Psr\Container\ContainerInterface;
 
 class PlatesViewEngineFactory implements ServiceFactoryInterface
 {
-    public static function create(ContainerInterface $container, string $id): ViewEngineInterface
+    public static function create(ContainerInterface $container, string $id): RendererInterface
     {
         $configuration = $container->get(Configuration::class);
-        $templates = $configuration['templates'] ?? [];
+        $templateConfig = $configuration['template'] ?? $configuration['templates'] ?? [];
 
-        return self::createPlatesEngine($container, $templates, $configuration);
+        return self::createPlatesEngine($container, $templateConfig, $configuration);
     }
 
-    private static function createPlatesEngine(ContainerInterface $container, array $templates, Configuration|array $configuration): ViewEngineInterface
+    private static function createPlatesEngine(ContainerInterface $container, array $templateConfig, Configuration|array $configuration): RendererInterface
     {
-        $directory = $templates['dir'] ?? COMPOSE_DIR_TEMPLATE;
-        $folders = $templates['folders'] ?? [];
-        $extension = $templates['extension'] ?? 'phtml';
-        $defaultLayout = $templates['layout'] ?? null;
-        $helpers = $templates['helpers'] ?? ($configuration['helpers'] ?? []);
+        $directory = $templateConfig['dir'] ?? COMPOSE_DIR_TEMPLATE;
+        $folders = $templateConfig['folders'] ?? [];
+        $extension = $templateConfig['extension'] ?? 'phtml';
+        $defaultLayout = $templateConfig['layout'] ?? null;
+        $helpers = $templateConfig['helpers'] ?? ($configuration['helpers'] ?? []);
 
         $engine = new Engine($directory);
         $engine->setFileExtension($extension);

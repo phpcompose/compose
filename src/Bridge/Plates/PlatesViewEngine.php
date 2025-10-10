@@ -2,11 +2,12 @@
 
 namespace Compose\Bridge\Plates;
 
+use Compose\Template\RendererInterface;
 use League\Plates\Engine;
 use League\Plates\Template\Template;
 use Psr\Http\Message\ServerRequestInterface;
 
-class PlatesViewEngine implements \Compose\Mvc\ViewEngineInterface
+class PlatesViewEngine implements RendererInterface
 {
     private Engine $engine;
     private ?string $defaultLayout;
