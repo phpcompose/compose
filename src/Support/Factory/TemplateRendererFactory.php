@@ -10,7 +10,7 @@ use Compose\Template\RendererInterface;
 use Compose\Template\TemplateRenderer;
 use Psr\Container\ContainerInterface;
 
-class ViewEngineFactory implements ServiceFactoryInterface
+class TemplateRendererFactory implements ServiceFactoryInterface
 {
     public static function create(ContainerInterface $container, string $id): RendererInterface
     {

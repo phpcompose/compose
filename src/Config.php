@@ -59,7 +59,8 @@ class Config
                 \Psr\EventDispatcher\ListenerProviderInterface::class => Compose\Support\Factory\ListenerProviderFactory::class,
                 \Psr\EventDispatcher\EventDispatcherInterface::class => Compose\Event\EventDispatcher::class,
                 Compose\Http\Session\Session::class => Compose\Support\Factory\SessionFactory::class,
-                Compose\Template\RendererInterface::class => Compose\Support\Factory\ViewEngineFactory::class,
+                Compose\Template\RendererInterface::class => Compose\Support\Factory\TemplateRendererFactory::class,
+                Compose\Template\TemplateRenderer::class => Compose\Support\Factory\TemplateRendererFactory::class,
                 Compose\Http\OutputBufferMiddleware::class => Compose\Http\OutputBufferMiddleware::class,
                 Compose\Pages\PagesMiddleware::class => Compose\Pages\PagesMiddleware::class,
                 Compose\Routing\RoutingMiddleware::class => Compose\Routing\RoutingMiddleware::class,
@@ -92,7 +93,7 @@ class Config
             /**
              * template
              *
-             * Configuration for the application's template renderer. The ViewEngineFactory
+             * Configuration for the application's template renderer. The TemplateRendererFactory
              * consumes this array and supports the following keys (all optional):
              *
              *  - dir (string):      the base templates directory. Defaults to COMPOSE_DIR_TEMPLATE.
