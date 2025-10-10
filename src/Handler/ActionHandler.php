@@ -3,13 +3,9 @@
 namespace Compose\Handler;
 
 use ArrayObject;
-use Compose\Container\ContainerAwareInterface;
-use Compose\Container\ContainerAwareTrait;
 use Compose\Http\Exception\HttpException;
 use Compose\Routing\Route;
 use Compose\Support\Invocation;
-use Compose\Template\RendererInterface;
-use Exception;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use ReflectionException;
@@ -17,9 +13,8 @@ use ReflectionException;
 /**
  * Multi-action request handler akin to traditional MVC controllers.
  */
-abstract class ActionHandler extends RequestHandler implements ContainerAwareInterface
+abstract class ActionHandler extends RequestHandler
 {
-    use ContainerAwareTrait;
 
     /**
      * Map of HTTP methods to action names.
@@ -43,7 +38,7 @@ abstract class ActionHandler extends RequestHandler implements ContainerAwareInt
      * @throws HttpException
      * @throws ReflectionException
      */
-    protected function onHandle(ServerRequestInterface $request): ResponseInterface
+    final protected function onHandle(ServerRequestInterface $request): ResponseInterface
     {
         $invocation = $this->resolveActionHandler($request);
         return $invocation();
@@ -131,23 +126,5 @@ abstract class ActionHandler extends RequestHandler implements ContainerAwareInt
         }
 
         return $action;
-    }
-
-    /**
-     * Template rendering helper.
-     *
-     * @throws Exception
-     */
-    protected function render(string $template, ?array $data = null, int $status = 200, array $headers = []): ResponseInterface
-    {
-        /** @var RendererInterface $engine */
-        $engine = $this->getContainer()->get(RendererInterface::class);
-        if (!$engine) {
-            throw new Exception('Template renderer not found in the container.');
-        }
-
-        $html = $engine->render($template, $data ?? [], $this->request);
-
-        return $this->html($html, $status, $headers);
     }
 }

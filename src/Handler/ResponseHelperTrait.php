@@ -35,7 +35,9 @@ trait ResponseHelperTrait
 
     public function json(array $data, int $status = 200, array $headers = []): ResponseInterface
     {
-        return new Response\JsonResponse($data, $status, $headers);
+        // Ensure the data is UTF-8 safe and normalize objects/JsonSerializable instances
+        $payload = $this->encodeJson($data);
+        return new Response\JsonResponse($payload, $status, $headers);
     }
 
     public function html(string $html, int $status = 200, array $headers = []): ResponseInterface

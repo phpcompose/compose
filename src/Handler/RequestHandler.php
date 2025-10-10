@@ -2,15 +2,19 @@
 
 namespace Compose\Handler;
 
+use Compose\Container\ContainerAwareInterface;
+use Compose\Container\ContainerAwareTrait;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
+use Compose\Template\RendererInterface;
+use Exception;
 use Throwable;
 
-abstract class RequestHandler implements MiddlewareInterface, RequestHandlerInterface
+abstract class RequestHandler implements MiddlewareInterface, RequestHandlerInterface, ContainerAwareInterface
 {
-    use ResponseHelperTrait;
+    use ResponseHelperTrait, ContainerAwareTrait;
 
     protected ServerRequestInterface $request;
 
@@ -53,4 +57,22 @@ abstract class RequestHandler implements MiddlewareInterface, RequestHandlerInte
         $e->request = $request;
         throw $e;
     }
+
+   /**
+     * Template rendering helper.
+     *
+     * @throws Exception
+     */
+    protected function render(string $template, ?array $data = null, int $status = 200, array $headers = []): ResponseInterface
+    {
+        /** @var RendererInterface $engine */
+        $engine = $this->getContainer()->get(RendererInterface::class);
+        if (!$engine) {
+            throw new Exception('Template renderer not found in the container.');
+        }
+
+        $html = $engine->render($template, $data ?? [], $this->request);
+
+        return $this->html($html, $status, $headers);
+    }    
 }
