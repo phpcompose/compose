@@ -7,10 +7,10 @@
  */
 
 namespace Compose\Support\Factory;
-
-
 use Compose\Container\ServiceFactoryInterface;
 use Compose\Http\Session\Session;
+use Compose\Http\Session\NativeSessionStorage;
+use Compose\Http\Session\SessionStorageInterface;
 use Compose\Support\Configuration;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\ContainerInterface;
@@ -40,7 +40,14 @@ class SessionFactory implements ServiceFactoryInterface
         }
 
         $config = $configuration['session'] ?? null;
-        $session = new Session($config);
+
+        if ($container->has(SessionStorageInterface::class)) {
+            $storage = $container->get(SessionStorageInterface::class);
+        } else {
+            $storage = new NativeSessionStorage();
+        }
+
+        $session = new Session($storage, $config);
         $session->start($handler);
 
         return $session;

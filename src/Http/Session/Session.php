@@ -8,103 +8,64 @@
 
 namespace Compose\Http\Session;
 
+use SessionHandlerInterface;
 
-
-/**
- * Class Session
- * @package Compose\Http\Session
- */
 class Session
 {
-    protected
-        /**
-         * @var array
-         */
-        $options = [
-            'cookie_path' => '/',
-            'cookie_timeout' => 21600,
-            'garbage_timeout' => 216600,
-            'cookie_secure' => false,
-            'cookie_domain' => null
-        ],
+    protected array $options = [
+        'cookie_path' => '/',
+        'cookie_timeout' => 21600,
+        'garbage_timeout' => 216600,
+        'cookie_secure' => false,
+        'cookie_domain' => null,
+    ];
 
-        /**
-         * @var string
-         */
-        $id;
+    private SessionStorageInterface $storage;
+    private ?SessionHandlerInterface $handler = null;
 
-    /**
-     * Session constructor.
-     * @param array|null $options
-     */
-    public function __construct(array $options = null)
+    public function __construct(SessionStorageInterface $storage, array $options = null)
     {
-        if($options) {
+        $this->storage = $storage;
+
+        if ($options) {
             $this->options = $options + $this->options;
         }
     }
 
-    /**
-     * @param \SessionHandlerInterface|null $handler
-     */
-    public function start(\SessionHandlerInterface $handler = null)
+    public function start(SessionHandlerInterface $handler = null): void
     {
-        if (session_status() === PHP_SESSION_NONE) {
-            if (headers_sent()) {
-                throw new \RuntimeException('Cannot start session: headers already sent');
-            }
-
-            if ($handler) {
-                session_set_save_handler($handler, true);
-            }
-
-            // set the options and configure the session for the first time
-            $options = $this->options;
-            $cookieDomain = $options['cookie_domain'] ?? '';
-            session_set_cookie_params(
-                (int) ($options['cookie_timeout'] ?? 0),
-                (string) ($options['cookie_path'] ?? '/'),
-                (string) $cookieDomain,
-                (bool) ($options['cookie_secure'] ?? false),
-                true
-            );
-            ini_set('session.gc_maxlifetime', (string) ($options['garbage_timeout'] ?? 0));
-            session_cache_limiter('must-revalidate');
-
-            // start the session
-            session_start();
+        if ($handler) {
+            $this->handler = $handler;
         }
+
+        $this->storage->start($this->handler, $this->options);
     }
 
     /**
      * @return string
      */
-    public function getId() : string
+    public function getId(): string
     {
         $this->ensureStarted();
-        return session_id();
+        return $this->storage->getId();
     }
 
     /**
      * @param string $id
      */
-    public function setId(string $id)
+    public function setId(string $id): void
     {
-        // set session id before starting the session
-        if (session_status() !== PHP_SESSION_NONE) {
-            throw new \RuntimeException('Cannot set session id after session has started');
-        }
-        session_id($id);
+        $this->storage->setId($id);
     }
 
     /**
      * @param string $name
      * @return bool
      */
-    public function has(string $name) : bool
+    public function has(string $name): bool
     {
         $this->ensureStarted();
-        return isset($_SESSION[$name]);
+        return $this->storage->has($name);
     }
 
     /**
@@ -115,29 +76,26 @@ class Session
     public function get(string $name, $default = null)
     {
         $this->ensureStarted();
-        return $_SESSION[$name] ?? $default;
+        return $this->storage->get($name, $default);
     }
 
     /**
      * @param string $name
      * @param $value
      */
-    public function set(string $name, $value)
+    public function set(string $name, $value): void
     {
         $this->ensureStarted();
-        $_SESSION[$name] = $value;
+        $this->storage->set($name, $value);
     }
 
     /**
      * @param string $name
      */
-    public function unset(string $name)
+    public function unset(string $name): void
     {
         $this->ensureStarted();
-        if (array_key_exists($name, $_SESSION)) {
-            $_SESSION[$name] = null;
-            unset($_SESSION[$name]);
-        }
+        $this->storage->remove($name);
     }
 
     /**
@@ -145,29 +103,25 @@ class Session
      *
      * @return $this
      */
-    public function regenerate() : self
+    public function regenerate(): self
     {
         $this->ensureStarted();
-        // delete old session id by passing true
-        session_regenerate_id(true);
+        $this->storage->regenerate(true);
         return $this;
     }
 
     /**
      * @return array
      */
-    public function toArray() : array
+    public function toArray(): array
     {
         $this->ensureStarted();
-        return $_SESSION;
+        return $this->storage->all();
     }
 
     public function __destruct()
     {
-        if (session_status() !== PHP_SESSION_NONE) {
-            // write and close the session to ensure data is persisted
-            session_write_close();
-        }
+        $this->storage->close();
     }
 
     /**
@@ -175,8 +129,8 @@ class Session
      */
     protected function ensureStarted(): void
     {
-        if (session_status() === PHP_SESSION_NONE) {
-            $this->start();
+        if (!$this->storage->isStarted()) {
+            $this->start($this->handler);
         }
     }
 }
