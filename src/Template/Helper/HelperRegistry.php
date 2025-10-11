@@ -2,15 +2,15 @@
 
 namespace Compose\Template\Helper;
 
-use Compose\Container\ContainerAwareInterface;
-use Compose\Container\ContainerAwareTrait;
+use Compose\Container\ServiceFactoryInterface;
 use Compose\Container\ServiceResolver;
+use Compose\Support\Configuration;
 use Compose\Template\Template;
+use Psr\Container\ContainerInterface;
 use Psr\Http\Message\ServerRequestInterface;
 
-class HelperRegistry implements ContainerAwareInterface, HelperRegistryInterface
+class HelperRegistry implements HelperRegistryInterface, ServiceFactoryInterface
 {
-    use ContainerAwareTrait;
 
     /** @deprecated */
     public $currentView;
@@ -28,6 +28,24 @@ class HelperRegistry implements ContainerAwareInterface, HelperRegistryInterface
     public function __construct(ServiceResolver $resolver)
     {
         $this->resolver = $resolver;
+    }
+
+    public static function create(ContainerInterface $container, string $id): self
+    {
+        $registry = new self(new ServiceResolver($container));
+        $config = $container->get(Configuration::class);
+
+        $helpers = $config['templates']['helpers'] ?? [];
+        foreach ($helpers as $alias => $definition) {
+            if (is_int($alias)) {
+                $registry->extend($definition);
+                continue;
+            }
+
+            $registry->register((string) $alias, $definition);
+        }
+
+        return $registry;
     }
 
     public function __invoke()

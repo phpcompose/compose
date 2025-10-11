@@ -15,26 +15,14 @@ class TemplateRendererFactory implements ServiceFactoryInterface
     public static function create(ContainerInterface $container, string $id): RendererInterface
     {
         $configuration = $container->get(Configuration::class);
-        $templateConfig = $configuration['template'] ?? $configuration['templates'] ?? [];
+        $templateConfig = $configuration['templates'] ?? [];
 
         return self::createComposeEngine($container, $templateConfig, $configuration);
     }
 
     private static function createComposeEngine(ContainerInterface $container, array $templateConfig, Configuration|array $configuration): RendererInterface
     {
-        $resolver = $container->get(ServiceResolver::class);
-        $registry = new HelperRegistry($resolver);
-
-        $helpers = $templateConfig['helpers'] ?? [];
-
-        foreach ($helpers as $alias => $definition) {
-            if (is_int($alias)) {
-                $registry->extend($definition);
-                continue;
-            }
-
-            $registry->register((string) $alias, $definition);
-        }
+        $registry = $container->get(HelperRegistry::class);
 
         $config = [
             'dir' => $templateConfig['dir'] ?? COMPOSE_DIR_TEMPLATE,

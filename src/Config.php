@@ -118,7 +118,7 @@ class Config
              *     ],
              * ]
              */
-            'template' => [
+            'templates' => [
                 // map view scripts to view different paths/folders
                 'maps' => [
                 ],
