@@ -54,7 +54,6 @@ abstract class RequestHandler implements MiddlewareInterface, RequestHandlerInte
      */
     protected function onException(ServerRequestInterface $request, Throwable $e): ?ResponseInterface
     {
-        $e->request = $request;
         throw $e;
     }
 
