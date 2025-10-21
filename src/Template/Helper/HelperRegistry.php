@@ -78,7 +78,7 @@ class HelperRegistry implements HelperRegistryInterface, ServiceFactoryInterface
         $reflection = new \ReflectionClass($helper);
         foreach ($reflection->getMethods(\ReflectionMethod::IS_PUBLIC) as $method) {
             $name = $method->getName();
-            if ($name === '__construct' || str_starts_with($name, '__')) {
+            if (str_starts_with($name, '__')) {
                 continue;
             }
 

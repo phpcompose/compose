@@ -11,7 +11,8 @@ class Template extends \ArrayObject
     public ?string $layout = null;
     public ?string $title = null;
 
-    private HelperRegistry $helpers;
+    public readonly HelperRegistry $helpers;
+
     private ?string $script;
     private array $sectionStack = [];
     private array $sections = [];
@@ -39,15 +40,19 @@ class Template extends \ArrayObject
 
     public static function escape(?string $str = null, ?array $args = null): string
     {
-        if (!$str) {
+        if ($str === null) {
             return '';
         }
 
         if ($args) {
-            return htmlentities(sprintf($str, ...$args));
+            try {
+                $str = sprintf($str, ...$args);
+            } catch (\ValueError $e) {
+                // fall back to original string when placeholders mismatch
+            }
         }
 
-        return htmlentities($str);
+        return htmlspecialchars($str, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8', false);
     }
 
     public function helpers(...$names)
