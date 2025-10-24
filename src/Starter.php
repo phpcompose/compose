@@ -10,7 +10,6 @@ use Compose\Http\OutputBufferMiddleware;
 use Compose\Http\Pipeline;
 use Compose\Pages\PagesMiddleware;
 use Compose\Routing\DispatchMiddleware;
-use Compose\Routing\Route;
 use Compose\Routing\RoutingMiddleware;
 use Compose\Support\Configuration;
 use Compose\Support\Error\NotFoundMiddleware;
@@ -20,7 +19,6 @@ use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\ContainerInterface;
 use Laminas\Stratigility\Middleware\ErrorHandler;
 use Laminas\Stratigility\Middleware\OriginalMessages;
-use Laminas\Stratigility\Middleware\PathMiddlewareDecorator;
 use Psr\Container\NotFoundExceptionInterface;
 
 /**
@@ -46,56 +44,14 @@ class Starter
         ksort($middleware);
         $pipeline->pipeMany($middleware);
 
-        // Pages middleware (filesystem-driven pages)
-        $pagesMiddleware = $container->get(PagesMiddleware::class);
-        if (method_exists($pagesMiddleware, 'setContainer')) {
-            $pagesMiddleware->setContainer($container);
-        }
-
-        $pagesConfig = $configuration['pages'] ?? [];
-        $pageDir = $pagesConfig['dir'] ?? null;
-        if ($pageDir) {
-            $pagesMiddleware->setDirectory($pageDir, $pagesConfig['namespace'] ?? null);
-        }
-
-        $pageFolders = $pagesConfig['folders'] ?? null;
-        if ($pageFolders) {
-            $pagesMiddleware->setFolders($pageFolders);
-        }
-        $middlewareToPipe = $pagesMiddleware;
-        if (array_key_exists('path', $pagesConfig)) {
-            $path = $pagesConfig['path'];
-            if (is_string($path)) {
-                $trimmed = trim($path);
-                if ($trimmed !== '' && $trimmed !== '/') {
-                    $middlewareToPipe = new PathMiddlewareDecorator($trimmed, $pagesMiddleware);
-                }
-            }
-        }       
-
-        $pipeline->pipe($middlewareToPipe);
-
         // Routing middleware
-        $routing = $container->get(RoutingMiddleware::class);
-        if (method_exists($routing, 'setContainer')) {
-            $routing->setContainer($container);
-        }
-
-        $routes = $configuration['routes'] ?? [];
-        foreach ($routes as $path => $handler) {
-            $routing->route(Route::fromArray([
-                'path' => $path,
-                'handler' => $handler,
-            ]));
-        }
-        $pipeline->pipe($routing);
+        $pipeline->pipe($container->get(RoutingMiddleware::class));
 
         // Dispatch middleware
-        $dispatch = $container->get(DispatchMiddleware::class);
-        if (method_exists($dispatch, 'setContainer')) {
-            $dispatch->setContainer($container);
-        }
-        $pipeline->pipe($dispatch);
+        $pipeline->pipe($container->get(DispatchMiddleware::class));
+
+        // Pages middleware (filesystem-driven pages)
+        $pipeline->pipe($container->get(PagesMiddleware::class));
     }
 
 

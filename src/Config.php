@@ -62,8 +62,8 @@ class Config
                 Compose\Template\RendererInterface::class => Compose\Support\Factory\TemplateRendererFactory::class,
                 Compose\Template\TemplateRenderer::class => Compose\Support\Factory\TemplateRendererFactory::class,
                 Compose\Http\OutputBufferMiddleware::class => Compose\Http\OutputBufferMiddleware::class,
-                Compose\Pages\PagesMiddleware::class => Compose\Pages\PagesMiddleware::class,
-                Compose\Routing\RoutingMiddleware::class => Compose\Routing\RoutingMiddleware::class,
+                Compose\Pages\PagesMiddleware::class => Compose\Support\Factory\PagesMiddlewareFactory::class,
+                Compose\Routing\RoutingMiddleware::class => Compose\Support\Factory\RoutingMiddlewareFactory::class,
                 Compose\Routing\DispatchMiddleware::class => Compose\Routing\DispatchMiddleware::class,
             ],
 
