@@ -62,8 +62,20 @@ class PagesMiddleware implements MiddlewareInterface, ContainerAwareInterface
         $data = $this->executeCodeBehind($template, $params, $request);
         $dispatcher->dispatch(new BroadcastEvent('pages.match'));
 
+        if ($data instanceof ServerRequestInterface) {
+            return $handler->handle($data);
+        }
+
         if ($data instanceof ResponseInterface) {
             return $data;
+        }
+
+        if ($data instanceof \Traversable) {
+            $data = iterator_to_array($data);
+        }
+
+        if ($data !== null && !is_array($data)) {
+            throw new \RuntimeException('Pages middleware expects data array; received ' . get_debug_type($data));
         }
 
         return new HtmlResponse($this->viewEngine->render($template, $data ?? [], $request));
@@ -124,7 +136,12 @@ class PagesMiddleware implements MiddlewareInterface, ContainerAwareInterface
             return $invocation(...$params);
         }
 
-        if (is_array($result)) {
+        if (
+            $result instanceof ResponseInterface ||
+            $result instanceof ServerRequestInterface ||
+            is_array($result) ||
+            $result instanceof \Traversable
+        ) {
             return $result;
         }
 

@@ -20,6 +20,7 @@ use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\ContainerInterface;
 use Laminas\Stratigility\Middleware\ErrorHandler;
 use Laminas\Stratigility\Middleware\OriginalMessages;
+use Laminas\Stratigility\Middleware\PathMiddlewareDecorator;
 use Psr\Container\NotFoundExceptionInterface;
 
 /**
@@ -61,7 +62,18 @@ class Starter
         if ($pageFolders) {
             $pagesMiddleware->setFolders($pageFolders);
         }
-        $pipeline->pipe($pagesMiddleware);
+        $middlewareToPipe = $pagesMiddleware;
+        if (array_key_exists('path', $pagesConfig)) {
+            $path = $pagesConfig['path'];
+            if (is_string($path)) {
+                $trimmed = trim($path);
+                if ($trimmed !== '' && $trimmed !== '/') {
+                    $middlewareToPipe = new PathMiddlewareDecorator($trimmed, $pagesMiddleware);
+                }
+            }
+        }       
+
+        $pipeline->pipe($middlewareToPipe);
 
         // Routing middleware
         $routing = $container->get(RoutingMiddleware::class);
