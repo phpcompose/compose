@@ -2,17 +2,20 @@
 
 namespace Compose\Pages;
 
+use ArgumentCountError;
 use Compose\Container\ContainerAwareInterface;
 use Compose\Container\ContainerAwareTrait;
 use Compose\Event\BroadcastEvent;
 use Compose\Support\Invocation;
 use Compose\Template\TemplateRenderer;
 use Laminas\Diactoros\Response\HtmlResponse;
+use InvalidArgumentException;
 use Psr\EventDispatcher\EventDispatcherInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
+use TypeError;
 
 class PagesMiddleware implements MiddlewareInterface, ContainerAwareInterface
 {
@@ -133,7 +136,12 @@ class PagesMiddleware implements MiddlewareInterface, ContainerAwareInterface
 
             $invocation = new Invocation($result);
             array_unshift($params, $request);
-            return $invocation(...$params);
+
+            try {
+                return $invocation(...$params);
+            } catch (ArgumentCountError|InvalidArgumentException|TypeError) {
+                return $request;
+            }
         }
 
         if (
