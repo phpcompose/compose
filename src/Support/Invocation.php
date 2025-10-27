@@ -105,10 +105,9 @@ class Invocation
      */
     public function __invoke(...$params)
     {
-        $reflection = $this->getReflection();
         $params = $params ?: $this->getParameters();
 
-        $this->verify($reflection, $params);
+        $this->validate($params);
 
         return call_user_func_array($this->callable, $params);
     }
@@ -149,8 +148,10 @@ class Invocation
      * @param ReflectionFunctionAbstract $method
      * @param array $args
      */
-    protected function verify(ReflectionFunctionAbstract $method, array $args = [])
+    public function validate(array $args = [])
     {
+        $method = $this->getReflection();
+
         // now we will validate the function with given $args
         $argsCount = ($args === null) ? 0 : count($args);
         $paramsCount = $method->getNumberOfParameters();

@@ -107,7 +107,7 @@ class PagesMiddleware implements MiddlewareInterface, ContainerAwareInterface
         return null;
     }
 
-    private function executeCodeBehind(string $template, array $params, ServerRequestInterface $request)
+    private function executeCodeBehind(string $template, array $params, ServerRequestInterface $request): mixed
     {
         $path = $this->viewEngine->resolvePath($template);
         if (!$path) {
