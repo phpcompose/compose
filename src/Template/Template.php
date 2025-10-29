@@ -19,7 +19,7 @@ class Template extends \ArrayObject
 
     public function __construct(string $script, ?array $data = null)
     {
-        parent::__construct($data ?? []);
+        parent::__construct($data ?? [], \ArrayObject::STD_PROP_LIST);
         $this->script = $script;
     }
 
@@ -87,12 +87,37 @@ class Template extends \ArrayObject
 
     public function set(string $name, mixed $value): void
     {
-        if ($name === self::CONTENT) {
-            $this->sections[self::CONTENT] = (string) $value;
-            return;
+        $this->sections[$name] = $value;
+    }
+
+    /**
+     * Get or set a section.
+     *
+     * - As setter: $this->section('toolbar', $html) will set the section (allows null value)
+     * - As getter: $this->section('toolbar') will return the section value or null if not present
+     *
+     * When setting, a dev-mode notice is emitted if a controller-provided value exists with the same name.
+     * Returns $this when used as setter to allow chaining in templates.
+     *
+     * @param string $name
+     * @param mixed|null $value
+     * @return mixed|null|$this
+     */
+    public function section(string $name, mixed $value = null)
+    {
+        if (func_num_args() > 1) {
+            // setter: warn in debug if the array-backed view data has same key
+            $isDebug = isset($_ENV['DEBUG']) ? filter_var($_ENV['DEBUG'], FILTER_VALIDATE_BOOLEAN) : false;
+            if ($this->offsetExists($name) && $isDebug) {
+                trigger_error("Template section \"$name\" shadows view data of the same name", E_USER_NOTICE);
+            }
+
+            $this->sections[$name] = $value;
+            return $this;
         }
 
-        $this->sections[$name] = $value;
+        // getter: section-only (no fallback to array-backed data)
+        return array_key_exists($name, $this->sections) ? $this->sections[$name] : null;
     }
 
     public function get(string $name, mixed $default = null): mixed
@@ -101,27 +126,26 @@ class Template extends \ArrayObject
             return $this->sections[$name];
         }
 
-        $data = $this->getArrayCopy();
-        return array_key_exists($name, $data) ? $data[$name] : $default;
+        if ($this->offsetExists($name)) {
+            return $this->offsetGet($name);
+        }
+
+        return $default;
     }
 
     public function has(string $name): bool
     {
-        return array_key_exists($name, $this->sections) || array_key_exists($name, $this->getArrayCopy());
+        return array_key_exists($name, $this->sections) || $this->offsetExists($name);
     }
 
-    public function content(): ?string
+    public function content(): string
     {
-        $value = $this->get(self::CONTENT);
-        return is_string($value) ? $value : null;
+        return (string) $this->get(self::CONTENT);
     }
 
     public function toArray(): array
     {
-        $data = $this->getArrayCopy();
-        $data['view'] = $this;
-
-        return $data;
+        return $this->getArrayCopy();
     }
 
     public function __call($name, $arguments)
