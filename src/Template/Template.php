@@ -106,12 +106,7 @@ class Template extends \ArrayObject
     public function section(string $name, mixed $value = null)
     {
         if (func_num_args() > 1) {
-            // setter: warn in debug if the array-backed view data has same key
-            $isDebug = isset($_ENV['DEBUG']) ? filter_var($_ENV['DEBUG'], FILTER_VALIDATE_BOOLEAN) : false;
-            if ($this->offsetExists($name) && $isDebug) {
-                trigger_error("Template section \"$name\" shadows view data of the same name", E_USER_NOTICE);
-            }
-
+            // setter: store section value (no dev-mode warnings)
             $this->sections[$name] = $value;
             return $this;
         }
