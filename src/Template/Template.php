@@ -16,6 +16,8 @@ class Template extends \ArrayObject
     private ?string $script;
     private array $sectionStack = [];
     private array $sections = [];
+    /** Cache of public properties per class to avoid Reflection on hot paths */
+    private static array $publicPropsCache = [];
 
     public function __construct(string $script, ?array $data = null)
     {
@@ -121,16 +123,13 @@ class Template extends \ArrayObject
             return $this->sections[$name];
         }
 
-        // check public object properties (template props like $this->title)
-        if (property_exists($this, $name)) {
-            try {
-                $rp = new \ReflectionProperty($this, $name);
-                if ($rp->isPublic()) {
-                    return $this->$name;
-                }
-            } catch (\ReflectionException $e) {
-                // fall through to array-backed data
-            }
+        // check declared public properties (cache class vars for speed)
+        $class = static::class;
+        if (!isset(self::$publicPropsCache[$class])) {
+            self::$publicPropsCache[$class] = array_keys(get_class_vars($class));
+        }
+        if (in_array($name, self::$publicPropsCache[$class], true)) {
+            return $this->$name;
         }
 
         // finally check array-backed view data without copying the whole array
@@ -147,15 +146,12 @@ class Template extends \ArrayObject
             return true;
         }
 
-        if (property_exists($this, $name)) {
-            try {
-                $rp = new \ReflectionProperty($this, $name);
-                if ($rp->isPublic()) {
-                    return true;
-                }
-            } catch (\ReflectionException $e) {
-                // ignore and fall through
-            }
+        $class = static::class;
+        if (!isset(self::$publicPropsCache[$class])) {
+            self::$publicPropsCache[$class] = array_keys(get_class_vars($class));
+        }
+        if (in_array($name, self::$publicPropsCache[$class], true)) {
+            return true;
         }
 
         return $this->offsetExists($name);
