@@ -121,6 +121,19 @@ class Template extends \ArrayObject
             return $this->sections[$name];
         }
 
+        // check public object properties (template props like $this->title)
+        if (property_exists($this, $name)) {
+            try {
+                $rp = new \ReflectionProperty($this, $name);
+                if ($rp->isPublic()) {
+                    return $this->$name;
+                }
+            } catch (\ReflectionException $e) {
+                // fall through to array-backed data
+            }
+        }
+
+        // finally check array-backed view data without copying the whole array
         if ($this->offsetExists($name)) {
             return $this->offsetGet($name);
         }
@@ -130,17 +143,27 @@ class Template extends \ArrayObject
 
     public function has(string $name): bool
     {
-        return array_key_exists($name, $this->sections) || $this->offsetExists($name);
+        if (array_key_exists($name, $this->sections)) {
+            return true;
+        }
+
+        if (property_exists($this, $name)) {
+            try {
+                $rp = new \ReflectionProperty($this, $name);
+                if ($rp->isPublic()) {
+                    return true;
+                }
+            } catch (\ReflectionException $e) {
+                // ignore and fall through
+            }
+        }
+
+        return $this->offsetExists($name);
     }
 
     public function content(): string
     {
         return (string) $this->get(self::CONTENT);
-    }
-
-    public function toArray(): array
-    {
-        return $this->getArrayCopy();
     }
 
     public function __call($name, $arguments)
