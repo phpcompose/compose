@@ -35,9 +35,8 @@ class TemplateRenderer implements RendererInterface
             $content = $this->renderScript($view->getScript(), $view->getArrayCopy(), $view);
 
             if ($view->layout) {
-                $view->set(Template::CONTENT, $content);
-                $layoutData = $view->toArray();
-                $content = $this->renderScript($view->layout, $layoutData, $view);
+                $view->block(Template::CONTENT, $content);
+                $content = $this->renderScript($view->layout, $view->getArrayCopy(), $view);
             }
 
             return $content;

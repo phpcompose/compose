@@ -4,20 +4,18 @@ namespace Compose\Template;
 
 use Compose\Template\Helper\HelperRegistry;
 
+#[\AllowDynamicProperties]
 class Template extends \ArrayObject
 {
     public const string CONTENT = 'content';
 
     public ?string $layout = null;
     public ?string $title = null;
-
     public readonly HelperRegistry $helpers;
 
     private ?string $script;
-    private array $sectionStack = [];
-    private array $sections = [];
-    /** Cache of public properties per class to avoid Reflection on hot paths */
-    private static array $publicPropsCache = [];
+    private array $blockStack = [];
+    private array $blocks = [];
 
     public function __construct(string $script, ?array $data = null)
     {
@@ -73,97 +71,34 @@ class Template extends \ArrayObject
 
     public function start(string $name): void
     {
-        $this->sectionStack[] = $name;
+        $this->blockStack[] = $name;
         ob_start();
     }
 
     public function end(): void
     {
-        if (empty($this->sectionStack)) {
-            throw new \LogicException('Cannot end a section without starting one.');
+        if (empty($this->blockStack)) {
+            throw new \LogicException('Cannot end a block without starting one.');
         }
 
-        $name = array_pop($this->sectionStack);
-        $this->sections[$name] = ob_get_clean();
+        $name = array_pop($this->blockStack);
+        $this->blocks[$name] = ob_get_clean();
     }
 
-    public function set(string $name, mixed $value): void
-    {
-        $this->sections[$name] = $value;
-    }
-
-    /**
-     * Get or set a section.
-     *
-     * - As setter: $this->section('toolbar', $html) will set the section (allows null value)
-     * - As getter: $this->section('toolbar') will return the section value or null if not present
-     *
-     * When setting, a dev-mode notice is emitted if a controller-provided value exists with the same name.
-     * Returns $this when used as setter to allow chaining in templates.
-     *
-     * @param string $name
-     * @param mixed|null $value
-     * @return mixed|null|$this
-     */
-    public function section(string $name, mixed $value = null)
+    public function block(string $name, mixed $value = null)
     {
         if (func_num_args() > 1) {
-            // setter: store section value (no dev-mode warnings)
-            $this->sections[$name] = $value;
+            // setter: store block value
+            $this->blocks[$name] = $value;
             return $this;
         }
 
-        // getter: section-only (no fallback to array-backed data)
-        return array_key_exists($name, $this->sections) ? $this->sections[$name] : null;
-    }
-
-    public function get(string $name, mixed $default = null): mixed
-    {
-        if (array_key_exists($name, $this->sections)) {
-            return $this->sections[$name];
-        }
-
-        // check declared public properties (cache class vars for speed)
-        $class = static::class;
-        if (!isset(self::$publicPropsCache[$class])) {
-            self::$publicPropsCache[$class] = array_keys(get_class_vars($class));
-        }
-        if (in_array($name, self::$publicPropsCache[$class], true)) {
-            return $this->$name;
-        }
-
-        // finally check array-backed view data without copying the whole array
-        if ($this->offsetExists($name)) {
-            return $this->offsetGet($name);
-        }
-
-        return $default;
-    }
-
-    public function has(string $name): bool
-    {
-        if (array_key_exists($name, $this->sections)) {
-            return true;
-        }
-
-        $class = static::class;
-        if (!isset(self::$publicPropsCache[$class])) {
-            self::$publicPropsCache[$class] = array_keys(get_class_vars($class));
-        }
-        if (in_array($name, self::$publicPropsCache[$class], true)) {
-            return true;
-        }
-
-        return $this->offsetExists($name);
+        // getter: block-only (no fallback to array-backed data)
+        return array_key_exists($name, $this->blocks) ? $this->blocks[$name] : null;
     }
 
     public function content(): string
     {
-        return (string) $this->get(self::CONTENT);
-    }
-
-    public function __call($name, $arguments)
-    {
-        return $this->helpers->__call($name, $arguments);
+        return (string) ($this->blocks[self::CONTENT] ?? '');
     }
 }

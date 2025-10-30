@@ -18,7 +18,7 @@ final class TemplateRendererTest extends TestCase
     {
         $dir = $this->createTemplates([
             'home/index.phtml' => "<?php \$this->layout = 'layout'; ?>Hello <?= \$name ?>",
-            'layout.phtml' => "<html><body><main><?= \$this->get('content') ?></main></body></html>",
+            'layout.phtml' => "<html><body><main><?= \$this->content() ?></main></body></html>",
         ]);
 
         $engine = $this->createRenderer(['dir' => $dir, 'layout' => 'layout']);
@@ -28,20 +28,20 @@ final class TemplateRendererTest extends TestCase
         $this->assertStringContainsString('<main>Hello Compose</main>', $html);
     }
 
-    public function testSectionsAndSharedDataAreAvailableInLayout(): void
+    public function testBlocksAndSharedDataAreAvailableInLayout(): void
     {
         $dir = $this->createTemplates([
             'home/index.phtml' => <<<'PHP'
 <?php $this->layout = 'layout'; ?>
-<?php $this->set('menu', ['Dashboard']); ?>
+<?php $this->menu = ['Dashboard']; ?>
 <?php $this->start('sidebar'); ?>Sidebar<?php $this->end(); ?>
 <p>Main Area</p>
 PHP,
             'layout.phtml' => <<<'PHP'
 <html><body>
-<nav><?= implode(',', (array) $this->get('menu', [])) ?></nav>
-<aside><?= trim($this->get('sidebar', '')) ?></aside>
-<main><?= $this->get('content') ?></main>
+<nav><?= implode(',', (array) $this->menu ?? []) ?></nav>
+<aside><?= trim($this->block('sidebar')) ?></aside>
+<main><?= $this->content() ?></main>
 </body></html>
 PHP,
         ]);
@@ -60,12 +60,12 @@ PHP,
         $dir = $this->createTemplates([
             'home/index.phtml' => <<<'PHP'
 <?php $this->layout = 'layout'; ?>
-<?php echo $this->open('section', ['class' => 'hero']); ?>
+<?php echo $this->helpers->open('section', ['class' => 'hero']); ?>
     <h2>Hello</h2>
-<?php echo $this->close('section'); ?>
+<?php echo $this->helpers->close('section'); ?>
 PHP,
             'layout.phtml' => <<<'PHP'
-<html><body><?= $this->get('content') ?></body></html>
+<html><body><?= $this->content() ?></body></html>
 PHP,
         ]);
 
