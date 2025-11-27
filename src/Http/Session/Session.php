@@ -23,7 +23,7 @@ class Session
     private SessionStorageInterface $storage;
     private ?SessionHandlerInterface $handler = null;
 
-    public function __construct(SessionStorageInterface $storage, array $options = null)
+    public function __construct(SessionStorageInterface $storage, ?array $options = null)
     {
         $this->storage = $storage;
 
@@ -32,7 +32,7 @@ class Session
         }
     }
 
-    public function start(SessionHandlerInterface $handler = null): void
+    public function start(?SessionHandlerInterface $handler = null): void
     {
         if ($handler) {
             $this->handler = $handler;

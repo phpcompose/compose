@@ -10,6 +10,7 @@ namespace Compose\Support;
 
 
 
+use ArgumentCountError;
 use InvalidArgumentException;
 use ReflectionException;
 use ReflectionFunction;
@@ -177,11 +178,11 @@ class Invocation
         }
 
         if ($argsCount < $requiredParamsCount) {
-            throw new InvalidArgumentException("{$method->getName()}: Invalid Param count. (Params ({$argsCount}) are less then method anticipates ({$requiredParamsCount}))");
+            throw new ArgumentCountError("{$method->getName()}: Invalid Param count. (Params ({$argsCount}) are less then method anticipates ({$requiredParamsCount}))");
         }
 
         if ($argsCount > $paramsCount) {
-            throw new InvalidArgumentException("{$method->getName()}: Invalid Param count. (Params ({$argsCount}) are more than method anticipates ({$requiredParamsCount}))");
+            throw new ArgumentCountError("{$method->getName()}: Invalid Param count. (Params ({$argsCount}) are more than method anticipates ({$requiredParamsCount}))");
         }
     }
 

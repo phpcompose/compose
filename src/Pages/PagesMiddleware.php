@@ -9,20 +9,18 @@ use Compose\Event\BroadcastEvent;
 use Compose\Support\Invocation;
 use Compose\Template\TemplateRenderer;
 use Laminas\Diactoros\Response\HtmlResponse;
-use InvalidArgumentException;
 use Psr\EventDispatcher\EventDispatcherInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
-use TypeError;
 
 class PagesMiddleware implements MiddlewareInterface, ContainerAwareInterface
 {
     use ContainerAwareTrait;
 
     private TemplateRenderer $viewEngine;
-    private ?string $baseAlias = null;
+    private ?string $namespace = null;
     private array $folders = [];
     private string $defaultPage = 'index';
 
@@ -33,8 +31,8 @@ class PagesMiddleware implements MiddlewareInterface, ContainerAwareInterface
 
     public function setDirectory(string $dir, ?string $namespace = null): void
     {
-        $this->baseAlias = $namespace ?: 'pages';
-        $this->viewEngine->addPath($this->baseAlias, $dir);
+        $this->namespace = $namespace ?: 'pages';
+        $this->viewEngine->addPath($this->namespace, $dir);
     }
 
     public function addFolder(string $name, string $dir): void
@@ -91,7 +89,7 @@ class PagesMiddleware implements MiddlewareInterface, ContainerAwareInterface
         $params = [];
 
         while (true) {
-            foreach ($this->candidateTemplateNames($segments) as $name) {
+            foreach ($this->candidateTemplateNames($segments, $path) as $name) {
                 if ($this->viewEngine->hasTemplate($name)) {
                     return [$name, $params];
                 }
@@ -139,7 +137,7 @@ class PagesMiddleware implements MiddlewareInterface, ContainerAwareInterface
 
             try {
                 return $invocation(...$params);
-            } catch (ArgumentCountError|InvalidArgumentException|TypeError) {
+            } catch (ArgumentCountError) {
                 return $request;
             }
         }
@@ -160,7 +158,7 @@ class PagesMiddleware implements MiddlewareInterface, ContainerAwareInterface
      * @param array<int,string> $segments
      * @return string[]
      */
-    private function candidateTemplateNames(array $segments): array
+    private function candidateTemplateNames(array $segments, string $originalPath): array
     {
         $names = [];
 
@@ -169,14 +167,14 @@ class PagesMiddleware implements MiddlewareInterface, ContainerAwareInterface
         if ($base !== '') {
             $names[] = $base;
             $names[] = $base . '/' . $this->defaultPage;
-            if ($this->baseAlias) {
-                $names[] = $this->baseAlias . '::' . $base;
-                $names[] = $this->baseAlias . '::' . $base . '/' . $this->defaultPage;
+            if ($this->namespace) {
+                $names[] = $this->namespace . '::' . $base;
+                $names[] = $this->namespace . '::' . $base . '/' . $this->defaultPage;
             }
-        } else {
+        } elseif($originalPath === '') {
             $names[] = $this->defaultPage;
-            if ($this->baseAlias) {
-                $names[] = $this->baseAlias . '::' . $this->defaultPage;
+            if ($this->namespace) {
+                $names[] = $this->namespace . '::' . $this->defaultPage;
             }
         }
 
