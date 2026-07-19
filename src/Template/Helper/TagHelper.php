@@ -53,8 +53,7 @@ class TagHelper
         $str = '';
         foreach ($attributes as $key => $value) {
             // Validate attribute name
-            if (!is_string($key) || !preg_match('/^[a-zA-Z_:][-a-zA-Z0-9_:.]*$/', $key)) {
-                trigger_error('Invalid attribute name: ' . (string)$key, E_USER_WARNING);
+            if (!is_string($key) || !preg_match('/^[a-zA-Z_:@][-a-zA-Z0-9_:.@]*$/', $key)) {                trigger_error('Invalid attribute name: ' . (string)$key, E_USER_WARNING);
                 continue;
             }
 
